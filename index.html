@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS CPC Quiz Trainer</title>
+
+    <link rel="stylesheet" href="css/swag.css">
+</head>
+<body>
+    <main class="container">
+        <!-- START SCREEN -->
+         <section id="start-screen" class="card active">
+      <h1>AWS Certified Cloud Practitioner Quiz</h1>
+      <p>Select a domain and question count to begin.</p>
+
+      <!-- Domain Selection -->
+      <div class="form-group">
+        <h3>Domain</h3>
+        <label><input type="radio" name="domain" value="All" checked /> All Domains</label>
+        <label><input type="radio" name="domain" value="Cloud Concepts" /> Cloud Concepts</label>
+        <label><input type="radio" name="domain" value="Security" /> Security</label>
+        <label><input type="radio" name="domain" value="Technology" /> Technology</label>
+        <label><input type="radio" name="domain" value="Billing" /> Billing & Pricing</label>
+      </div>
+
+      <!-- Question Count -->
+      <div class="form-group">
+        <h3>Number of Questions</h3>
+        <label><input type="radio" name="count" value="5" checked /> 5</label>
+        <label><input type="radio" name="count" value="10" /> 10</label>
+        <label><input type="radio" name="count" value="15" /> 15</label>
+        <label><input type="radio" name="count" value="20" /> 20</label>
+        <label><input type="radio" name="count" value="25" /> 25</label>
+      </div>
+
+      <button id="start-btn">Start Quiz</button>
+    </section>
+
+    <!-- ========== QUIZ SCREEN ========== -->
+    <section id="quiz-screen" class="card hidden">
+      <div id="timer">Time: 00:00</div>
+      <h2 id="question-text"></h2>
+      <ul id="options"></ul>
+      <button id="next-btn" disabled>Next</button>
+    </section>
+
+    <!-- ========== RESULTS SCREEN ========== -->
+    <section id="result-screen" class="card hidden">
+      <h2>Results</h2>
+      <p id="score-summary"></p>
+      <table id="domain-stats"></table>
+      <button id="restart-btn">Restart</button>
+    </section>
+
+        </main>
+
+        <script src="js/app.js"></script>
+        <script src="js/questions.js"></script>
+    
+</body>
+</html>
