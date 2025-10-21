@@ -1,3 +1,6 @@
+/* ========================================================
+   GLOBAL STYLES
+   ======================================================== */
 body {
   font-family: system-ui, sans-serif;
   background: #f3f4f6;
@@ -13,18 +16,29 @@ body {
   width: 100%;
 }
 
+/* ========================================================
+   CARD LAYOUT
+   ======================================================== */
 .card {
   background: #fff;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  transition: 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 h1, h2, h3 {
   margin-top: 0;
 }
 
+/* ========================================================
+   BUTTONS
+   ======================================================== */
 button {
   background: #2563eb;
   color: #fff;
@@ -33,7 +47,7 @@ button {
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.2s ease;
 }
 
 button:hover {
@@ -45,14 +59,25 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* ========================================================
+   FORM & SCREEN HELPERS
+   ======================================================== */
 .form-group label {
   display: block;
   margin: 0.25rem 0;
 }
 
-.hidden { display: none; }
-.active { display: block; }
+.hidden {
+  display: none;
+}
 
+.active {
+  display: block;
+}
+
+/* ========================================================
+   QUIZ OPTIONS
+   ======================================================== */
 #options li {
   list-style: none;
   background: #f9fafb;
@@ -61,14 +86,87 @@ button:disabled {
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 #options li:hover {
   background: #eff6ff;
+  transform: scale(1.02);
 }
 
+#options li.correct {
+  background: #bbf7d0; /* green */
+}
+
+#options li.incorrect {
+  background: #fecaca; /* red */
+}
+
+/* ========================================================
+   TIMER
+   ======================================================== */
 #timer {
   text-align: right;
   font-weight: bold;
   margin-bottom: 1rem;
+  color: #1e3a8a;
+}
+
+/* ========================================================
+   EXPLANATION (🥕 TOGGLE)
+   ======================================================== */
+.explanation {
+  margin-top: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background 0.2s ease;
+}
+
+.toggle-exp {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.toggle-exp:hover {
+  color: #1d4ed8;
+}
+
+.exp-text {
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  color: #374151;
+}
+
+/* ========================================================
+   RESULTS TABLE
+   ======================================================== */
+#domain-stats {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+#domain-stats th,
+#domain-stats td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+#domain-stats th {
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+#domain-stats tr:hover td {
+  background: #f9fafb;
 }
