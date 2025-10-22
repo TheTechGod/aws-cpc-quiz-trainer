@@ -1,19 +1,47 @@
 /* ========================================================
+   AWS CPC QUIZ TRAINER v4.0 — REVIEW MODE
+   Author: Geoffrey D. Metzger | Integrity Programming
+   Purpose: Clean UI, responsive layout, review-ready design
+   ======================================================== */
+
+/* ========================================================
    GLOBAL STYLES
    ======================================================== */
+:root {
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --gray-bg: #f3f4f6;
+  --gray-border: #e5e7eb;
+  --gray-light: #f9fafb;
+  --gray-text: #374151;
+  --green: #059669;
+  --green-light: #bbf7d0;
+  --red: #ef4444;
+  --red-light: #fecaca;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: system-ui, sans-serif;
-  background: #f3f4f6;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--gray-bg);
   color: #111;
   margin: 0;
   padding: 2rem;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
 }
 
 .container {
-  max-width: 600px;
+  max-width: 640px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 /* ========================================================
@@ -21,37 +49,45 @@ body {
    ======================================================== */
 .card {
   background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
-  transition: 0.3s ease;
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card.hidden {
+  opacity: 0;
+  transform: scale(0.98);
+  display: none !important;
 }
 
 h1, h2, h3 {
   margin-top: 0;
+  color: #111827;
 }
 
 /* ========================================================
    BUTTONS
    ======================================================== */
 button {
-  background: #2563eb;
+  background: var(--blue);
   color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
-  background: #1d4ed8;
+  background: var(--blue-dark);
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -59,34 +95,62 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Review Button (green contrast) */
+#review-btn {
+  background: var(--green);
+}
+
+#review-btn:hover {
+  background: #047857;
+}
+
+/* Back to Results */
+#back-to-results-btn {
+  background: var(--blue-dark);
+}
+
 /* ========================================================
-   FORM & SCREEN HELPERS
+   FORMS & LABELS
    ======================================================== */
+.form-group {
+  margin-bottom: 1rem;
+}
+
 .form-group label {
   display: block;
   margin: 0.25rem 0;
+  color: var(--gray-text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  accent-color: var(--blue);
+  margin-right: 0.4rem;
 }
 
 .hidden {
-  display: none;
-}
-
-.active {
-  display: block;
+  display: none !important;
 }
 
 /* ========================================================
-   QUIZ OPTIONS
+   QUIZ QUESTION / OPTIONS
    ======================================================== */
+#options {
+  padding: 0;
+  margin: 1rem 0;
+}
+
 #options li {
   list-style: none;
-  background: #f9fafb;
+  background: var(--gray-light);
   margin: 0.5rem 0;
-  padding: 0.75rem;
+  padding: 0.8rem 1rem;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--gray-border);
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 1rem;
 }
 
 #options li:hover {
@@ -95,11 +159,13 @@ button:disabled {
 }
 
 #options li.correct {
-  background: #bbf7d0; /* green */
+  background: var(--green-light);
+  border-color: #16a34a;
 }
 
 #options li.incorrect {
-  background: #fecaca; /* red */
+  background: var(--red-light);
+  border-color: var(--red);
 }
 
 /* ========================================================
@@ -109,26 +175,26 @@ button:disabled {
   text-align: right;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #1e3a8a;
+  color: var(--blue-dark);
+  font-size: 0.95rem;
 }
 
 /* ========================================================
    EXPLANATION (🥕 TOGGLE)
    ======================================================== */
 .explanation {
-  margin-top: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e5e7eb;
+  margin-top: 1.25rem;
+  background: var(--gray-light);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--gray-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: background 0.2s ease;
 }
 
 .toggle-exp {
   background: none;
   border: none;
-  color: #2563eb;
+  color: var(--blue);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -137,13 +203,14 @@ button:disabled {
 }
 
 .toggle-exp:hover {
-  color: #1d4ed8;
+  color: var(--blue-dark);
 }
 
 .exp-text {
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
   line-height: 1.5;
-  color: #374151;
+  color: var(--gray-text);
+  font-size: 0.95rem;
 }
 
 /* ========================================================
@@ -153,20 +220,94 @@ button:disabled {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+  font-size: 0.95rem;
 }
 
 #domain-stats th,
 #domain-stats td {
   padding: 0.5rem;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--gray-border);
 }
 
 #domain-stats th {
   background: #eff6ff;
-  font-weight: 600;
+  color: #1e3a8a;
+  font-weight: 700;
 }
 
 #domain-stats tr:hover td {
-  background: #f9fafb;
+  background: var(--gray-light);
 }
+
+/* ========================================================
+   REVIEW SCREEN
+   ======================================================== */
+.review-item {
+  background: var(--gray-light);
+  border: 1px solid var(--gray-border);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.review-item h3 {
+  margin-top: 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.review-item p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: var(--gray-text);
+}
+
+.review-item .correct {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.review-item .incorrect {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.review-item hr {
+  border: none;
+  border-bottom: 1px solid var(--gray-border);
+  margin-top: 1rem;
+}
+
+/* ========================================================
+   RESPONSIVE DESIGN
+   ======================================================== */
+@media (max-width: 640px) {
+  body {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  #options li {
+    font-size: 0.95rem;
+  }
+
+  #timer {
+    font-size: 0.9rem;
+  }
+
+  .review-item {
+    font-size: 0.9rem;
+  }
+}
+
+/* ========================================================
+   END OF FILE
+   ======================================================== */

@@ -1,11 +1,16 @@
 // ========================================================
-// ELEMENT REFERENCES
+// AWS CPC QUIZ TRAINER v4.0 — Review Mode Edition
+// Author: Geoffrey D. Metzger | Integrity Programming
 // ========================================================
+
+// ======================= ELEMENT REFERENCES =======================
 const startBtn = document.getElementById("start-btn");
 const restartBtn = document.getElementById("restart-btn");
 const startScreen = document.getElementById("start-screen");
 const quizScreen = document.getElementById("quiz-screen");
 const resultScreen = document.getElementById("result-screen");
+const reviewScreen = document.getElementById("review-screen");
+
 const nextBtn = document.getElementById("next-btn");
 const questionText = document.getElementById("question-text");
 const optionsList = document.getElementById("options");
@@ -13,18 +18,18 @@ const timerDisplay = document.getElementById("timer");
 const scoreSummary = document.getElementById("score-summary");
 const domainTable = document.getElementById("domain-stats");
 
-// ========================================================
-// STATE VARIABLES
-// ========================================================
+const reviewBtn = document.getElementById("review-btn");
+const backToResultsBtn = document.getElementById("back-to-results-btn");
+const reviewContainer = document.getElementById("review-container");
+
+// ======================= STATE VARIABLES =======================
 let quizQuestions = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let selectedDomains = [];
 let questionCount = 5;
 
-// ========================================================
-// TIMER / STATS VARIABLES
-// ========================================================
+// ======================= TIMER / STATS VARIABLES =======================
 let startTime;
 let endTime;
 let totalTime = 0;
@@ -36,19 +41,29 @@ let timerInterval;
 // HELPERS
 // ========================================================
 function shuffleArray(arr) {
-  // Simple shuffle helper for questions or answer options
+  // Randomize array order (simple Fisher-Yates)
   return arr.sort(() => Math.random() - 0.5);
 }
 
+function fadeSwap(hideEl, showEl) {
+  // Smooth fade transition between screens
+  hideEl.style.opacity = "0";
+  setTimeout(() => {
+    hideEl.classList.add("hidden");
+    showEl.classList.remove("hidden");
+    showEl.style.opacity = "1";
+  }, 200);
+}
+
 // ========================================================
-// DOMAIN CHECKBOX LOGIC
+// DOMAIN SELECTION LOGIC
 // ========================================================
 const allBox = document.querySelector('input[name="domain"][value="All"]');
 const domainBoxes = Array.from(
   document.querySelectorAll('input[name="domain"]')
 ).filter((b) => b.value !== "All");
 
-// Make "All" mutually exclusive with specific domains
+// Make “All Domains” mutually exclusive
 if (allBox) {
   allBox.addEventListener("change", () => {
     if (allBox.checked) domainBoxes.forEach((b) => (b.checked = false));
@@ -70,59 +85,52 @@ startBtn.addEventListener("click", () => {
   selectedDomains = Array.from(
     document.querySelectorAll('input[name="domain"]:checked')
   ).map((el) => el.value);
+
   if (selectedDomains.length === 0) selectedDomains = ["All"];
 
-  // Get number of questions
+  // Get selected number of questions
   const countInput = document.querySelector('input[name="count"]:checked');
   questionCount = parseInt(countInput.value);
 
-  // Filter questions based on domain
-  if (selectedDomains.includes("All")) {
-    quizQuestions = [...questions];
-  } else {
-    quizQuestions = questions.filter((q) =>
-      selectedDomains.includes(q.domain)
-    );
-  }
+  // Filter questions
+  quizQuestions = selectedDomains.includes("All")
+    ? [...questions]
+    : questions.filter((q) => selectedDomains.includes(q.domain));
 
-  // Guard against too few questions
-  const available = quizQuestions.length;
-  if (available === 0) {
+  // Validate available questions
+  if (quizQuestions.length === 0) {
     alert("No questions found for your selection. Try another domain.");
     return;
   }
-  if (available < questionCount) {
-    alert(`Only ${available} question(s) available. Using ${available}.`);
-    questionCount = available;
+  if (quizQuestions.length < questionCount) {
+    alert(`Only ${quizQuestions.length} question(s) available. Using all.`);
+    questionCount = quizQuestions.length;
   }
 
-  // Shuffle and trim
+  // Shuffle & limit
   quizQuestions = shuffleArray(quizQuestions).slice(0, questionCount);
 
-  // Reset state for this session
+  // Reset state
   currentQuestionIndex = 0;
   score = 0;
   domainStats = {};
   totalTime = 0;
 
-  // Start timer tracking
+  // Start timer
   startTime = Date.now();
   questionStartTime = Date.now();
-
-  // Start visible timer
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
 
-  // Switch to quiz screen
-  startScreen.classList.add("hidden");
-  quizScreen.classList.remove("hidden");
+  // Switch screens smoothly
+  fadeSwap(startScreen, quizScreen);
 
-  // Display first question
+  // Show first question
   showQuestion();
 });
 
 // ========================================================
-// TIMER DISPLAY
+// TIMER
 // ========================================================
 function updateTimer() {
   const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -134,85 +142,60 @@ function updateTimer() {
 }
 
 // ========================================================
-// SHOW QUESTION (with 🥕 explanation support)
+// SHOW QUESTION
 // ========================================================
 function showQuestion() {
   const q = quizQuestions[currentQuestionIndex];
   questionText.textContent = q.question;
   optionsList.innerHTML = "";
 
-  // Shuffle answer options each time for anti-memorization
+  // Randomize options to prevent memorization
   const shuffledOptions = shuffleArray([...q.options]);
 
   shuffledOptions.forEach((opt) => {
     const li = document.createElement("li");
     li.textContent = opt;
-    li.addEventListener("click", () => selectAnswer(li, q.answer));
+    li.addEventListener("click", () => selectAnswer(li, q));
     optionsList.appendChild(li);
   });
 
-  // Remove any old explanation section before adding new one
-  const existingExp = document.querySelector(".explanation");
-  if (existingExp) existingExp.remove();
+  // Remove previous explanation block (no 🥕 on quiz phase)
+  const oldExp = document.querySelector(".explanation");
+  if (oldExp) oldExp.remove();
 
-  // Add 🥕 explanation toggle only if explanation exists in data
-  if (q.explanation) {
-    const expDiv = document.createElement("div");
-    expDiv.classList.add("explanation");
-
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = "🥕 Show Explanation";
-    toggleBtn.classList.add("toggle-exp");
-
-    const expText = document.createElement("p");
-    expText.textContent = q.explanation;
-    expText.classList.add("exp-text", "hidden");
-
-    toggleBtn.addEventListener("click", () => {
-      expText.classList.toggle("hidden");
-      toggleBtn.textContent = expText.classList.contains("hidden")
-        ? "🥕 Show Explanation"
-        : "🥕 Hide Explanation";
-    });
-
-    expDiv.appendChild(toggleBtn);
-    expDiv.appendChild(expText);
-
-    // Append explanation block under the options
-    quizScreen.appendChild(expDiv);
-  }
-
-  // Disable next button until an answer is chosen
   nextBtn.disabled = true;
-  questionStartTime = Date.now(); // mark start of this question
+  questionStartTime = Date.now();
 }
 
 // ========================================================
 // SELECT ANSWER
 // ========================================================
-function selectAnswer(selectedLi, correctAnswer) {
+function selectAnswer(selectedLi, q) {
   const options = document.querySelectorAll("#options li");
   options.forEach((opt) => (opt.style.pointerEvents = "none"));
 
-  // Time tracking
+  // Track user answer for review
+  q.userAnswer = selectedLi.textContent;
+
+  // Track time
   const elapsed = (Date.now() - questionStartTime) / 1000;
   totalTime += elapsed;
 
   // Domain tracking
-  const currentDomain = quizQuestions[currentQuestionIndex].domain;
+  const currentDomain = q.domain;
   if (!domainStats[currentDomain])
     domainStats[currentDomain] = { correct: 0, total: 0 };
   domainStats[currentDomain].total++;
 
-  // Correctness check
-  if (selectedLi.textContent === correctAnswer) {
+  // Correctness logic
+  if (selectedLi.textContent === q.answer) {
     selectedLi.style.background = "#bbf7d0"; // green
     score++;
     domainStats[currentDomain].correct++;
   } else {
     selectedLi.style.background = "#fecaca"; // red
     options.forEach((opt) => {
-      if (opt.textContent === correctAnswer)
+      if (opt.textContent === q.answer)
         opt.style.outline = "2px solid #16a34a"; // highlight correct
     });
   }
@@ -233,27 +216,25 @@ nextBtn.addEventListener("click", () => {
 });
 
 // ========================================================
-// SHOW RESULTS (Score + Domain Breakdown + Timing)
+// SHOW RESULTS
 // ========================================================
 function showResults() {
   clearInterval(timerInterval);
-  quizScreen.classList.add("hidden");
-  resultScreen.classList.remove("hidden");
+  fadeSwap(quizScreen, resultScreen);
 
-  // Calculate timing and accuracy
   endTime = Date.now();
   const totalDuration = (endTime - startTime) / 1000;
   const avgTime = (totalDuration / quizQuestions.length).toFixed(1);
   const percentage = ((score / quizQuestions.length) * 100).toFixed(1);
 
-  // Summary Stats
+  // Summary block
   scoreSummary.innerHTML = `
     <p>Score: ${score} / ${quizQuestions.length} (${percentage}%)</p>
     <p>Total Time: ${totalDuration.toFixed(1)}s</p>
     <p>Avg per Question: ${avgTime}s</p>
   `;
 
-  // Domain breakdown table
+  // Domain breakdown
   domainTable.innerHTML = `
     <tr><th>Domain</th><th>Correct</th><th>Total</th><th>%</th></tr>
   `;
@@ -272,6 +253,44 @@ function showResults() {
 }
 
 // ========================================================
+// REVIEW QUESTIONS
+// ========================================================
+reviewBtn.addEventListener("click", () => {
+  fadeSwap(resultScreen, reviewScreen);
+  renderReview();
+});
+
+function renderReview() {
+  reviewContainer.innerHTML = "";
+
+  quizQuestions.forEach((q, index) => {
+    const div = document.createElement("div");
+    div.classList.add("review-item");
+    div.innerHTML = `
+      <h3>Q${index + 1}: ${q.question}</h3>
+      <p><strong>Your Answer:</strong>
+        <span class="${q.userAnswer === q.answer ? "correct" : "incorrect"}">
+          ${q.userAnswer || "No answer selected"}
+        </span>
+      </p>
+      <p><strong>Correct Answer:</strong> ${q.answer}</p>
+      ${
+        q.explanation
+          ? `<p class="exp-text"><strong>Explanation:</strong> ${q.explanation}</p>`
+          : ""
+      }
+      <hr/>
+    `;
+    reviewContainer.appendChild(div);
+  });
+}
+
+// Return to Results
+backToResultsBtn.addEventListener("click", () => {
+  fadeSwap(reviewScreen, resultScreen);
+});
+
+// ========================================================
 // RESTART QUIZ
 // ========================================================
 restartBtn.addEventListener("click", () => {
@@ -280,7 +299,5 @@ restartBtn.addEventListener("click", () => {
   score = 0;
   clearInterval(timerInterval);
   timerDisplay.textContent = "Time: 00:00";
-
-  resultScreen.classList.add("hidden");
-  startScreen.classList.remove("hidden");
+  fadeSwap(resultScreen, startScreen);
 });

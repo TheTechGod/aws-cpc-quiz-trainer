@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS CPC Quiz Trainer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS CPC Quiz Trainer</title>
 
-    <link rel="stylesheet" href="css/swag.css">
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/swag.css" />
 </head>
+
 <body>
-    <main class="container">
-        <!-- START SCREEN -->
-         <section id="start-screen" class="card active">
+  <main class="container">
+
+    <!-- ===================================================== -->
+    <!-- START SCREEN -->
+    <!-- ===================================================== -->
+    <section id="start-screen" class="card active">
       <h1>AWS Certified Cloud Practitioner Quiz</h1>
       <p>Select a domain and question count to begin.</p>
 
@@ -37,7 +42,9 @@
       <button id="start-btn">Start Quiz</button>
     </section>
 
-    <!-- ========== QUIZ SCREEN ========== -->
+    <!-- ===================================================== -->
+    <!-- QUIZ SCREEN -->
+    <!-- ===================================================== -->
     <section id="quiz-screen" class="card hidden">
       <div id="timer">Time: 00:00</div>
       <h2 id="question-text"></h2>
@@ -45,18 +52,36 @@
       <button id="next-btn" disabled>Next</button>
     </section>
 
-    <!-- ========== RESULTS SCREEN ========== -->
+    <!-- ===================================================== -->
+    <!-- RESULTS SCREEN -->
+    <!-- ===================================================== -->
     <section id="result-screen" class="card hidden">
       <h2>Results</h2>
-      <p id="score-summary"></p>
+      <div id="score-summary"></div>
+
       <table id="domain-stats"></table>
-      <button id="restart-btn">Restart</button>
+
+      <div style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button id="review-btn" style="background:#059669;">Review Questions</button>
+        <button id="restart-btn">Restart</button>
+      </div>
     </section>
 
-        </main>
+    <!-- ===================================================== -->
+    <!-- REVIEW SCREEN -->
+    <!-- ===================================================== -->
+    <section id="review-screen" class="card hidden">
+      <h2>Question Review</h2>
+      <div id="review-container"></div>
+      <button id="back-to-results-btn" style="margin-top: 1rem;">Back to Results</button>
+    </section>
 
-        <script src="js/app.js"></script>
-        <script src="js/questions.js"></script>
-    
+  </main>
+
+  <!-- ===================================================== -->
+  <!-- SCRIPTS -->
+  <!-- ===================================================== -->
+  <script src="js/questions.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

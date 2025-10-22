@@ -461,5 +461,110 @@ const questions = [
     options: ["AWS Trusted Advisor", "AWS GuardDuty", "AWS Security Hub", "Amazon Inspector"],
     answer: "AWS Trusted Advisor",
     explanation: "Trusted Advisor offers real-time guidance to optimize performance, reduce costs, and improve security and fault tolerance."
-  }
+  },
+  {
+  id: 50,
+  domain: "Technology",
+  question: "A developer is building an application that processes large amounts of data and requires high I/O performance. After processing the data for an operation, the results are displayed to the user and do not need to be retained long-term. Unfortunately, the application's current storage solution is experiencing performance bottlenecks during peak processing times. How could implementing an EC2 instance store improve the performance of the application?",
+  options: [
+    "EC2 instance store provides high I/O performance for temporary storage needs.",
+    "EC2 instance store reduces overall storage costs by offering the cheapest per-gigabyte storage option in AWS.",
+    "EC2 instance store provides a persistent storage solution that survives instance failures.",
+    "EC2 instance store allows storage to be conveniently shared between multiple EC2 instances simultaneously."
+  ],
+  answer: "EC2 instance store provides high I/O performance for temporary storage needs.",
+  explanation: "EC2 instance store is physically attached to the host and offers extremely low latency and high I/O performance. It is ideal for temporary storage that does not need to persist after instance termination."
+},
+
+{
+  id: 51,
+  domain: "Technology",
+  question: "AnyCompany Finance is designing an application that requires consistent and low-latency access to financial data. They're looking for a storage solution that provides persistent block storage. Why would Amazon EBS be suitable to store data in this scenario?",
+  options: [
+    "Amazon EBS allows sharing volumes across multiple AWS Regions without any latency impact.",
+    "Amazon EBS automatically scales volume capacity without requiring any volume modifications.",
+    "Amazon EBS provides unlimited input/output operations per second (IOPS) for all volume types, regardless of size.",
+    "Amazon EBS provides high availability and durability by automatically replicating volumes within the same Availability Zone."
+  ],
+  answer: "Amazon EBS provides high availability and durability by automatically replicating volumes within the same Availability Zone.",
+  explanation: "Amazon Elastic Block Store (EBS) provides persistent block-level storage for EC2 instances with high availability and durability by automatically replicating data within the same Availability Zone."
+},
+{
+  id: 52,
+  domain: "Technology",
+  question: "AnyCompany Software is migrating their on-premises application architecture to AWS. They are particularly concerned about data persistence because in their current environment, they have experienced data loss when virtual machines (VMs) crashed. They want to understand how Amazon Elastic Block Store (Amazon EBS) can help address their data persistence requirements when they move their workloads to Amazon EC2 instances. How does Amazon EBS solve the data persistence issue described in this scenario?",
+  options: [
+    "EBS automatically synchronizes data with Amazon S3 every 5 minutes, ensuring that if an EC2 instance crashes, all data can be immediately restored from the S3 backup.",
+    "Amazon EBS caches all data in memory for instant recovery when instances are restarted.",
+    "Amazon EBS volumes exist independently from the instance and persist even after the instance is terminated.",
+    "Amazon EBS automatically backs up all data to Amazon S3 every hour to help ensure persistence."
+  ],
+  answer: "Amazon EBS volumes exist independently from the instance and persist even after the instance is terminated.",
+  explanation: "Amazon EBS volumes are persistent block storage devices that exist independently from EC2 instances. Even if an instance fails or is terminated, the data on the EBS volume remains intact until the volume itself is deleted."
+},
+{
+  id: 53,
+  domain: "Technology",
+  question: "AnyCompany Commerce operates an online trading platform experiencing rapid growth. Their development team frequently needs to create test environments that mirror production for testing new features, but setting up these environments has become time-consuming and error-prone. What is the most significant benefit of using EBS snapshots in this scenario?",
+  options: [
+    "EBS snapshots enable rapid creation of new volumes from existing data, so you can quickly deploy identical test environments that mirror production.",
+    "EBS snapshots automatically optimize the performance of your EBS volumes by defragmenting data during the snapshot process.",
+    "EBS snapshots reduce your storage costs by compressing all data on your EBS volumes by up to 90 percent.",
+    "EBS snapshots automatically migrate your data to different AWS Regions for improved global access speeds."
+  ],
+  answer: "EBS snapshots enable rapid creation of new volumes from existing data, so you can quickly deploy identical test environments that mirror production.",
+  explanation: "EBS snapshots allow you to back up the state of an EBS volume and quickly create new volumes from those snapshots. This enables fast and consistent replication of production environments for testing or staging."
+},
+{
+  id: 54,
+  domain: "Technology",
+  question: "AnyCompany Healthcare manages thousands of EBS volumes containing patient records. They need to ensure that this data is properly backed up, retained according to compliance requirements, and old snapshots are removed to control costs. Which problem does AWS Data Lifecycle Manager primarily solve in this scenario?",
+  options: [
+    "Providing real-time monitoring of EBS volume performance metrics",
+    "Encrypting sensitive patient data stored on EBS volumes",
+    "Automating the creation, retention, and deletion of EBS snapshots and EBS backed Amazon Machine Images (AMIs) according to a schedule",
+    "Migrating patient data from on-premises storage to AWS Cloud storage"
+  ],
+  answer: "Automating the creation, retention, and deletion of EBS snapshots and EBS backed Amazon Machine Images (AMIs) according to a schedule",
+  explanation: "AWS Data Lifecycle Manager (DLM) allows you to automate the creation, retention, and deletion of EBS snapshots and AMIs, ensuring compliance while reducing manual management and cost overhead."
+},
+{
+  id: 55,
+  domain: "Technology",
+  question: "AnyCompany Mobile is evaluating cloud storage solutions for their new mobile application. They need a reliable service that can handle various types of data storage requirements as their user base grows. Based on this scenario, what is an aspect of Amazon S3 that they could use in this scenario?",
+  options: [
+    "Running relational database queries for user authentication",
+    "Hosting virtual machines (VMs) to process application logic",
+    "Real-time data streaming and message processing",
+    "Storing and distributing mobile application content and user-generated media files"
+  ],
+  answer: "Storing and distributing mobile application content and user-generated media files",
+  explanation: "Amazon S3 provides object storage for data of any type and scale. It is ideal for storing and distributing mobile app content such as images, videos, and user-generated files, offering high durability and scalability."
+},
+{
+  id: 56,
+  domain: "Technology",
+  question: "AnyCompany Marketing has created an Amazon S3 bucket to host images for their new website. The images need to be accessible to anyone visiting the website without authentication. After uploading the images to the bucket, users report they cannot access them, even though the bucket policy is set to allow public access. What is the most likely cause of this access issue?",
+  options: [
+    "The images are not properly tagged with public read permissions.",
+    "Block public access settings are enabled at the account or bucket level.",
+    "They need to enable the website hosting feature to make any Amazon S3 content public.",
+    "The S3 bucket must be in the same AWS Region as the users trying to access the content."
+  ],
+  answer: "Block public access settings are enabled at the account or bucket level.",
+  explanation: "Even if a bucket policy allows public access, S3’s Block Public Access feature can override it. If enabled at the account or bucket level, it prevents any public access until explicitly disabled."
+},
+{
+  id: 57,
+  domain: "Technology",
+  question: "AnyCompany Media is looking for a new cloud storage solution. They distribute large video files to users around the world, and are looking for a service that is highly durable, scalable, and offers various access control mechanisms. Based on this scenario, which Amazon S3 feature would be particularly beneficial?",
+  options: [
+    "Amazon S3 offers 99.999999999 percent (11 nines) of durability for objects stored across multiple Availability Zones. This maintains highly available for their video content and protects it against data loss.",
+    "Amazon S3 automatically compresses all stored objects to reduce storage costs by up to 90 percent, making it ideal for large video files.",
+    "Amazon S3 limits individual object sizes to 5 GB, requiring companies to split large video files before upload.",
+    "Amazon S3 provides built-in video transcoding services that automatically convert videos to different formats when they are uploaded."
+  ],
+  answer: "Amazon S3 offers 99.999999999 percent (11 nines) of durability for objects stored across multiple Availability Zones. This maintains highly available for their video content and protects it against data loss.",
+  explanation: "Amazon S3 is designed for 99.999999999% durability by redundantly storing data across multiple Availability Zones, ensuring protection against data loss for critical media and large file workloads."
+},
 ];
