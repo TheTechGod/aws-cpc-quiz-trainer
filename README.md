@@ -8,8 +8,7 @@ The project simulates a professional quiz environment with scoring, timing, and 
 ---
 
 ## 🚀 Live Demo
-👉 https://aws-cpc-quiz-trainer-thetechgod.vercel.app
-)
+👉 aws-cpc-quiz-trainer-e7cjisvue-geoff-metzs-projects.vercel.app
 
 ---
 
