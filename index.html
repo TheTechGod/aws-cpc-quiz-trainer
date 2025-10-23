@@ -48,7 +48,9 @@
     <section id="quiz-screen" class="card hidden">
       <div id="timer">Time: 00:00</div>
       <h2 id="question-text"></h2>
-      <ul id="options"></ul>
+      <ul id="options" class="option-list">
+        <!-- Dynamic list of radio or checkbox options -->
+      </ul>
       <button id="next-btn" disabled>Next</button>
     </section>
 
@@ -58,11 +60,10 @@
     <section id="result-screen" class="card hidden">
       <h2>Results</h2>
       <div id="score-summary"></div>
-
       <table id="domain-stats"></table>
 
-      <div style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
-        <button id="review-btn" style="background:#059669;">Review Questions</button>
+      <div class="btn-group" style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button id="review-btn" class="green-btn">🧠 View Review</button>
         <button id="restart-btn">Restart</button>
       </div>
     </section>
@@ -73,7 +74,7 @@
     <section id="review-screen" class="card hidden">
       <h2>Question Review</h2>
       <div id="review-container"></div>
-      <button id="back-to-results-btn" style="margin-top: 1rem;">Back to Results</button>
+      <button id="back-to-results-btn" style="margin-top: 1rem;">⬅️ Back to Results</button>
     </section>
 
   </main>

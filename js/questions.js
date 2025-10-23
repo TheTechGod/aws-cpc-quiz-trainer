@@ -1,19 +1,22 @@
 const questions = [
  // === Cloud Concepts ===
   {
-    id: 1,
-    domain: "Cloud Concepts",
-    question: "Which factors are MOST important to consider when selecting an AWS Region? (Select TWO.)",
-    options: [
-      "Any regulatory compliance standards the agency requires",
-      "Proximity to users",
-      "Number of files stored",
-      "Personal preference of the CIO",
-      "How recently the Region was constructed"
-    ],
-    answer: "Any regulatory compliance standards the agency requires; Proximity to users",
-    explanation: "When selecting a Region, consider compliance requirements and proximity to users to meet regulations and minimize latency."
-  },
+  id: 1,
+  domain: "Cloud Concepts",
+  question: "Which factors are MOST important to consider when selecting an AWS Region? (Select TWO.)",
+  options: [
+    "Any regulatory compliance standards the agency requires",
+    "Proximity to users",
+    "Number of files stored",
+    "Personal preference of the CIO",
+    "How recently the Region was constructed"
+  ],
+  answer: [
+    "Any regulatory compliance standards the agency requires",
+    "Proximity to users"
+  ],
+  explanation: "When selecting a Region, consider compliance requirements and proximity to users to meet regulations and minimize latency."
+},
   {
     id: 2,
     domain: "Cloud Concepts",
