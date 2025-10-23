@@ -567,4 +567,70 @@ const questions = [
   answer: "Amazon S3 offers 99.999999999 percent (11 nines) of durability for objects stored across multiple Availability Zones. This maintains highly available for their video content and protects it against data loss.",
   explanation: "Amazon S3 is designed for 99.999999999% durability by redundantly storing data across multiple Availability Zones, ensuring protection against data loss for critical media and large file workloads."
 },
+{
+  id: 58,
+  domain: "Technology",
+  question: "AnyCompany Business stores a growing amount of customer data in Amazon S3. Their manager is concerned about storage costs and asks IT to implement a solution to move older data to cheaper storage. The data is frequently accessed for the first 30 days, occasionally accessed for the next 60 days, and rarely accessed after 90 days. What should they do in this situation to optimize costs while maintaining appropriate access to the data?",
+  options: [
+    "Create a lifecycle rule to transition objects to S3 Standard-Infrequent Access (S3 Standard-IA) after 30 days, transition to S3 Glacier after 90 days.",
+    "Create a lifecycle rule to immediately transition all objects to S3 Glacier and set up a restore policy.",
+    "Create a lifecycle rule to delete all objects after 90 days and rely on database backups.",
+    "Create multiple S3 buckets with different storage classes and manually move objects between buckets as they age."
+  ],
+  answer: "Create a lifecycle rule to transition objects to S3 Standard-Infrequent Access (S3 Standard-IA) after 30 days, transition to S3 Glacier after 90 days.",
+  explanation: "S3 Lifecycle rules automate the transition of objects between storage classes based on age and access patterns. Using S3 Standard for active data, S3 Standard-IA after 30 days, and S3 Glacier after 90 days optimizes cost while maintaining access when needed."
+},
+{
+  id: 59,
+  domain: "Technology",
+  question: "Which statement BEST describes S3 Lifecycle?",
+  options: [
+    "A backup service that creates copies of your S3 objects in different AWS Regions to protect against Regional failures.",
+    "A feature that automatically compresses Amazon S3 objects after a certain period to reduce storage costs.",
+    "A monitoring system that alerts administrators when Amazon S3 objects have not been accessed for a specified period.",
+    "A feature used to define rules to automatically transition objects between different storage classes, or delete them based on age or usage patterns."
+  ],
+  answer: "A feature used to define rules to automatically transition objects between different storage classes, or delete them based on age or usage patterns.",
+  explanation: "Amazon S3 Lifecycle allows you to define rules that automatically transition objects between storage classes or delete them after a set time. It helps reduce costs by moving data to cheaper tiers as it becomes less frequently accessed."
+},
+{
+  id: 60,
+  domain: "Technology",
+  question: "AnyCompany Financial needs to implement a new data application that will analyze market data. The application must be able to scale compute resources up or down to match traffic demand while maintaining access to the same datasets. What is a benefit of using Amazon EFS as the storage solution for the application described in this scenario?",
+  options: [
+    "Amazon EFS provides the lowest cost storage option for infrequently accessed financial data.",
+    "Amazon EFS provides faster read access than local instance storage for high-frequency trading algorithms.",
+    "Amazon EFS provides elastic storage capacity, automatically scaling up and down as files are added and removed, with no disruption to applications.",
+    "Amazon EFS provides automatic global replication of data, eliminating the need for data backups."
+  ],
+  answer: "Amazon EFS provides elastic storage capacity, automatically scaling up and down as files are added and removed, with no disruption to applications.",
+  explanation: "Amazon Elastic File System (EFS) provides elastic, shared file storage that automatically scales as data is added or removed. It supports multiple EC2 instances concurrently and adjusts capacity without manual intervention."
+},
+{
+  id: 61,
+  domain: "Technology",
+  question: "AnyCompany Retail is planning to migrate their on-premises file storage to AWS. They need a solution that allows their global development teams to collaborate on the same set of files simultaneously. Which feature of Amazon EFS makes it a good fit for this scenario?",
+  options: [
+    "Amazon EFS provides shared access for thousands of Amazon EC2 instances, with consistent low latencies.",
+    "Amazon EFS makes it possible to store files in the cloud, but requires manual synchronization between different instances.",
+    "Amazon EFS provides block storage that can be formatted with any file system.",
+    "Amazon EFS offers single-instance access with high throughput for dedicated processing."
+  ],
+  answer: "Amazon EFS provides shared access for thousands of Amazon EC2 instances, with consistent low latencies.",
+  explanation: "Amazon Elastic File System (EFS) supports shared access from thousands of EC2 instances across multiple Availability Zones with low latency. This allows global teams to work on the same files simultaneously without data conflicts."
+},
+
+{
+  id: 62,
+  domain: "Technology",
+  question: "AnyCompany Media wants to migrate its file shares to AWS while maintaining compatibility with existing applications. They need a solution that supports Server Message Block (SMB) protocol and integrates with Microsoft Active Directory. Which AWS service should they implement in this scenario?",
+  options: [
+    "Amazon Elastic File System (Amazon EFS)",
+    "Amazon S3 File Gateway",
+    "Amazon FSx for Windows File Server",
+    "Amazon Elastic Block Store (Amazon EBS)"
+  ],
+  answer: "Amazon FSx for Windows File Server",
+  explanation: "Amazon FSx for Windows File Server provides a fully managed file system built on Windows Server, supporting SMB protocol and integration with Microsoft Active Directory, making it ideal for Windows-based workloads and legacy applications."
+}
 ];
