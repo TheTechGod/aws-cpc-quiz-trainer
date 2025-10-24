@@ -48,9 +48,7 @@
     <section id="quiz-screen" class="card hidden">
       <div id="timer">Time: 00:00</div>
       <h2 id="question-text"></h2>
-      <ul id="options" class="option-list">
-        <!-- Dynamic list of radio or checkbox options -->
-      </ul>
+      <ul id="options" class="option-list"></ul>
       <button id="next-btn" disabled>Next</button>
     </section>
 
@@ -64,6 +62,7 @@
 
       <div class="btn-group" style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
         <button id="review-btn" class="green-btn">🧠 View Review</button>
+        <button id="progress-btn" class="blue-btn">📈 View Progress</button>
         <button id="restart-btn">Restart</button>
       </div>
     </section>
@@ -75,6 +74,27 @@
       <h2>Question Review</h2>
       <div id="review-container"></div>
       <button id="back-to-results-btn" style="margin-top: 1rem;">⬅️ Back to Results</button>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- PROGRESS DASHBOARD SCREEN -->
+    <!-- ===================================================== -->
+    <section id="progress-screen" class="card hidden">
+      <h2>📊 Progress Dashboard</h2>
+
+      <div id="progress-summary" class="progress-summary">
+        <p>Total Quizzes Taken: <span id="total-quizzes">0</span></p>
+        <p>Average Score: <span id="avg-score">0%</span></p>
+        <p>Best Domain: <span id="best-domain">N/A</span></p>
+        <p>Last Session: <span id="last-session">—</span></p>
+      </div>
+
+      <div id="progress-history" class="progress-history">
+        <h3>Recent Sessions</h3>
+        <ul id="history-list"></ul>
+      </div>
+
+      <button id="back-to-results-from-progress" style="margin-top: 1rem;">⬅️ Back to Results</button>
     </section>
 
   </main>

@@ -1,28 +1,30 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER v5.0 — REVIEW MODE ENHANCED
+   AWS CPC QUIZ TRAINER v5.4 — Progress + Chart Edition
    Author: Geoffrey D. Metzger | Integrity Programming
-   Purpose: Clean UI, smooth transitions, and review layout
+   Purpose: Clean UI, smooth transitions, review layout,
+            progress dashboard, and mini bar chart
    ======================================================== */
 
 /* ========================================================
-   GLOBAL STYLES
+   GLOBAL STYLES / TOKENS
    ======================================================== */
 :root {
   --blue: #2563eb;
   --blue-dark: #1d4ed8;
   --gray-bg: #f3f4f6;
-  --gray-border: #e5e7eb;
-  --gray-light: #f9fafb;
+  --gray-ink: #111827;
   --gray-text: #374151;
+  --gray-light: #f9fafb;
+  --gray-border: #e5e7eb;
   --green: #059669;
   --green-light: #bbf7d0;
   --red: #ef4444;
   --red-light: #fecaca;
+  --amber: #f59e0b;
+  --amber-dark: #d97706;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -51,7 +53,7 @@ body {
   background: #fff;
   border-radius: 14px;
   padding: 1.75rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
   opacity: 1;
 }
@@ -64,7 +66,7 @@ body {
 
 h1, h2, h3 {
   margin-top: 0;
-  color: #111827;
+  color: var(--gray-ink);
 }
 
 /* ========================================================
@@ -79,39 +81,42 @@ button {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-button:hover {
-  background: var(--blue-dark);
-  transform: translateY(-1px);
+button:hover { background: var(--blue-dark); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+button:focus-visible {
+  outline: 3px solid rgba(37,99,235,.35);
+  outline-offset: 2px;
 }
 
-button:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-}
+/* Utility button themes */
+.green-btn { background: var(--green); }
+.green-btn:hover { background: #047857; }
 
-/* Green button for Review */
-#review-btn, .review-btn {
-  background: var(--green);
-}
+.blue-btn { background: var(--blue); }
+.blue-btn:hover { background: var(--blue-dark); }
 
-#review-btn:hover, .review-btn:hover {
-  background: #047857;
-}
+.warning-btn { background: var(--amber); }
+.warning-btn:hover { background: var(--amber-dark); }
 
-/* Back button */
-#back-to-results-btn, .back-btn {
-  background: var(--blue-dark);
+/* Back buttons (dark) */
+.back-btn, #back-to-results-btn { background: var(--blue-dark); }
+
+/* Button group helper */
+.btn-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 /* ========================================================
    FORMS & LABELS
    ======================================================== */
-.form-group {
-  margin-bottom: 1rem;
-}
+.form-group { margin-bottom: 1rem; }
 
 .form-group label {
   display: block;
@@ -121,22 +126,18 @@ button:disabled {
   cursor: pointer;
 }
 
-input[type="radio"] {
+input[type="radio"],
+input[type="checkbox"] {
   accent-color: var(--blue);
   margin-right: 0.4rem;
 }
 
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 /* ========================================================
    QUIZ QUESTION / OPTIONS
    ======================================================== */
-#options {
-  padding: 0;
-  margin: 1rem 0;
-}
+#options { padding: 0; margin: 1rem 0; }
 
 #options li {
   list-style: none;
@@ -148,22 +149,16 @@ input[type="radio"] {
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
 }
 
-#options li:hover {
-  background: #eff6ff;
-  transform: scale(1.02);
-}
+#options li:hover { background: #eff6ff; transform: scale(1.02); }
+#options li.correct { background: var(--green-light); border-color: #16a34a; }
+#options li.incorrect { background: var(--red-light); border-color: var(--red); }
 
-#options li.correct {
-  background: var(--green-light);
-  border-color: #16a34a;
-}
-
-#options li.incorrect {
-  background: var(--red-light);
-  border-color: var(--red);
-}
+#options li input { transform: translateY(1px); }
 
 /* ========================================================
    TIMER
@@ -185,7 +180,7 @@ input[type="radio"] {
   border-radius: 10px;
   padding: 0.85rem 1rem;
   border: 1px solid var(--gray-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .toggle-exp {
@@ -199,9 +194,7 @@ input[type="radio"] {
   transition: color 0.2s ease;
 }
 
-.toggle-exp:hover {
-  color: var(--blue-dark);
-}
+.toggle-exp:hover { color: var(--blue-dark); }
 
 .exp-text {
   margin-top: 0.6rem;
@@ -233,9 +226,7 @@ input[type="radio"] {
   font-weight: 700;
 }
 
-#domain-stats tr:hover td {
-  background: var(--gray-light);
-}
+#domain-stats tr:hover td { background: var(--gray-light); }
 
 /* ========================================================
    REVIEW SCREEN
@@ -249,15 +240,9 @@ input[type="radio"] {
   transition: transform 0.2s ease;
 }
 
-.review-item:hover {
-  transform: scale(1.01);
-}
+.review-item:hover { transform: scale(1.01); }
 
-.review-item h4 {
-  margin-top: 0;
-  font-size: 1rem;
-  color: #111827;
-}
+.review-item h4 { margin-top: 0; font-size: 1rem; color: var(--gray-ink); }
 
 .review-item p {
   margin: 0.3rem 0;
@@ -265,15 +250,8 @@ input[type="radio"] {
   color: var(--gray-text);
 }
 
-.review-item .correct {
-  color: var(--green);
-  font-weight: 600;
-}
-
-.review-item .incorrect {
-  color: var(--red);
-  font-weight: 600;
-}
+.review-item .correct { color: var(--green); font-weight: 600; }
+.review-item .incorrect { color: var(--red); font-weight: 600; }
 
 .review-item hr {
   border: none;
@@ -290,59 +268,160 @@ input[type="radio"] {
 }
 
 /* Scrollbar styling */
-#review-screen::-webkit-scrollbar {
-  width: 8px;
+#review-screen::-webkit-scrollbar { width: 8px; }
+#review-screen::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+#review-screen::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ========================================================
+   PROGRESS DASHBOARD
+   ======================================================== */
+#progress-screen {
+  padding: 1.75rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  animation: fadeIn 0.4s ease;
 }
 
-#review-screen::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+#progress-screen h2 {
+  margin-bottom: 1rem;
+  color: var(--gray-ink);
+  text-align: center;
+}
+
+.progress-summary {
+  background: var(--gray-light);
+  border: 1px solid var(--gray-border);
   border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-#review-screen::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.progress-summary p {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  color: var(--gray-text);
+}
+
+.progress-summary span {
+  font-weight: 600;
+  color: var(--blue-dark);
+}
+
+.progress-history {
+  background: var(--gray-light);
+  border: 1px solid var(--gray-border);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.progress-history h3 {
+  margin-top: 0;
+  font-size: 1.05rem;
+  color: var(--blue-dark);
+  margin-bottom: 0.5rem;
+}
+
+.progress-history ul { list-style: none; margin: 0; padding: 0; }
+.progress-history li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-border);
+  font-size: 0.9rem;
+  color: var(--gray-text);
+}
+.progress-history li:last-child { border-bottom: none; }
+.progress-history li::before {
+  content: "• ";
+  color: var(--blue);
+  font-weight: bold;
+}
+
+#back-to-results-from-progress {
+  margin-top: 1rem;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+}
+#back-to-results-from-progress:hover { background: var(--blue-dark); }
+
+/* ========================================================
+   PROGRESS CHART (Mini Bar Visualization)
+   ======================================================== */
+.progress-chart {
+  margin-top: 1.25rem;
+  background: #f1f5f9;
+  border-radius: 10px;
+  border: 1px solid var(--gray-border);
+  padding: 1rem;
+}
+
+.progress-chart h3 {
+  margin-top: 0;
+  font-size: 1rem;
+  color: var(--blue-dark);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 120px;
+  gap: 0.5rem;
+}
+
+.chart-bar {
+  flex: 1;
+  background: linear-gradient(to top, var(--blue-dark), var(--blue));
+  border-radius: 6px 6px 0 0;
+  transition: height 0.6s ease, background 0.3s ease;
+  position: relative;
+  animation: riseUp 0.6s ease forwards;
+  min-width: 14px; /* keep tap targets visible on mobile */
+}
+
+.chart-bar span {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-text);
+  white-space: nowrap;
+}
+
+/* Performance-based colors (add classes via JS if desired) */
+.bar--bad   { background: linear-gradient(to top, #b91c1c, var(--red)); }
+.bar--ok    { background: linear-gradient(to top, #b45309, var(--amber)); }
+.bar--good  { background: linear-gradient(to top, #047857, var(--green)); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes riseUp {
+  from { height: 0; opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ========================================================
    RESPONSIVE DESIGN
    ======================================================== */
 @media (max-width: 640px) {
-  body {
-    padding: 1rem;
-  }
-
-  .card {
-    padding: 1.25rem;
-  }
-
-  button {
-    width: 100%;
-  }
-
-  #options li {
-    font-size: 0.95rem;
-  }
-
-  #timer {
-    font-size: 0.9rem;
-  }
-
-  .review-item {
-    font-size: 0.9rem;
-  }
+  body { padding: 1rem; }
+  .card { padding: 1.25rem; }
+  button { width: 100%; }
+  #options li { font-size: 0.95rem; }
+  #timer { font-size: 0.9rem; }
+  .review-item { font-size: 0.9rem; }
 }
-
-
-#options li {
-  display: flex;
-  align-items: center;
-  gap: .6rem;
-}
-
-#options li input {
-  transform: translateY(1px);
-}
-
-/* ========================================================
-   END OF FILE
-   ======================================================== */

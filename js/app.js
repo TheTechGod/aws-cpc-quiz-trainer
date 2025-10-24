@@ -1,5 +1,6 @@
 // ========================================================
-// AWS CPC QUIZ TRAINER v5.1.1 — Multi-Answer Fixes + Review
+// AWS CPC QUIZ TRAINER v5.3 — Progress Dashboard Edition
+// Author: Geoffrey D. Metzger | Integrity Programming
 // ========================================================
 
 // -------- Elements
@@ -8,30 +9,49 @@ const restartBtn = document.getElementById("restart-btn");
 const startScreen = document.getElementById("start-screen");
 const quizScreen = document.getElementById("quiz-screen");
 const resultScreen = document.getElementById("result-screen");
-
 const nextBtn = document.getElementById("next-btn");
 const questionText = document.getElementById("question-text");
 const optionsList = document.getElementById("options");
 const timerDisplay = document.getElementById("timer");
 const scoreSummary = document.getElementById("score-summary");
 const domainTable = document.getElementById("domain-stats");
-
-// Use the Review UI that already exists in your HTML
-const reviewBtn = document.getElementById("review-btn"); // on Results screen
+const reviewBtn = document.getElementById("review-btn");
 const reviewScreen = document.getElementById("review-screen");
 const reviewContainer = document.getElementById("review-container");
 const backToResultsBtn = document.getElementById("back-to-results-btn");
 
+// NEW: Progress Dashboard elements
+const progressBtn = document.getElementById("progress-btn");
+const progressScreen = document.getElementById("progress-screen");
+const backToResultsFromProgress = document.getElementById("back-to-results-from-progress");
+const totalQuizzesEl = document.getElementById("total-quizzes");
+const avgScoreEl = document.getElementById("avg-score");
+const bestDomainEl = document.getElementById("best-domain");
+const lastSessionEl = document.getElementById("last-session");
+const historyList = document.getElementById("history-list");
+
+// NEW: Retake Button
+const retakeBtn = document.createElement("button");
+retakeBtn.id = "retake-btn";
+retakeBtn.textContent = "Retake Missed Questions";
+retakeBtn.style.background = "#f59e0b";
+retakeBtn.style.color = "#fff";
+retakeBtn.style.border = "none";
+retakeBtn.style.padding = "0.75rem 1.25rem";
+retakeBtn.style.borderRadius = "8px";
+retakeBtn.style.cursor = "pointer";
+retakeBtn.style.fontWeight = "600";
+retakeBtn.style.marginRight = "0.5rem";
+
 // -------- State
 let quizQuestions = [];
 let currentQuestionIndex = 0;
-let score = 0; // now allows partial credit
+let score = 0;
 let selectedDomains = [];
 let questionCount = 5;
 let userAnswers = [];
-
 let startTime, endTime, totalTime = 0, questionStartTime;
-let domainStats = {}; // { [domain]: { correct: <sum of partial>, total: <number of questions> } }
+let domainStats = {};
 let timerInterval;
 
 // -------- Helpers
@@ -39,37 +59,41 @@ const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
 const fadeSwap = (hide, show) => { hide.classList.add("hidden"); show.classList.remove("hidden"); };
 const norm = (s) => String(s).replace(/\s+/g, " ").trim();
 
+// -------- Local Storage Helpers (now tracks history)
+function saveStats(resultData) {
+  const history = JSON.parse(localStorage.getItem("awsProgress") || "[]");
+  history.push(resultData);
+  localStorage.setItem("awsProgress", JSON.stringify(history.slice(-10))); // Keep last 10
+}
+
+function loadStats() {
+  return JSON.parse(localStorage.getItem("awsProgress")) || [];
+}
+
 // -------- Start Quiz
 startBtn.addEventListener("click", () => {
   resultScreen.classList.add("hidden");
 
-  // collect domain selections (radios or checkboxes depending on your HTML)
-  selectedDomains = Array.from(
-    document.querySelectorAll('input[name="domain"]:checked')
-  ).map(el => el.value);
+  selectedDomains = Array.from(document.querySelectorAll('input[name="domain"]:checked')).map(el => el.value);
   if (!selectedDomains.length) selectedDomains = ["All"];
 
   const countInput = document.querySelector('input[name="count"]:checked');
   questionCount = parseInt(countInput.value, 10);
 
-  // filter question pool
   quizQuestions = selectedDomains.includes("All")
     ? [...questions]
     : questions.filter(q => selectedDomains.includes(q.domain));
 
   if (!quizQuestions.length) return alert("No questions found for your selection.");
-
   if (quizQuestions.length < questionCount) questionCount = quizQuestions.length;
   quizQuestions = shuffleArray(quizQuestions).slice(0, questionCount);
 
-  // reset session
   currentQuestionIndex = 0;
   score = 0;
   userAnswers = [];
   domainStats = {};
   totalTime = 0;
 
-  // timer
   startTime = Date.now();
   questionStartTime = Date.now();
   clearInterval(timerInterval);
@@ -87,20 +111,19 @@ function updateTimer() {
   timerDisplay.textContent = `Time: ${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
-// -------- Show Question (auto checkbox for multi-answer)
+// -------- Show Question
 function showQuestion() {
   const q = quizQuestions[currentQuestionIndex];
   questionText.textContent = q.question;
   optionsList.innerHTML = "";
 
-  const multi = Array.isArray(q.answer);               // multi-answer?
+  const multi = Array.isArray(q.answer);
   const correctAnswers = multi ? q.answer.map(norm) : [norm(q.answer)];
   const shuffledOptions = shuffleArray([...q.options]);
 
   shuffledOptions.forEach((opt, idx) => {
     const id = `opt-${currentQuestionIndex}-${idx}`;
     const li = document.createElement("li");
-
     const input = document.createElement("input");
     input.type = multi ? "checkbox" : "radio";
     input.name = "option";
@@ -111,9 +134,7 @@ function showQuestion() {
     label.setAttribute("for", id);
     label.textContent = opt;
 
-    // Make the whole row feel clickable
     li.addEventListener("click", (e) => {
-      // don't double-toggle when clicking the checkbox itself
       if (e.target !== input) input.checked = !input.checked;
     });
 
@@ -128,7 +149,7 @@ function showQuestion() {
   questionStartTime = Date.now();
 }
 
-// -------- Grade (partial credit for multi)
+// -------- Grade (Multi-Answer Safe)
 function gradeAnswer(q) {
   const inputs = Array.from(optionsList.querySelectorAll("input"));
   const selectedVals = inputs.filter(i => i.checked).map(i => norm(i.value));
@@ -140,43 +161,37 @@ function gradeAnswer(q) {
     return;
   }
 
-  // timing
   const elapsed = (Date.now() - questionStartTime) / 1000;
   totalTime += elapsed;
-
-  // domain stats scaffold
   const currentDomain = q.domain;
+
   if (!domainStats[currentDomain]) domainStats[currentDomain] = { correct: 0, total: 0 };
   domainStats[currentDomain].total++;
 
-  // partial credit: (# of correct choices the user selected) / (# of correct choices)
   const selectedCorrectCount = selectedVals.filter(v => correctAnswers.includes(v)).length;
   const questionScore = selectedCorrectCount / correctAnswers.length;
 
-  // add to overall score + per-domain score
   score += questionScore;
   domainStats[currentDomain].correct += questionScore;
 
-  // visual feedback
   optionsList.querySelectorAll("li").forEach(li => {
     const val = norm(li.querySelector("input").value);
-    if (correctAnswers.includes(val)) li.classList.add("correct");        // show all correct
-    if (selectedVals.includes(val) && !correctAnswers.includes(val)) {
-      li.classList.add("incorrect");                                      // show wrong picks
-    }
+    if (correctAnswers.includes(val)) li.classList.add("correct");
+    if (selectedVals.includes(val) && !correctAnswers.includes(val)) li.classList.add("incorrect");
     li.querySelector("input").disabled = true;
   });
 
-  // store for review screen
+  const wasCorrect = questionScore === 1;
+  q.wasCorrect = wasCorrect;
+
   userAnswers.push({
     question: q.question,
     yourAnswer: selectedVals.join("; "),
     correctAnswer: correctAnswers.join("; "),
     explanation: q.explanation || "No explanation provided.",
-    correct: questionScore === 1
+    correct: wasCorrect
   });
 
-  // advance button
   nextBtn.textContent = (currentQuestionIndex + 1 === quizQuestions.length) ? "Finish Quiz" : "Next Question";
   nextBtn.onclick = () => {
     currentQuestionIndex++;
@@ -194,6 +209,20 @@ function showResults() {
   const totalDuration = (endTime - startTime) / 1000;
   const avgTime = (totalDuration / quizQuestions.length).toFixed(1);
   const percentage = ((score / quizQuestions.length) * 100).toFixed(1);
+
+  // Save result to localStorage for progress tracking
+  const resultData = {
+    date: new Date().toLocaleString(),
+    score: parseFloat(percentage),
+    totalQuestions: quizQuestions.length,
+    bestDomain: Object.keys(domainStats).reduce((a, b) => (
+      (domainStats[a]?.correct / domainStats[a]?.total) >
+      (domainStats[b]?.correct / domainStats[b]?.total)
+        ? a : b
+    )),
+    time: totalDuration.toFixed(1)
+  };
+  saveStats(resultData);
 
   scoreSummary.innerHTML = `
     <p>Score: ${score.toFixed(1)} / ${quizQuestions.length} (${percentage}%)</p>
@@ -213,9 +242,15 @@ function showResults() {
       <td>${pct}%</td>`;
     domainTable.appendChild(row);
   });
+
+  const btnRow = scoreSummary.parentElement;
+  if (!document.getElementById("retake-btn")) {
+    btnRow.insertBefore(retakeBtn, restartBtn);
+    retakeBtn.addEventListener("click", retakeMissed);
+  }
 }
 
-// -------- Review (uses your existing review screen)
+// -------- Review
 function renderReview() {
   reviewContainer.innerHTML = "";
   userAnswers.forEach((a, i) => {
@@ -226,8 +261,7 @@ function renderReview() {
       <p><strong>Your Answer:</strong> <span class="${a.correct ? "correct" : "incorrect"}">${a.yourAnswer || "—"}</span></p>
       <p><strong>Correct Answer:</strong> ${a.correctAnswer}</p>
       <p><strong>Explanation:</strong> ${a.explanation}</p>
-      <hr>
-    `;
+      <hr>`;
     reviewContainer.appendChild(div);
   });
 }
@@ -237,6 +271,49 @@ reviewBtn?.addEventListener("click", () => {
   fadeSwap(resultScreen, reviewScreen);
 });
 backToResultsBtn?.addEventListener("click", () => fadeSwap(reviewScreen, resultScreen));
+
+// -------- Retake Missed
+function retakeMissed() {
+  const missed = userAnswers.filter(a => !a.correct);
+  if (!missed.length) {
+    alert("No missed questions to retake!");
+    return;
+  }
+  quizQuestions = questions.filter(q =>
+    missed.some(m => m.question === q.question)
+  );
+  currentQuestionIndex = 0;
+  score = 0;
+  userAnswers = [];
+  fadeSwap(resultScreen, quizScreen);
+  showQuestion();
+}
+
+// -------- Progress Dashboard
+progressBtn?.addEventListener("click", renderProgress);
+backToResultsFromProgress?.addEventListener("click", () => fadeSwap(progressScreen, resultScreen));
+
+function renderProgress() {
+  const history = loadStats();
+  if (!history.length) {
+    historyList.innerHTML = "<p>No quiz data yet. Take a quiz to see your progress!</p>";
+  } else {
+    const avgScore = (history.reduce((a, b) => a + b.score, 0) / history.length).toFixed(1);
+    const best = history.reduce((a, b) => (a.score > b.score ? a : b));
+    totalQuizzesEl.textContent = history.length;
+    avgScoreEl.textContent = `${avgScore}%`;
+    bestDomainEl.textContent = best.bestDomain || "N/A";
+    lastSessionEl.textContent = `${history[history.length - 1].date} — ${history[history.length - 1].score}%`;
+
+    historyList.innerHTML = "";
+    history.slice(-5).reverse().forEach(h => {
+      const li = document.createElement("li");
+      li.textContent = `${h.date} — ${h.score}% (${h.bestDomain})`;
+      historyList.appendChild(li);
+    });
+  }
+  fadeSwap(resultScreen, progressScreen);
+}
 
 // -------- Restart
 restartBtn.addEventListener("click", () => {
