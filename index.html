@@ -24,9 +24,10 @@
         <h3>Domain</h3>
         <label><input type="radio" name="domain" value="All" checked /> All Domains</label>
         <label><input type="radio" name="domain" value="Cloud Concepts" /> Cloud Concepts</label>
-        <label><input type="radio" name="domain" value="Security" /> Security</label>
+        <label><input type="radio" name="domain" value="Security & Compliance" /> Security & Compliance</label>
         <label><input type="radio" name="domain" value="Technology" /> Technology</label>
-        <label><input type="radio" name="domain" value="Billing" /> Billing & Pricing</label>
+        <label><input type="radio" name="domain" value="Billing & Pricing" /> Billing & Pricing</label>
+        <label><input type="radio" name="domain" value="Networking & Content Delivery" /> Networking & Content Delivery</label>
       </div>
 
       <!-- Question Count -->
@@ -39,17 +40,28 @@
         <label><input type="radio" name="count" value="25" /> 25</label>
       </div>
 
-      <button id="start-btn">Start Quiz</button>
+      <button id="start-btn" class="primary-btn">Start Quiz</button>
     </section>
 
     <!-- ===================================================== -->
     <!-- QUIZ SCREEN -->
     <!-- ===================================================== -->
     <section id="quiz-screen" class="card hidden">
-      <div id="timer">Time: 00:00</div>
+
+      <!-- Header: Question # + Timer -->
+      <div id="quiz-status" class="quiz-status-bar">
+        <span id="question-number">Question 1 of 5</span>
+        <span id="timer">Time: 00:00</span>
+      </div>
+
+      <!-- Question + Options -->
       <h2 id="question-text"></h2>
       <ul id="options" class="option-list"></ul>
-      <button id="next-btn" disabled>Next</button>
+
+      <!-- Navigation Button -->
+      <div class="btn-group" style="margin-top: 1rem;">
+        <button id="next-btn" class="blue-btn" disabled>Next</button>
+      </div>
     </section>
 
     <!-- ===================================================== -->
@@ -60,10 +72,10 @@
       <div id="score-summary"></div>
       <table id="domain-stats"></table>
 
-      <div class="btn-group" style="margin-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <div class="btn-group">
         <button id="review-btn" class="green-btn">🧠 View Review</button>
         <button id="progress-btn" class="blue-btn">📈 View Progress</button>
-        <button id="restart-btn">Restart</button>
+        <button id="restart-btn" class="secondary-btn">Restart</button>
       </div>
     </section>
 
@@ -73,7 +85,7 @@
     <section id="review-screen" class="card hidden">
       <h2>Question Review</h2>
       <div id="review-container"></div>
-      <button id="back-to-results-btn" style="margin-top: 1rem;">⬅️ Back to Results</button>
+      <button id="back-to-results-btn" class="back-btn">⬅️ Back to Results</button>
     </section>
 
     <!-- ===================================================== -->
@@ -94,7 +106,10 @@
         <ul id="history-list"></ul>
       </div>
 
-      <button id="back-to-results-from-progress" style="margin-top: 1rem;">⬅️ Back to Results</button>
+      <div class="btn-group">
+        <button id="back-to-results-from-progress" class="secondary-btn">⬅️ Back to Results</button>
+        <button id="reset-progress-btn" class="warning-btn">🗑️ Reset Progress</button>
+      </div>
     </section>
 
   </main>
