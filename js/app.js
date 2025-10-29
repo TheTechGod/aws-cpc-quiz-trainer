@@ -23,6 +23,11 @@
 // Author: Geoffrey D. Metzger | Integrity Programming
 // ========================================================
 
+// ========================================================
+// AWS CPC QUIZ TRAINER — Multi-Domain Selection Edition
+// Author: Geoffrey D. Metzger | Integrity Programming
+// ========================================================
+
 // -------- Elements --------
 const startBtn = document.getElementById("start-btn");
 const restartBtn = document.getElementById("restart-btn");
@@ -97,6 +102,39 @@ function saveCurrentResultToHistory(result) {
 }
 
 // --------------------------------------------------------
+// DOMAIN SELECTION LOGIC (NEW)
+// --------------------------------------------------------
+function getSelectedDomains() {
+  const allDomainsBox = document.getElementById("allDomains");
+  const domainBoxes = document.querySelectorAll(".domain-check");
+
+  // If "All Domains" is checked or no specific domains are checked
+  if (allDomainsBox.checked) {
+    return ["All"];
+  }
+
+  const selected = Array.from(domainBoxes)
+    .filter(box => box.checked)
+    .map(box => box.value);
+
+  // Default fallback if none selected
+  return selected.length ? selected : ["All"];
+}
+
+// Toggle logic: ensures "All Domains" and others behave correctly
+document.addEventListener("change", (e) => {
+  if (e.target.id === "allDomains") {
+    if (e.target.checked) {
+      document.querySelectorAll(".domain-check").forEach(box => box.checked = false);
+    }
+  } else if (e.target.classList.contains("domain-check")) {
+    if (e.target.checked) {
+      document.getElementById("allDomains").checked = false;
+    }
+  }
+});
+
+// --------------------------------------------------------
 // INITIALIZE PROGRESS BAR
 // --------------------------------------------------------
 const progressBar = document.createElement("div");
@@ -123,10 +161,8 @@ document.getElementById("quiz-status").after(progressBar);
 startBtn.addEventListener("click", () => {
   resultScreen.classList.add("hidden");
 
-  // Domain selection
-  selectedDomains = Array.from(document.querySelectorAll('input[name="domain"]:checked'))
-    .map(el => el.value);
-  if (!selectedDomains.length) selectedDomains = ["All"];
+  // Domain selection (updated)
+  selectedDomains = getSelectedDomains();
 
   // Question count
   const countInput = document.querySelector('input[name="count"]:checked');
@@ -177,7 +213,6 @@ function showQuestion() {
   const q = quizQuestions[currentQuestionIndex];
   const shortId = q.id.includes("_") ? q.id.split("_")[1] : q.id;
 
-  // Header + progress bar
   questionNumberDisplay.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
   const progressPercent = (currentQuestionIndex / quizQuestions.length) * 100;
   progressFill.style.width = `${progressPercent}%`;
@@ -256,11 +291,9 @@ function gradeAnswer(q) {
     correct: questionScore === 1
   });
 
-  // Update progress bar
   const progressPercent = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
   progressFill.style.width = `${progressPercent}%`;
 
-  // Button behavior
   if (currentQuestionIndex + 1 === quizQuestions.length) {
     nextBtn.textContent = "Finish Quiz";
     nextBtn.onclick = () => {
@@ -279,7 +312,7 @@ function gradeAnswer(q) {
 // --------------------------------------------------------
 // RESULTS
 // --------------------------------------------------------
-function showResults() { 
+function showResults() {
   clearInterval(timerInterval);
   endTime = Date.now();
 
@@ -302,14 +335,12 @@ function showResults() {
     domains: domainStats
   });
 
-  // ----- Summary -----
   scoreSummary.innerHTML = `
     <p>Score: ${score.toFixed(1)} / ${quizQuestions.length} (${percentage}%)</p>
     <p>Total Time: ${totalDuration.toFixed(1)}s</p>
     <p>Avg per Question: ${avgTime}s</p>
   `;
 
-  // ----- Domain Breakdown -----
   domainTable.innerHTML = `<tr><th>Domain</th><th>Correct</th><th>Total</th><th>%</th></tr>`;
   Object.keys(domainStats).forEach(domain => {
     const stats = domainStats[domain];
@@ -324,20 +355,16 @@ function showResults() {
     domainTable.appendChild(row);
   });
 
-  // ----- Safe Retake Button Placement -----
   if (!document.getElementById("retake-btn")) {
     const btnGroup = resultScreen.querySelector(".btn-group");
     if (btnGroup) {
-      // You can choose either insertBefore (first position) or appendChild (last)
       btnGroup.insertBefore(retakeBtn, btnGroup.firstChild);
-      // or → btnGroup.appendChild(retakeBtn);
       retakeBtn.addEventListener("click", retakeMissed);
     }
   }
 
   fadeSwap(quizScreen, resultScreen);
 }
-
 
 // --------------------------------------------------------
 // REVIEW MODE
