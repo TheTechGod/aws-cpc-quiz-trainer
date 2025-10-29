@@ -19,16 +19,41 @@
       <h1>AWS Certified Cloud Practitioner Quiz</h1>
       <p>Select a domain and question count to begin.</p>
 
-      <!-- Domain Selection -->
-      <div class="form-group">
-        <h3>Domain</h3>
-        <label><input type="radio" name="domain" value="All" checked /> All Domains</label>
-        <label><input type="radio" name="domain" value="Cloud Concepts" /> Cloud Concepts</label>
-        <label><input type="radio" name="domain" value="Security & Compliance" /> Security & Compliance</label>
-        <label><input type="radio" name="domain" value="Technology" /> Technology</label>
-        <label><input type="radio" name="domain" value="Billing & Pricing" /> Billing & Pricing</label>
-        <label><input type="radio" name="domain" value="Networking & Content Delivery" /> Networking & Content Delivery</label>
-      </div>
+     <!-- Domain Selection -->
+<div class="mb-4">
+  <h5>Domain</h5>
+
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="allDomains" value="All Domains" checked>
+    <label class="form-check-label" for="allDomains">All Domains</label>
+  </div>
+
+  <div class="form-check">
+    <input class="form-check-input domain-check" type="checkbox" value="Cloud Concepts" id="domainCloud">
+    <label class="form-check-label" for="domainCloud">Cloud Concepts</label>
+  </div>
+
+  <div class="form-check">
+    <input class="form-check-input domain-check" type="checkbox" value="Security & Compliance" id="domainSecurity">
+    <label class="form-check-label" for="domainSecurity">Security & Compliance</label>
+  </div>
+
+  <div class="form-check">
+    <input class="form-check-input domain-check" type="checkbox" value="Technology" id="domainTech">
+    <label class="form-check-label" for="domainTech">Technology</label>
+  </div>
+
+  <div class="form-check">
+    <input class="form-check-input domain-check" type="checkbox" value="Billing & Pricing" id="domainBilling">
+    <label class="form-check-label" for="domainBilling">Billing & Pricing</label>
+  </div>
+
+  <div class="form-check">
+    <input class="form-check-input domain-check" type="checkbox" value="Networking & Content Delivery" id="domainNetwork">
+    <label class="form-check-label" for="domainNetwork">Networking & Content Delivery</label>
+  </div>
+</div>
+
 
       <!-- Question Count -->
       <div class="form-group">
