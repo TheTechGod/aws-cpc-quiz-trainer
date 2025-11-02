@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS CPC Learning Modules | Integrity Programming</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/swag.css" />
+</head>
+
+<body>
+  <main class="container">
+    <!-- Back Button -->
+    <button onclick="window.location.href='index.html'" class="secondary-btn mb-3">🏠 Back to CPC Menu</button>
+
+    <!-- ===================================================== -->
+    <!-- LEARNING MODULES SCREEN -->
+    <!-- ===================================================== -->
+    <section id="modules-screen" class="card active">
+      <h1 class="fw-bold">📘 AWS Bite-Size Learning</h1>
+      <p class="lead">Short, focused lessons to help you master Cloud Practitioner concepts.</p>
+
+      <!-- Lesson Display -->
+      <div id="module-content" class="mt-3"></div>
+
+      <!-- Reader Buttons -->
+      <div class="btn-group mt-3">
+        <button class="green-btn" id="read-btn">🔊 Read Aloud</button>
+        <button class="warning-btn" id="stop-btn">⏹️ Stop</button>
+      </div>
+
+      <!-- Navigation -->
+      <div class="btn-group mt-4">
+        <button id="prev-module" class="secondary-btn">⬅️ Previous</button>
+        <button id="next-module" class="blue-btn">Next ➡️</button>
+      </div>
+
+      <!-- Other Actions -->
+      <div class="btn-group mt-4">
+        <button onclick="window.location.href='quiz.html'" class="green-btn">🧠 Take Practice Quiz</button>
+        <button onclick="window.location.href='../index.html'" class="warning-btn">🏁 Exit to Main Hub</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================================================== -->
+  <!-- SCRIPTS -->
+  <!-- ===================================================== -->
+  <script src="js/modules.js"></script>
+
+  <script>
+    // =====================================================
+    // 🗣️ Screen Reader with Female Voice Preference
+    // =====================================================
+    let speechUtterance = null;
+    let isSpeaking = false;
+    let preferredVoice = null;
+
+    // Load voices asynchronously
+    function loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) {
+        // Try again when voices load
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        return;
+      }
+
+      // Try to find a natural female voice
+      const femaleCandidates = voices.filter(v =>
+        /female|Google US English|Microsoft Aria|Jenny|Samantha|en-US/i.test(v.name)
+      );
+
+      preferredVoice = femaleCandidates[0] || voices.find(v => /en/i.test(v.lang)) || voices[0];
+      console.log("Selected voice:", preferredVoice ? preferredVoice.name : "default");
+    }
+
+    loadVoices();
+
+    function readCurrentModule() {
+      const module = awsModules[currentModule];
+      if (!module || !window.speechSynthesis) {
+        alert("Speech synthesis not supported in this browser.");
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const textToSpeak = `${module.title}. ${module.text.replace(/(<([^>]+)>)/gi, "")}`;
+
+      speechUtterance = new SpeechSynthesisUtterance(textToSpeak);
+      speechUtterance.lang = preferredVoice?.lang || "en-US";
+      speechUtterance.rate = 1.0;
+      speechUtterance.pitch = 1.05;
+      if (preferredVoice) speechUtterance.voice = preferredVoice;
+
+      window.speechSynthesis.speak(speechUtterance);
+      isSpeaking = true;
+    }
+
+    function stopReading() {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+    }
+
+    // =====================================================
+    // 🧭 Navigation + Auto-Read
+    // =====================================================
+    const nextBtn = document.getElementById("next-module");
+    const prevBtn = document.getElementById("prev-module");
+    const readBtn = document.getElementById("read-btn");
+    const stopBtn = document.getElementById("stop-btn");
+
+    if (readBtn) readBtn.addEventListener("click", readCurrentModule);
+    if (stopBtn) stopBtn.addEventListener("click", stopReading);
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        if (currentModule < awsModules.length - 1) {
+          currentModule++;
+          showModule(currentModule);
+          if (isSpeaking) readCurrentModule();
+        }
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        if (currentModule > 0) {
+          currentModule--;
+          showModule(currentModule);
+          if (isSpeaking) readCurrentModule();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

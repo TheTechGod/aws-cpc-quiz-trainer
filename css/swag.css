@@ -1,14 +1,11 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER v5.4 — Progress + Chart Edition
+   AWS CPC QUIZ TRAINER v5.5 — Unified + Dark Mode Edition
    Author: Geoffrey D. Metzger | Integrity Programming
-   Purpose: Clean UI, smooth transitions, review layout,
-            progress dashboard, and mini bar chart
    ======================================================== */
 
 /* ========================================================
-   AWS CPC QUIZ TRAINER — SWAG.CSS v2.1
+   ROOT COLORS
    ======================================================== */
-
 :root {
   --blue: #2563eb;
   --blue-dark: #1d4ed8;
@@ -23,8 +20,32 @@
   --red-light: #fecaca;
   --amber: #f59e0b;
   --amber-dark: #d97706;
+  --card-bg: #fff;
 }
 
+/* 🌙 Dark Mode Variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --blue: #3b82f6;
+    --blue-dark: #2563eb;
+    --gray-bg: #0f172a;
+    --gray-ink: #f8fafc;
+    --gray-text: #e2e8f0;
+    --gray-light: #1e293b;
+    --gray-border: #334155;
+    --green: #10b981;
+    --green-light: #064e3b;
+    --red: #f87171;
+    --red-light: #7f1d1d;
+    --amber: #fbbf24;
+    --amber-dark: #b45309;
+    --card-bg: #1e293b;
+  }
+}
+
+/* ========================================================
+   BASE STYLES
+   ======================================================== */
 * { box-sizing: border-box; }
 
 body {
@@ -37,6 +58,7 @@ body {
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -51,7 +73,7 @@ body {
    CARD LAYOUT
    ======================================================== */
 .card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 14px;
   padding: 1.75rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -70,7 +92,7 @@ h1, h2, h3 {
 }
 
 /* ========================================================
-   QUIZ STATUS BAR (QUESTION COUNTER + TIMER)
+   QUIZ STATUS BAR
    ======================================================== */
 .quiz-status-bar {
   display: flex;
@@ -86,19 +108,13 @@ h1, h2, h3 {
   color: var(--gray-text);
 }
 
-#question-number {
-  color: var(--gray-ink);
-}
-
-#timer {
-  color: var(--blue-dark);
-  font-weight: bold;
-}
+#question-number { color: var(--gray-ink); }
+#timer { color: var(--blue-dark); font-weight: bold; }
 
 /* ========================================================
    BUTTONS
    ======================================================== */
-button {
+button, .primary-btn, .green-btn, .secondary-btn, .warning-btn {
   background: var(--blue);
   color: #fff;
   border: none;
@@ -108,37 +124,28 @@ button {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.4rem;
 }
 
-button:hover { background: var(--blue-dark); transform: translateY(-1px); }
-button:active { transform: translateY(0); }
+button:hover,
+.primary-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
 button:disabled { background: #94a3b8; cursor: not-allowed; }
-
-button:focus-visible {
-  outline: 3px solid rgba(37,99,235,.35);
-  outline-offset: 2px;
-}
 
 .green-btn { background: var(--green); }
 .green-btn:hover { background: #047857; }
 
-.blue-btn { background: var(--blue); }
-.blue-btn:hover { background: var(--blue-dark); }
+.secondary-btn { background: var(--gray-text); }
+.secondary-btn:hover { background: #1f2937; }
 
 .warning-btn { background: var(--amber); }
 .warning-btn:hover { background: var(--amber-dark); }
 
-.secondary-btn { background: var(--gray-text); }
-.secondary-btn:hover { background: #1f2937; }
-
-.back-btn, #back-to-results-btn { background: var(--blue-dark); }
-
-.btn-group {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 1rem;
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* ========================================================
@@ -154,8 +161,7 @@ button:focus-visible {
   cursor: pointer;
 }
 
-input[type="radio"],
-input[type="checkbox"] {
+input[type="radio"], input[type="checkbox"] {
   accent-color: var(--blue);
   margin-right: 0.4rem;
 }
@@ -195,10 +201,9 @@ input[type="checkbox"] {
 #options li:hover { background: #eff6ff; transform: scale(1.02); }
 #options li.correct { background: var(--green-light); border-color: #16a34a; }
 #options li.incorrect { background: var(--red-light); border-color: var(--red); }
-#options li input { transform: translateY(1px); }
 
 /* ========================================================
-   RESULTS TABLE
+   RESULTS TABLE / REVIEW / PROGRESS
    ======================================================== */
 #domain-stats {
   width: 100%;
@@ -220,11 +225,6 @@ input[type="checkbox"] {
   font-weight: 700;
 }
 
-#domain-stats tr:hover td { background: var(--gray-light); }
-
-/* ========================================================
-   REVIEW SCREEN
-   ======================================================== */
 .review-item {
   background: var(--gray-light);
   border: 1px solid var(--gray-border);
@@ -235,153 +235,91 @@ input[type="checkbox"] {
 }
 
 .review-item:hover { transform: scale(1.01); }
-.review-item h4 { margin-top: 0; font-size: 1rem; color: var(--gray-ink); }
 
-.review-item p {
-  margin: 0.3rem 0;
-  font-size: 0.95rem;
-  color: var(--gray-text);
-}
-
-.review-item .correct { color: var(--green); font-weight: 600; }
-.review-item .incorrect { color: var(--red); font-weight: 600; }
-
-.review-item hr {
-  border: none;
-  border-bottom: 1px solid var(--gray-border);
-  margin-top: 1rem;
-}
-
-/* Scrollable review panel */
-#review-screen {
-  max-height: 80vh;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-  scroll-behavior: smooth;
-}
-
-/* Scrollbar */
-#review-screen::-webkit-scrollbar { width: 8px; }
-#review-screen::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-#review-screen::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-/* ========================================================
-   PROGRESS DASHBOARD
-   ======================================================== */
 #progress-screen {
   padding: 1.75rem;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  animation: fadeIn 0.4s ease;
 }
 
-#progress-screen h2 {
+/* ========================================================
+   LANDING PAGE / SUB-INDEX LAYOUT
+   ======================================================== */
+.center-screen {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card.text-center {
+  text-align: center;
+  padding: 2rem 2.5rem;
+  border-radius: 1rem;
+  background: var(--card-bg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 700px;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+/* Cert selection grid */
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.cert-card {
+  padding: 1.5rem;
+  border: 1px solid var(--gray-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cert-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+.cert-card h3 {
   margin-bottom: 1rem;
   color: var(--gray-ink);
-  text-align: center;
 }
 
-.progress-summary {
-  background: var(--gray-light);
-  border: 1px solid var(--gray-border);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-
-.progress-summary p {
-  margin: 0.4rem 0;
-  font-size: 0.95rem;
-  color: var(--gray-text);
-}
-
-.progress-summary span {
-  font-weight: 600;
-  color: var(--blue-dark);
-}
-
-.progress-history {
-  background: var(--gray-light);
-  border: 1px solid var(--gray-border);
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-
-.progress-history h3 {
-  margin-top: 0;
-  font-size: 1.05rem;
-  color: var(--blue-dark);
-  margin-bottom: 0.5rem;
-}
-
-.progress-history ul { list-style: none; margin: 0; padding: 0; }
-
-.progress-history li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--gray-border);
-  font-size: 0.9rem;
-  color: var(--gray-text);
-}
-
-.progress-history li:last-child { border-bottom: none; }
-.progress-history li::before {
-  content: "• ";
-  color: var(--blue);
-  font-weight: bold;
-}
-
-.warning-btn#reset-progress-btn {
-  width: 100%;
-  margin-top: 0.5rem;
-}
+.fw-bold { font-weight: 700; }
+.lead { font-size: 1.1rem; color: var(--gray-text); }
+.small { font-size: 0.85rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mb-3 { margin-bottom: 1rem; }
 
 /* ========================================================
-   CHART STYLES
+   DARK MODE CARD SHADOW TWEAK
    ======================================================== */
-.chart-bars {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  height: 120px;
-  gap: 0.5rem;
-}
+@media (prefers-color-scheme: dark) {
+  .card,
+  .card.text-center,
+  .cert-card {
+    box-shadow: 0 2px 12px rgba(255, 255, 255, 0.05);
+  }
 
-.chart-bar {
-  flex: 1;
-  border-radius: 6px 6px 0 0;
-  transition: height 0.6s ease, background 0.3s ease;
-  position: relative;
-  min-width: 14px;
-}
+  #options li:hover {
+    background: rgba(59,130,246,0.15);
+  }
 
-.chart-bar span {
-  position: absolute;
-  top: -22px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--gray-text);
-  white-space: nowrap;
-}
-
-.bar--bad   { background: linear-gradient(to top, #b91c1c, var(--red)); }
-.bar--ok    { background: linear-gradient(to top, #b45309, var(--amber)); }
-.bar--good  { background: linear-gradient(to top, #047857, var(--green)); }
-
-/* ========================================================
-   ANIMATIONS
-   ======================================================== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  #domain-stats th {
+    background: rgba(59,130,246,0.15);
+    color: #93c5fd;
+  }
 }
 
 /* ========================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE
    ======================================================== */
 @media (max-width: 640px) {
   body { padding: 1rem; }
@@ -394,6 +332,4 @@ input[type="checkbox"] {
   }
   #options li { font-size: 0.95rem; }
   button { width: 100%; }
-  #timer, #question-number { text-align: left; }
-  .review-item { font-size: 0.9rem; }
 }
