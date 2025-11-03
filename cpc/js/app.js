@@ -1,183 +1,136 @@
-// ========================================================
-// AWS CPC QUIZ TRAINER v5.4 — Visual Dashboard Edition
-// Author: Geoffrey D. Metzger | Integrity Programming
-// ========================================================
-//
-// Features:
-// - Multi-answer questions (checkboxes) + partial credit
-// - Shuffled questions and options
-// - Timer + avg per question
-// - Review mode (answers + explanations)
-// - Retake Missed Questions
-// - Progress Dashboard (history, averages, best domain)
-// - Mini bar chart (last 5 scores) with color coding
-// - LocalStorage persistence (last 20 sessions)
-// ========================================================
+/* ========================================================
+   AWS CPC QUIZ TRAINER — v7.0 Stable
+   Author: Geoffrey D. Metzger | Integrity Programming
+   ========================================================
+   - Multi-domain filtering (checkboxes). If none checked → All.
+   - Shuffled questions + options
+   - Multi-answer support with partial credit
+   - Timer + avg time/question
+   - Progress bar
+   - Review screen + Retake Missed
+   - Progress Dashboard (localStorage; last 20 sessions)
+   ======================================================== */
 
+/* -----------------------------
+   ELEMENTS
+----------------------------- */
+const el = (id) => document.getElementById(id);
 
-// --------------------------------------------------------
-// ELEMENT REFERENCES
-// --------------------------------------------------------
-// ========================================================
-// AWS CPC QUIZ TRAINER v6.3 — Stable Build + Progress Bar
-// Author: Geoffrey D. Metzger | Integrity Programming
-// ========================================================
+const startBtn = el("start-btn");
+const restartBtn = el("restart-btn");
 
-// ========================================================
-// AWS CPC QUIZ TRAINER — Multi-Domain Selection Edition
-// Author: Geoffrey D. Metzger | Integrity Programming
-// ========================================================
+const startScreen   = el("start-screen");
+const quizScreen    = el("quiz-screen");
+const resultScreen  = el("result-screen");
+const reviewScreen  = el("review-screen");
+const progressScreen= el("progress-screen");
 
-// -------- Elements --------
-const startBtn = document.getElementById("start-btn");
-const restartBtn = document.getElementById("restart-btn");
-const startScreen = document.getElementById("start-screen");
-const quizScreen = document.getElementById("quiz-screen");
-const resultScreen = document.getElementById("result-screen");
-const reviewScreen = document.getElementById("review-screen");
-const progressScreen = document.getElementById("progress-screen");
+const nextBtn = el("next-btn");
+const questionText = el("question-text");
+const optionsList = el("options");
+const timerDisplay = el("timer");
+const questionNumberDisplay = el("question-number");
 
-const nextBtn = document.getElementById("next-btn");
-const questionText = document.getElementById("question-text");
-const optionsList = document.getElementById("options");
-const timerDisplay = document.getElementById("timer");
-const questionNumberDisplay = document.getElementById("question-number");
+const scoreSummary = el("score-summary");
+const domainTable  = el("domain-stats");
 
-const scoreSummary = document.getElementById("score-summary");
-const domainTable = document.getElementById("domain-stats");
+const reviewBtn = el("review-btn");
+const reviewContainer = el("review-container");
+const backToResultsBtn = el("back-to-results-btn");
 
-const reviewBtn = document.getElementById("review-btn");
-const reviewContainer = document.getElementById("review-container");
-const backToResultsBtn = document.getElementById("back-to-results-btn");
+const progressBtn = el("progress-btn");
+const backToResultsFromProgress = el("back-to-results-from-progress");
 
-const progressBtn = document.getElementById("progress-btn");
-const backToResultsFromProgress = document.getElementById("back-to-results-from-progress");
+const totalQuizzesEl = el("total-quizzes");
+const avgScoreEl     = el("avg-score");
+const bestDomainEl   = el("best-domain");
+const lastSessionEl  = el("last-session");
+const historyList    = el("history-list");
+const resetProgressBtn = el("reset-progress-btn");
 
-const totalQuizzesEl = document.getElementById("total-quizzes");
-const avgScoreEl = document.getElementById("avg-score");
-const bestDomainEl = document.getElementById("best-domain");
-const lastSessionEl = document.getElementById("last-session");
-const historyList = document.getElementById("history-list");
-
-const resetProgressBtn = document.getElementById("reset-progress-btn");
-
-// --------------------------------------------------------
-// STATE
-// --------------------------------------------------------
+/* -----------------------------
+   STATE
+----------------------------- */
 let quizQuestions = [];
 let currentQuestionIndex = 0;
 let score = 0;
-let selectedDomains = [];
 let questionCount = 5;
 let userAnswers = [];
-
-let startTime, endTime, totalTime = 0, questionStartTime;
 let domainStats = {};
-let timerInterval;
+
+let selectedDomains = [];        // from checkboxes
+let startTime = 0;
+let endTime = 0;
+let questionStartTime = 0;
+let timerInterval = null;
 
 const STORAGE_KEY = "awsProgress";
-const retakeBtn = document.createElement("button");
-retakeBtn.id = "retake-btn";
-retakeBtn.textContent = "Retake Missed Questions";
-retakeBtn.className = "warning-btn";
 
-// --------------------------------------------------------
-// HELPERS
-// --------------------------------------------------------
-const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
+/* -----------------------------
+   HELPERS
+----------------------------- */
+const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
 const fadeSwap = (hide, show) => { hide.classList.add("hidden"); show.classList.remove("hidden"); };
 const norm = (s) => String(s).replace(/\s+/g, " ").trim();
 
-// LocalStorage helpers
-function loadHistory() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-}
-function saveHistory(history) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20)));
-}
-function saveCurrentResultToHistory(result) {
-  const history = loadHistory();
-  history.push(result);
-  saveHistory(history);
-}
+const lsLoad = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+const lsSave = (history) => localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20)));
+const saveResult = (result) => { const h = lsLoad(); h.push(result); lsSave(h); };
 
-// --------------------------------------------------------
-// DOMAIN SELECTION LOGIC (NEW)
-// --------------------------------------------------------
+/* -----------------------------
+   DOMAIN FILTER (no “All Domains”)
+----------------------------- */
 function getSelectedDomains() {
-  const allDomainsBox = document.getElementById("allDomains");
-  const domainBoxes = document.querySelectorAll(".domain-check");
-
-  // If "All Domains" is checked or no specific domains are checked
-  if (allDomainsBox.checked) {
-    return ["All"];
-  }
-
-  const selected = Array.from(domainBoxes)
-    .filter(box => box.checked)
-    .map(box => box.value);
-
-  // Default fallback if none selected
-  return selected.length ? selected : ["All"];
+  const checks = Array.from(document.querySelectorAll(".domain-check"));
+  const checked = checks.filter(cb => cb.checked).map(cb => cb.value);
+  // If user didn’t select anything, treat as ALL domains
+  return checked.length ? checked : Array.from(new Set(questions.map(q => q.domain)));
 }
 
-// Toggle logic: ensures "All Domains" and others behave correctly
-document.addEventListener("change", (e) => {
-  if (e.target.id === "allDomains") {
-    if (e.target.checked) {
-      document.querySelectorAll(".domain-check").forEach(box => box.checked = false);
-    }
-  } else if (e.target.classList.contains("domain-check")) {
-    if (e.target.checked) {
-      document.getElementById("allDomains").checked = false;
-    }
-  }
-});
+/* -----------------------------
+   PROGRESS BAR
+----------------------------- */
+(function mountProgressBar() {
+  const status = document.getElementById("quiz-status");
+  if (!status) return;
+  const bar = document.createElement("div");
+  bar.id = "progress-bar";
+  bar.style.height = "8px";
+  bar.style.background = "#2b3240";
+  bar.style.borderRadius = "4px";
+  bar.style.overflow = "hidden";
+  bar.style.marginTop = "10px";
 
-// --------------------------------------------------------
-// INITIALIZE PROGRESS BAR
-// --------------------------------------------------------
-const progressBar = document.createElement("div");
-progressBar.id = "progress-bar";
-progressBar.style.height = "8px";
-progressBar.style.background = "#e0e0e0";
-progressBar.style.borderRadius = "4px";
-progressBar.style.overflow = "hidden";
-progressBar.style.marginTop = "10px";
+  const fill = document.createElement("div");
+  fill.id = "progress-fill";
+  fill.style.height = "100%";
+  fill.style.width = "0%";
+  fill.style.background = "linear-gradient(90deg, #3b82f6, #10b981)";
+  fill.style.transition = "width 0.3s ease";
 
-const progressFill = document.createElement("div");
-progressFill.id = "progress-fill";
-progressFill.style.height = "100%";
-progressFill.style.width = "0%";
-progressFill.style.background = "linear-gradient(90deg, #007bff, #00c851)";
-progressFill.style.transition = "width 0.3s ease";
+  bar.appendChild(fill);
+  status.after(bar);
+})();
 
-progressBar.appendChild(progressFill);
-document.getElementById("quiz-status").after(progressBar);
+const progressFill = document.getElementById("progress-fill");
 
-// --------------------------------------------------------
-// START QUIZ
-// --------------------------------------------------------
-startBtn.addEventListener("click", () => {
-  resultScreen.classList.add("hidden");
-
-  // Domain selection (updated)
+/* -----------------------------
+   START QUIZ
+----------------------------- */
+function startQuiz() {
+  // Read selections
   selectedDomains = getSelectedDomains();
 
-  // Question count
   const countInput = document.querySelector('input[name="count"]:checked');
   questionCount = parseInt(countInput?.value || "5", 10);
 
-  // Filter pool
-  const pool = selectedDomains.includes("All")
-    ? [...questions]
-    : questions.filter(q => selectedDomains.includes(q.domain));
-
+  const pool = questions.filter(q => selectedDomains.includes(q.domain));
   if (!pool.length) {
     alert("No questions found for your selection.");
     return;
   }
 
+  // Build quiz set
   quizQuestions = shuffleArray(pool).slice(0, Math.min(pool.length, questionCount));
 
   // Reset state
@@ -185,46 +138,54 @@ startBtn.addEventListener("click", () => {
   score = 0;
   userAnswers = [];
   domainStats = {};
-  totalTime = 0;
+  progressFill.style.width = "0%";
 
+  // Timer
+  clearInterval(timerInterval);
   startTime = Date.now();
   questionStartTime = Date.now();
-  clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
+  timerDisplay.textContent = "Time: 00:00";
 
   fadeSwap(startScreen, quizScreen);
-  showQuestion();
-});
-
-// --------------------------------------------------------
-// TIMER
-// --------------------------------------------------------
-function updateTimer() {
-  const elapsed = Math.floor((Date.now() - startTime) / 1000);
-  const mins = Math.floor(elapsed / 60);
-  const secs = elapsed % 60;
-  timerDisplay.textContent = `Time: ${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  renderQuestion();
 }
 
-// --------------------------------------------------------
-// RENDER QUESTION
-// --------------------------------------------------------
-function showQuestion() {
+if (startBtn) startBtn.addEventListener("click", startQuiz);
+
+/* -----------------------------
+   TIMER
+----------------------------- */
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const m = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const s = String(elapsed % 60).padStart(2, "0");
+  timerDisplay.textContent = `Time: ${m}:${s}`;
+}
+
+/* -----------------------------
+   RENDER QUESTION
+----------------------------- */
+function renderQuestion() {
   const q = quizQuestions[currentQuestionIndex];
-  const shortId = q.id.includes("_") ? q.id.split("_")[1] : q.id;
+  if (!q) return;
 
-  questionNumberDisplay.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
-  const progressPercent = (currentQuestionIndex / quizQuestions.length) * 100;
-  progressFill.style.width = `${progressPercent}%`;
+  const idxLabel = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+  questionNumberDisplay.textContent = idxLabel;
 
+  // progress %
+  progressFill.style.width = `${(currentQuestionIndex / quizQuestions.length) * 100}%`;
+
+  const shortId = q.id?.toString().includes("_") ? q.id.split("_")[1] : q.id;
   questionText.textContent = `${shortId}. ${q.question}`;
+
+  // build options
   optionsList.innerHTML = "";
-
   const isMulti = Array.isArray(q.answer);
-  const shuffledOptions = shuffleArray([...q.options]);
+  const opts = shuffleArray(q.options);
 
-  shuffledOptions.forEach((opt, idx) => {
-    const id = `opt-${currentQuestionIndex}-${idx}`;
+  opts.forEach((opt, i) => {
+    const id = `opt-${currentQuestionIndex}-${i}`;
     const li = document.createElement("li");
 
     const input = document.createElement("input");
@@ -244,188 +205,176 @@ function showQuestion() {
 
   nextBtn.disabled = false;
   nextBtn.textContent = "Submit";
-  nextBtn.onclick = () => gradeAnswer(q);
+  nextBtn.onclick = () => gradeCurrent(q);
   questionStartTime = Date.now();
 }
 
-// --------------------------------------------------------
-// GRADE ANSWER
-// --------------------------------------------------------
-function gradeAnswer(q) {
-  const inputs = Array.from(optionsList.querySelectorAll("input"));
-  const selectedVals = inputs.filter(i => i.checked).map(i => norm(i.value));
+/* -----------------------------
+   GRADE CURRENT QUESTION
+----------------------------- */
+function gradeCurrent(q) {
   const isMulti = Array.isArray(q.answer);
-  const correctAnswers = isMulti ? q.answer.map(norm) : [norm(q.answer)];
+  const inputs = Array.from(optionsList.querySelectorAll("input"));
+  const picked = inputs.filter(i => i.checked).map(i => norm(i.value));
 
-  if (selectedVals.length === 0) {
+  if (picked.length === 0) {
     alert(isMulti ? "Select one or more answers, then submit." : "Select an answer, then submit.");
     return;
   }
 
-  const elapsed = (Date.now() - questionStartTime) / 1000;
-  totalTime += elapsed;
+  const correct = isMulti ? q.answer.map(norm) : [norm(q.answer)];
 
-  const domain = q.domain;
-  if (!domainStats[domain]) domainStats[domain] = { correct: 0, total: 0 };
-  domainStats[domain].total++;
+  // Update domain stats
+  const d = q.domain;
+  if (!domainStats[d]) domainStats[d] = { correct: 0, total: 0 };
+  domainStats[d].total += 1;
 
-  const selectedCorrect = selectedVals.filter(v => correctAnswers.includes(v)).length;
-  const questionScore = selectedCorrect / correctAnswers.length;
-
+  // Partial credit scoring
+  const selectedCorrect = picked.filter(v => correct.includes(v)).length;
+  const questionScore = selectedCorrect / correct.length;
   score += questionScore;
-  domainStats[domain].correct += questionScore;
+  domainStats[d].correct += questionScore;
 
+  // Visual feedback
   optionsList.querySelectorAll("li").forEach(li => {
     const val = norm(li.querySelector("input").value);
-    if (correctAnswers.includes(val)) li.classList.add("correct");
-    if (selectedVals.includes(val) && !correctAnswers.includes(val)) li.classList.add("incorrect");
+    if (correct.includes(val)) li.classList.add("correct");
+    if (picked.includes(val) && !correct.includes(val)) li.classList.add("incorrect");
     li.querySelector("input").disabled = true;
   });
 
   userAnswers.push({
     id: q.id,
     question: q.question,
-    yourAnswer: selectedVals.join("; "),
-    correctAnswer: correctAnswers.join("; "),
+    yourAnswer: picked.join("; "),
+    correctAnswer: correct.join("; "),
     explanation: q.explanation || "No explanation provided.",
     correct: questionScore === 1
   });
 
-  const progressPercent = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
-  progressFill.style.width = `${progressPercent}%`;
+  // Next step
+  const last = currentQuestionIndex + 1 === quizQuestions.length;
+  progressFill.style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`;
 
-  if (currentQuestionIndex + 1 === quizQuestions.length) {
-    nextBtn.textContent = "Finish Quiz";
-    nextBtn.onclick = () => {
-      console.log("✅ Finish clicked – showing results");
-      showResults();
-    };
-  } else {
-    nextBtn.textContent = "Next Question";
-    nextBtn.onclick = () => {
-      currentQuestionIndex++;
-      showQuestion();
-    };
-  }
+  nextBtn.textContent = last ? "Finish Quiz" : "Next Question";
+  nextBtn.onclick = () => {
+    if (last) showResults();
+    else { currentQuestionIndex += 1; renderQuestion(); }
+  };
 }
 
-// --------------------------------------------------------
-// RESULTS
-// --------------------------------------------------------
+/* -----------------------------
+   RESULTS
+----------------------------- */
 function showResults() {
   clearInterval(timerInterval);
   endTime = Date.now();
 
   const totalDuration = (endTime - startTime) / 1000;
-  const avgTime = (totalDuration / quizQuestions.length).toFixed(1);
-  const percentage = ((score / quizQuestions.length) * 100).toFixed(1);
+  const avg = (totalDuration / quizQuestions.length).toFixed(1);
+  const pct = ((score / quizQuestions.length) * 100).toFixed(1);
 
-  const bestDomain = Object.keys(domainStats).length
+  // best domain
+  const best = Object.keys(domainStats).length
     ? Object.keys(domainStats).reduce((a, b) =>
         (domainStats[a].correct / domainStats[a].total) >
         (domainStats[b].correct / domainStats[b].total) ? a : b)
     : "N/A";
 
-  saveCurrentResultToHistory({
+  saveResult({
     date: new Date().toLocaleString(),
-    score: parseFloat(percentage),
+    score: Number(pct),
     totalQuestions: quizQuestions.length,
-    bestDomain,
+    bestDomain: best,
     time: totalDuration.toFixed(1),
     domains: domainStats
   });
 
   scoreSummary.innerHTML = `
-    <p>Score: ${score.toFixed(1)} / ${quizQuestions.length} (${percentage}%)</p>
+    <p>Score: ${score.toFixed(1)} / ${quizQuestions.length} (${pct}%)</p>
     <p>Total Time: ${totalDuration.toFixed(1)}s</p>
-    <p>Avg per Question: ${avgTime}s</p>
+    <p>Avg per Question: ${avg}s</p>
   `;
 
+  // domain table
   domainTable.innerHTML = `<tr><th>Domain</th><th>Correct</th><th>Total</th><th>%</th></tr>`;
-  Object.keys(domainStats).forEach(domain => {
-    const stats = domainStats[domain];
-    const pct = ((stats.correct / stats.total) * 100).toFixed(1);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${domain}</td>
+  Object.entries(domainStats).forEach(([name, stats]) => {
+    const p = ((stats.correct / stats.total) * 100).toFixed(1);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${name}</td>
       <td>${stats.correct.toFixed(1)}</td>
       <td>${stats.total}</td>
-      <td>${pct}%</td>
+      <td>${p}%</td>
     `;
-    domainTable.appendChild(row);
+    domainTable.appendChild(tr);
   });
 
-  if (!document.getElementById("retake-btn")) {
-    const btnGroup = resultScreen.querySelector(".btn-group");
-    if (btnGroup) {
-      btnGroup.insertBefore(retakeBtn, btnGroup.firstChild);
-      retakeBtn.addEventListener("click", retakeMissed);
-    }
+  // ensure retake button present
+  let retakeBtn = document.getElementById("retake-btn");
+  if (!retakeBtn) {
+    retakeBtn = document.createElement("button");
+    retakeBtn.id = "retake-btn";
+    retakeBtn.className = "warning-btn";
+    retakeBtn.textContent = "Retake Missed Questions";
+    const group = resultScreen.querySelector(".btn-group");
+    if (group) group.insertBefore(retakeBtn, group.firstChild);
+    retakeBtn.addEventListener("click", retakeMissed);
   }
 
   fadeSwap(quizScreen, resultScreen);
 }
 
-// --------------------------------------------------------
-// REVIEW MODE
-// --------------------------------------------------------
+/* -----------------------------
+   REVIEW
+----------------------------- */
 function renderReview() {
   reviewContainer.innerHTML = "";
   userAnswers.forEach((a, i) => {
     const div = document.createElement("div");
-    div.classList.add("review-item");
+    div.className = "review-item";
     div.innerHTML = `
       <h4>${i + 1}. ${a.question}</h4>
       <p><strong>Your Answer:</strong> <span class="${a.correct ? "correct" : "incorrect"}">${a.yourAnswer || "—"}</span></p>
       <p><strong>Correct Answer:</strong> ${a.correctAnswer}</p>
       <p><strong>Explanation:</strong> ${a.explanation}</p>
-      <hr>
+      <hr/>
     `;
     reviewContainer.appendChild(div);
   });
 }
 
-reviewBtn?.addEventListener("click", () => {
-  renderReview();
-  fadeSwap(resultScreen, reviewScreen);
-});
-
+reviewBtn?.addEventListener("click", () => { renderReview(); fadeSwap(resultScreen, reviewScreen); });
 backToResultsBtn?.addEventListener("click", () => fadeSwap(reviewScreen, resultScreen));
 
-// --------------------------------------------------------
-// RETAKE MISSED
-// --------------------------------------------------------
+/* -----------------------------
+   RETAKE MISSED
+----------------------------- */
 function retakeMissed() {
   const missedIds = userAnswers.filter(a => !a.correct).map(a => a.id);
-  if (!missedIds.length) {
-    alert("No missed questions to retake!");
-    return;
-  }
+  if (!missedIds.length) { alert("No missed questions to retake!"); return; }
 
   quizQuestions = questions.filter(q => missedIds.includes(q.id));
   currentQuestionIndex = 0;
   score = 0;
   userAnswers = [];
   domainStats = {};
-  totalTime = 0;
+  progressFill.style.width = "0%";
 
+  clearInterval(timerInterval);
   startTime = Date.now();
   questionStartTime = Date.now();
-  clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
+  timerDisplay.textContent = "Time: 00:00";
 
   fadeSwap(resultScreen, quizScreen);
-  showQuestion();
+  renderQuestion();
 }
 
-// --------------------------------------------------------
-// PROGRESS DASHBOARD
-// --------------------------------------------------------
-progressBtn?.addEventListener("click", () => {
-  renderProgress();
-  fadeSwap(resultScreen, progressScreen);
-});
-
+/* -----------------------------
+   PROGRESS DASHBOARD
+----------------------------- */
+progressBtn?.addEventListener("click", () => { renderProgress(); fadeSwap(resultScreen, progressScreen); });
 backToResultsFromProgress?.addEventListener("click", () => fadeSwap(progressScreen, resultScreen));
 
 resetProgressBtn?.addEventListener("click", () => {
@@ -436,7 +385,7 @@ resetProgressBtn?.addEventListener("click", () => {
 });
 
 function renderProgress() {
-  const history = loadHistory();
+  const history = lsLoad();
 
   if (!history.length) {
     totalQuizzesEl.textContent = 0;
@@ -448,30 +397,30 @@ function renderProgress() {
   }
 
   const total = history.length;
-  const avg = (history.reduce((sum, h) => sum + h.score, 0) / total).toFixed(1);
+  const avg = (history.reduce((s, h) => s + h.score, 0) / total).toFixed(1);
   const last = history[history.length - 1];
 
-  const domainAgg = {};
+  // aggregate domains
+  const agg = {};
   history.forEach(h => {
     const d = h.domains || {};
     Object.keys(d).forEach(name => {
       const { correct, total } = d[name];
-      if (!domainAgg[name]) domainAgg[name] = { c: 0, t: 0 };
-      domainAgg[name].c += correct;
-      domainAgg[name].t += total;
+      if (!agg[name]) agg[name] = { c: 0, t: 0 };
+      agg[name].c += correct;
+      agg[name].t += total;
     });
   });
 
-  let bestDomain = "N/A";
-  let bestRate = 0;
-  Object.keys(domainAgg).forEach(name => {
-    const rate = domainAgg[name].c / domainAgg[name].t;
-    if (rate > bestRate) { bestRate = rate; bestDomain = name; }
+  let best = "N/A", bestRate = 0;
+  Object.keys(agg).forEach(k => {
+    const r = agg[k].c / agg[k].t;
+    if (r > bestRate) { bestRate = r; best = k; }
   });
 
   totalQuizzesEl.textContent = total;
   avgScoreEl.textContent = `${avg}%`;
-  bestDomainEl.textContent = bestDomain;
+  bestDomainEl.textContent = best;
   lastSessionEl.textContent = `${last.date} — ${last.score}%`;
 
   historyList.innerHTML = "";
@@ -482,10 +431,10 @@ function renderProgress() {
   });
 }
 
-// --------------------------------------------------------
-// RESTART
-// --------------------------------------------------------
-restartBtn.addEventListener("click", () => {
+/* -----------------------------
+   RESTART
+----------------------------- */
+restartBtn?.addEventListener("click", () => {
   quizQuestions = [];
   currentQuestionIndex = 0;
   score = 0;
@@ -495,4 +444,14 @@ restartBtn.addEventListener("click", () => {
   questionNumberDisplay.textContent = "";
   progressFill.style.width = "0%";
   fadeSwap(resultScreen, startScreen);
+});
+
+/* -----------------------------
+   QUALITY-OF-LIFE
+----------------------------- */
+// Start with Enter on start screen
+document.addEventListener("keydown", (e) => {
+  if (!startScreen.classList.contains("hidden") && e.key === "Enter") {
+    e.preventDefault(); startQuiz();
+  }
 });
