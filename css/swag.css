@@ -1,5 +1,5 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER v5.5 — Unified + Dark Mode Edition
+   AWS CPC QUIZ TRAINER v6.0 — Unified + Dark Mode Edition
    Author: Geoffrey D. Metzger | Integrity Programming
    ======================================================== */
 
@@ -23,7 +23,7 @@
   --card-bg: #fff;
 }
 
-/* 🌙 Dark Mode Variables */
+/* 🌙 Dark Mode */
 @media (prefers-color-scheme: dark) {
   :root {
     --blue: #3b82f6;
@@ -44,7 +44,7 @@
 }
 
 /* ========================================================
-   BASE STYLES
+   BASE
    ======================================================== */
 * { box-sizing: border-box; }
 
@@ -80,16 +80,9 @@ body {
   transition: all 0.3s ease;
 }
 
-.card.hidden {
-  opacity: 0;
-  transform: scale(0.98);
-  display: none !important;
-}
+.card.hidden { opacity: 0; display: none !important; }
 
-h1, h2, h3 {
-  margin-top: 0;
-  color: var(--gray-ink);
-}
+h1, h2, h3 { margin-top: 0; color: var(--gray-ink); }
 
 /* ========================================================
    QUIZ STATUS BAR
@@ -115,24 +108,23 @@ h1, h2, h3 {
    BUTTONS
    ======================================================== */
 button, .primary-btn, .green-btn, .secondary-btn, .warning-btn {
-  background: var(--blue);
-  color: #fff;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 8px;
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  color: #fff;
   text-decoration: none;
   display: inline-block;
   margin: 0.4rem;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-button:hover,
-.primary-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+button:hover { transform: translateY(-1px); }
 
-button:disabled { background: #94a3b8; cursor: not-allowed; }
+.primary-btn { background: var(--blue); }
+.primary-btn:hover { background: var(--blue-dark); }
 
 .green-btn { background: var(--green); }
 .green-btn:hover { background: #047857; }
@@ -143,30 +135,14 @@ button:disabled { background: #94a3b8; cursor: not-allowed; }
 .warning-btn { background: var(--amber); }
 .warning-btn:hover { background: var(--amber-dark); }
 
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
+button:disabled { background: #94a3b8; cursor: not-allowed; }
 
 /* ========================================================
-   FORMS & LABELS
+   FORM ELEMENTS
    ======================================================== */
-.form-group { margin-bottom: 1.25rem; }
+.form-group { margin-bottom: 1.25rem; text-align: center; }
 
-.form-group label {
-  display: block;
-  margin: 0.3rem 0;
-  color: var(--gray-text);
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
-input[type="radio"], input[type="checkbox"] {
-  accent-color: var(--blue);
-  margin-right: 0.4rem;
-}
-
-.hidden { display: none !important; }
+.form-group h3 { margin-bottom: 0.75rem; color: #fff; }
 
 /* ========================================================
    QUIZ QUESTION / OPTIONS
@@ -178,10 +154,7 @@ input[type="radio"], input[type="checkbox"] {
   line-height: 1.45;
 }
 
-#options {
-  padding: 0;
-  margin: 1rem 0;
-}
+#options { padding: 0; margin: 1rem 0; }
 
 #options li {
   list-style: none;
@@ -192,10 +165,6 @@ input[type="radio"], input[type="checkbox"] {
   border: 1px solid var(--gray-border);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
 }
 
 #options li:hover { background: #eff6ff; transform: scale(1.02); }
@@ -203,7 +172,7 @@ input[type="radio"], input[type="checkbox"] {
 #options li.incorrect { background: var(--red-light); border-color: var(--red); }
 
 /* ========================================================
-   RESULTS TABLE / REVIEW / PROGRESS
+   RESULTS / REVIEW / PROGRESS
    ======================================================== */
 #domain-stats {
   width: 100%;
@@ -212,10 +181,8 @@ input[type="radio"], input[type="checkbox"] {
   font-size: 0.95rem;
 }
 
-#domain-stats th,
-#domain-stats td {
+#domain-stats th, #domain-stats td {
   padding: 0.5rem;
-  text-align: left;
   border-bottom: 1px solid var(--gray-border);
 }
 
@@ -236,75 +203,144 @@ input[type="radio"], input[type="checkbox"] {
 
 .review-item:hover { transform: scale(1.01); }
 
-#progress-screen {
-  padding: 1.75rem;
-  background: var(--card-bg);
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* ========================================================
+   STYLED RADIO BUTTONS (Question Count)
+   ======================================================== */
+.form-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: rgba(255, 255, 255, 0.07);
+  padding: 0.5rem 1rem;
+  margin: 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #e5e7eb;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.form-group label:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Hide native radio */
+.form-group input[type="radio"] {
+  appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid #9ca3af;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Checked glow */
+.form-group input[type="radio"]:checked {
+  border-color: #00ffcc;
+  background: radial-gradient(circle at center, #00ffcc 45%, transparent 46%);
+  box-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
+  animation: pop 0.15s ease-out;
 }
 
 /* ========================================================
-   LANDING PAGE / SUB-INDEX LAYOUT
+   DOMAIN FILTER (Unified for Learn + Quiz)
    ======================================================== */
-.center-screen {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.card.text-center {
+#domain-filter, .domain-filter {
   text-align: center;
-  padding: 2rem 2.5rem;
-  border-radius: 1rem;
-  background: var(--card-bg);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  max-width: 700px;
-  width: 100%;
-  transition: background 0.3s ease;
+  margin-bottom: 1.75rem;
 }
 
-/* Cert selection grid */
-.cert-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+#domain-filter .filter-title,
+.domain-filter .filter-title {
+  display: block;
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 0.85rem;
 }
 
-.cert-card {
-  padding: 1.5rem;
-  border: 1px solid var(--gray-border);
-  border-radius: 12px;
-  background: var(--card-bg);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+#domain-filter .filter-options,
+.domain-filter .filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
-.cert-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+/* Checkbox pills */
+#domain-filter label,
+.domain-filter label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: rgba(255, 255, 255, 0.07);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #e5e7eb;
+  font-weight: 500;
 }
 
-.cert-card h3 {
-  margin-bottom: 1rem;
-  color: var(--gray-ink);
+#domain-filter label:hover,
+.domain-filter label:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
+/* Hide default checkbox */
+#domain-filter input[type="checkbox"],
+.domain-filter input[type="checkbox"] {
+  appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid #9ca3af;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Checked glow */
+#domain-filter input[type="checkbox"]:checked,
+.domain-filter input[type="checkbox"]:checked {
+  border-color: #00ffcc;
+  background: #00ffcc;
+  box-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
+  animation: pop 0.15s ease-out;
+}
+
+#domain-filter input[type="checkbox"]:checked + label,
+.domain-filter input[type="checkbox"]:checked + label {
+  color: #00ffcc;
+  font-weight: 600;
+}
+
+/* ========================================================
+   UTILITIES
+   ======================================================== */
 .fw-bold { font-weight: 700; }
 .lead { font-size: 1.1rem; color: var(--gray-text); }
-.small { font-size: 0.85rem; }
 .mt-3 { margin-top: 1rem; }
 .mt-4 { margin-top: 1.5rem; }
 .mb-3 { margin-bottom: 1rem; }
 
 /* ========================================================
-   DARK MODE CARD SHADOW TWEAK
+   POP ANIMATION
+   ======================================================== */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ========================================================
+   DARK MODE SHADOWS
    ======================================================== */
 @media (prefers-color-scheme: dark) {
-  .card,
-  .card.text-center,
-  .cert-card {
+  .card, .cert-card {
     box-shadow: 0 2px 12px rgba(255, 255, 255, 0.05);
   }
 
@@ -332,4 +368,22 @@ input[type="radio"], input[type="checkbox"] {
   }
   #options li { font-size: 0.95rem; }
   button { width: 100%; }
+  #domain-filter .filter-options,
+  .domain-filter .filter-options {
+    gap: 0.6rem;
+  }
+  #domain-filter label,
+  .domain-filter label {
+    flex: 1 1 calc(45% - 0.5rem);
+    justify-content: center;
+  }
+}
+
+#clear-filters-btn {
+  margin-top: 0.75rem;
+  background: var(--amber);
+}
+
+#clear-filters-btn:hover {
+  background: var(--amber-dark);
 }

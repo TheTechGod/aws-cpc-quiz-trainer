@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AWS CPC Learning Modules | Integrity Programming</title>
-
-  <!-- Styles -->
   <link rel="stylesheet" href="../css/swag.css" />
 </head>
 
@@ -15,13 +13,33 @@
     <button onclick="window.location.href='index.html'" class="secondary-btn mb-3">🏠 Back to CPC Menu</button>
 
     <!-- ===================================================== -->
+    <!-- DOMAIN FILTER -->
+    <!-- ===================================================== -->
+    <div id="domain-filter" class="domain-filter">
+  <p class="filter-title"><strong>Filter by Domain (optional):</strong></p>
+  <div class="filter-options">
+    <label><input type="checkbox" class="domain-check" value="Cloud Concepts"> Cloud Concepts</label>
+    <label><input type="checkbox" class="domain-check" value="Security & Compliance"> Security & Compliance</label>
+    <label><input type="checkbox" class="domain-check" value="Technology"> Technology</label>
+    <label><input type="checkbox" class="domain-check" value="Billing & Pricing"> Billing & Pricing</label>
+    <label><input type="checkbox" class="domain-check" value="Networking & Content Delivery"> Networking & Content Delivery</label>
+  </div>
+  <!-- Clear Filters Button -->
+<div class="mt-3">
+  <button id="clear-filters-btn" class="warning-btn">🧹 Clear Filters</button>
+</div>
+
+</div>
+
+
+
+    <!-- ===================================================== -->
     <!-- LEARNING MODULES SCREEN -->
     <!-- ===================================================== -->
     <section id="modules-screen" class="card active">
       <h1 class="fw-bold">📘 AWS Bite-Size Learning</h1>
       <p class="lead">Short, focused lessons to help you master Cloud Practitioner concepts.</p>
 
-      <!-- Lesson Display -->
       <div id="module-content" class="mt-3"></div>
 
       <!-- Reader Buttons -->
@@ -50,50 +68,59 @@
   <script src="js/modules.js"></script>
 
   <script>
-    // =====================================================
-    // 🗣️ Screen Reader with Female Voice Preference
-    // =====================================================
-    let speechUtterance = null;
-    let isSpeaking = false;
     let preferredVoice = null;
+    let isSpeaking = false;
+    let filteredModules = [...awsModules];
+    let currentModule = 0;
 
-    // Load voices asynchronously
+    // =====================================================
+    // 💬 Filter Logic
+    // =====================================================
+    function applyDomainFilter() {
+      const checked = Array.from(document.querySelectorAll(".domain-check:checked")).map(cb => cb.value);
+
+      filteredModules = checked.length
+        ? awsModules.filter(m => checked.includes(m.domain))
+        : [...awsModules];
+
+      currentModule = 0;
+      showModule(currentModule);
+    }
+
+    document.querySelectorAll(".domain-check").forEach(cb => {
+      cb.addEventListener("change", applyDomainFilter);
+    });
+
+    // =====================================================
+    // 🎙️ Voice Setup (Female Voice Preference)
+    // =====================================================
     function loadVoices() {
       const voices = window.speechSynthesis.getVoices();
       if (!voices.length) {
-        // Try again when voices load
         window.speechSynthesis.onvoiceschanged = loadVoices;
         return;
       }
 
-      // Try to find a natural female voice
       const femaleCandidates = voices.filter(v =>
         /female|Google US English|Microsoft Aria|Jenny|Samantha|en-US/i.test(v.name)
       );
-
       preferredVoice = femaleCandidates[0] || voices.find(v => /en/i.test(v.lang)) || voices[0];
-      console.log("Selected voice:", preferredVoice ? preferredVoice.name : "default");
     }
-
     loadVoices();
 
     function readCurrentModule() {
-      const module = awsModules[currentModule];
-      if (!module || !window.speechSynthesis) {
-        alert("Speech synthesis not supported in this browser.");
-        return;
-      }
+      const module = filteredModules[currentModule];
+      if (!module || !window.speechSynthesis) return;
 
       window.speechSynthesis.cancel();
       const textToSpeak = `${module.title}. ${module.text.replace(/(<([^>]+)>)/gi, "")}`;
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = preferredVoice?.lang || "en-US";
+      utterance.rate = 1.0;
+      utterance.pitch = 1.05;
+      if (preferredVoice) utterance.voice = preferredVoice;
 
-      speechUtterance = new SpeechSynthesisUtterance(textToSpeak);
-      speechUtterance.lang = preferredVoice?.lang || "en-US";
-      speechUtterance.rate = 1.0;
-      speechUtterance.pitch = 1.05;
-      if (preferredVoice) speechUtterance.voice = preferredVoice;
-
-      window.speechSynthesis.speak(speechUtterance);
+      window.speechSynthesis.speak(utterance);
       isSpeaking = true;
     }
 
@@ -103,36 +130,42 @@
     }
 
     // =====================================================
-    // 🧭 Navigation + Auto-Read
+    // 🧭 Navigation
     // =====================================================
-    const nextBtn = document.getElementById("next-module");
-    const prevBtn = document.getElementById("prev-module");
-    const readBtn = document.getElementById("read-btn");
-    const stopBtn = document.getElementById("stop-btn");
-
-    if (readBtn) readBtn.addEventListener("click", readCurrentModule);
-    if (stopBtn) stopBtn.addEventListener("click", stopReading);
-
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => {
-        if (currentModule < awsModules.length - 1) {
-          currentModule++;
-          showModule(currentModule);
-          if (isSpeaking) readCurrentModule();
-        }
-      });
+    function showModule(index) {
+      if (index < 0 || index >= filteredModules.length) return;
+      const module = filteredModules[index];
+      const contentDiv = document.getElementById("module-content");
+      contentDiv.innerHTML = `
+        <h3>${module.title}</h3>
+        <p><strong>Domain:</strong> ${module.domain}</p>
+        <p>${module.text}</p>
+        <p><em>Duration: ${module.duration}</em></p>
+        <p class="mt-2"><small>Lesson ${index + 1} of ${filteredModules.length}</small></p>
+      `;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (isSpeaking) readCurrentModule();
     }
 
-    if (prevBtn) {
-      prevBtn.addEventListener("click", () => {
-        if (currentModule > 0) {
-          currentModule--;
-          showModule(currentModule);
-          if (isSpeaking) readCurrentModule();
-        }
-      });
-    }
+    document.getElementById("next-module").addEventListener("click", () => {
+      if (currentModule < filteredModules.length - 1) {
+        currentModule++;
+        showModule(currentModule);
+      }
+    });
+
+    document.getElementById("prev-module").addEventListener("click", () => {
+      if (currentModule > 0) {
+        currentModule--;
+        showModule(currentModule);
+      }
+    });
+
+    document.getElementById("read-btn").addEventListener("click", readCurrentModule);
+    document.getElementById("stop-btn").addEventListener("click", stopReading);
+
+    // Initialize first lesson
+    showModule(currentModule);
   </script>
 </body>
 </html>
-
