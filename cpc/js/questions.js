@@ -831,5 +831,290 @@ const questions = [
   ],
   answer: "On Demand",
   explanation: "On-Demand pricing is ideal for new workloads with unpredictable usage. It allows you to pay only for the compute you use, without long-term commitments, providing flexibility as usage patterns stabilize."
-}
+},
+
+// === Compute ===
+{
+  id: "Compute_01",
+  domain: "Compute",
+  question: "Which AWS compute model allows you to run code without provisioning servers?",
+  options: ["Amazon EC2", "AWS Lambda", "Amazon ECS", "AWS Batch"],
+  answer: "AWS Lambda",
+  explanation: "Lambda is a fully managed serverless compute service that executes code in response to events without needing servers."
+},
+{
+  id: "Compute_02",
+  domain: "Compute",
+  question: "A development team at a fintech startup is building a new customer-facing microservice using AWS Lambda. AWS takes care of the infrastructure, but the team is focused on meeting strict security and compliance requirements. Which task is still the team's responsibility when using Lambda?",
+  options: [
+    "Patching the underlying operating system",
+    "Scaling the infrastructure",
+    "Managing data access permissions",
+    "Managing server availability"
+  ],
+  answer: "Managing data access permissions",
+  explanation: "While AWS manages the Lambda infrastructure, customers are responsible for securing their code and correctly configuring IAM roles and permissions for services the function accesses."
+},
+{
+  id: "Compute_03",
+  domain: "Compute",
+  question: "A photography company offers cloud-based photo editing and storage. It uses AWS Lambda to automatically process photos—resizing images, applying filters, and organizing files—every time a client uploads a new image. Which key components are involved in running this automated workflow with Lambda? (Select THREE.)",
+  options: [
+    "Lambda function",
+    "Triggers",
+    "Server provisioning",
+    "Runtimes",
+    "Manual scaling configuration",
+    "Operating system selection"
+  ],
+  answer: ["Lambda function", "Triggers", "Runtimes"],
+  explanation: "Lambda workflows consist of functions (code), triggers (events), and runtimes (language environments). AWS handles infrastructure, scaling, and OS management automatically."
+},
+{
+  id: "Compute_04",
+  domain: "Compute",
+  question: "A developer just finished building an application that runs flawlessly on their laptop. However, when the team deploys it in a different environment, it crashes due to missing dependencies. How do containers help solve this problem?",
+  options: [
+    "By providing access to multiple operating systems for compatibility testing",
+    "By packaging the application and everything it needs to run into one consistent environment",
+    "By automatically scaling the application across multiple cloud providers",
+    "By eliminating the need to write configuration files"
+  ],
+  answer: "By packaging the application and everything it needs to run into one consistent environment",
+  explanation: "Containers bundle the application and all dependencies into one portable, consistent runtime environment. This ensures the app runs identically across development, testing, and production."
+},
+{
+  id: "Compute_05",
+  domain: "Compute",
+  question: "Match each AWS container service with its correct definition.",
+  options: [
+    "Amazon Elastic Kubernetes Service (Amazon EKS)",
+    "Amazon Elastic Container Registry (Amazon ECR)",
+    "AWS Fargate",
+    "Amazon Elastic Container Service (Amazon ECS)"
+  ],
+  answer: {
+    "Amazon Elastic Kubernetes Service (Amazon EKS)": "Fully managed Kubernetes service for deploying and scaling containers",
+    "Amazon Elastic Container Registry (Amazon ECR)": "Stores, manages, and deploys Open Container Initiative (OCI)-compliant container images",
+    "AWS Fargate": "Serverless compute engine for containers—removes the need to manage servers",
+    "Amazon Elastic Container Service (Amazon ECS)": "Scalable container orchestration service for running containers on AWS"
+  },
+  explanation: "Amazon EKS is a managed Kubernetes service; Amazon ECR is for container image storage and management; AWS Fargate runs containers without servers; and Amazon ECS orchestrates containerized workloads on AWS."
+},
+{
+  id: "Compute_06",
+  domain: "Compute",
+  question: "Match each AWS service with the correct description.",
+  options: [
+    "Amazon Lightsail",
+    "AWS Outposts",
+    "AWS Batch",
+    "AWS Elastic Beanstalk"
+  ],
+  answer: {
+    "Amazon Lightsail": "A simplified service with virtual private servers (VPSs), storage, and networking",
+    "AWS Outposts": "A hybrid cloud service extending AWS to on-premises environments",
+    "AWS Batch": "A fully managed service for batch computing workloads",
+    "AWS Elastic Beanstalk": "A managed service for deploying and scaling web applications"
+  },
+  explanation: "Amazon Lightsail provides easy-to-use VPSs with predictable pricing, AWS Outposts extends AWS infrastructure on-premises, AWS Batch runs large-scale batch jobs efficiently, and Elastic Beanstalk simplifies web app deployment and scaling."
+},
+{
+  id: "Compute_07",
+  domain: "Compute",
+  question: "A financial company must run workloads on premises because of strict compliance requirements, but it wants to use AWS services and tools consistently across environments. Which service meets their needs?",
+  options: [
+    "AWS Elastic Beanstalk",
+    "Amazon Lightsail",
+    "AWS Batch",
+    "AWS Outposts"
+  ],
+  answer: "AWS Outposts",
+  explanation: "AWS Outposts extends AWS infrastructure, services, and APIs to on-premises environments. It provides a consistent hybrid experience, allowing organizations to run AWS services locally while meeting compliance and low-latency requirements."
+},
+// === Cloud Concepts (Module 4 – Global Infrastructure & CloudFormation) ===
+{
+  id: "Cloud_22",
+  domain: "Cloud Concepts",
+  question: "Which of the following are key factors to consider when choosing an AWS Region? (Select TWO.)",
+  options: [
+    "Regulatory compliance requirements in that location",
+    "Proximity to your users for lower latency",
+    "The number of Amazon EC2 instances available",
+    "Your organization’s default AWS account settings",
+    "Whether the Region uses renewable energy sources"
+  ],
+  answer: [
+    "Regulatory compliance requirements in that location",
+    "Proximity to your users for lower latency"
+  ],
+  explanation: "When selecting a Region, organizations should evaluate compliance requirements and proximity to end users. These factors affect data residency laws and latency performance."
+},
+{
+  id: "Cloud_23",
+  domain: "Cloud Concepts",
+  question: "What is the difference between AWS Regions and Availability Zones?",
+  options: [
+    "A Region is a data center, while an Availability Zone is a single physical server.",
+    "A Region is a geographic location containing multiple Availability Zones, and each Availability Zone is an isolated data center or group of data centers.",
+    "An Availability Zone spans multiple Regions across the world.",
+    "Regions and Availability Zones refer to the same thing in AWS."
+  ],
+  answer: "A Region is a geographic location containing multiple Availability Zones, and each Availability Zone is an isolated data center or group of data centers.",
+  explanation: "AWS Regions are global geographic areas. Each Region includes multiple Availability Zones, which are isolated data centers designed for high availability and fault tolerance."
+},
+{
+  id: "Cloud_24",
+  domain: "Cloud Concepts",
+  question: "Which AWS component caches content closer to users to improve performance and reduce latency?",
+  options: [
+    "AWS Global Accelerator",
+    "Amazon CloudFront Edge Location",
+    "AWS Direct Connect Gateway",
+    "Amazon Route 53 Resolver"
+  ],
+  answer: "Amazon CloudFront Edge Location",
+  explanation: "Edge locations are part of AWS’s global content delivery network (CDN) and cache data closer to users to reduce latency and improve download speeds."
+},
+{
+  id: "Cloud_25",
+  domain: "Cloud Concepts",
+  question: "Which AWS service allows you to model and automate the setup of AWS infrastructure using templates?",
+  options: [
+    "AWS Elastic Beanstalk",
+    "AWS CloudFormation",
+    "AWS OpsWorks",
+    "AWS Systems Manager"
+  ],
+  answer: "AWS CloudFormation",
+  explanation: "AWS CloudFormation lets you define infrastructure as code through reusable templates that automatically provision and configure AWS resources."
+},
+{
+  id: "Cloud_26",
+  domain: "Cloud Concepts",
+  question: "What are the main advantages of deploying AWS resources across multiple Availability Zones? (Select TWO.)",
+  options: [
+    "Improved fault tolerance and high availability",
+    "Reduced AWS pricing",
+    "Automatic compliance with all international data regulations",
+    "Increased application latency",
+    "Redundancy in case of infrastructure failure"
+  ],
+  answer: [
+    "Improved fault tolerance and high availability",
+    "Redundancy in case of infrastructure failure"
+  ],
+  explanation: "Using multiple Availability Zones increases application reliability and uptime by spreading workloads across physically separate data centers."
+},
+{
+  id: "Cloud_27",
+  domain: "Cloud Concepts",
+  question: "Which benefit of AWS infrastructure allows businesses to automatically scale resources up or down as demand changes?",
+  options: [
+    "Elasticity",
+    "High availability",
+    "Durability",
+    "Compliance"
+  ],
+  answer: "Elasticity",
+  explanation: "Elasticity in AWS allows resources to automatically adjust capacity in response to traffic or demand changes, optimizing cost and performance."
+},
+{
+  id: "Cloud_28",
+  domain: "Cloud Concepts",
+  question: "Which method is NOT used to interact with AWS resources?",
+  options: [
+    "AWS Management Console",
+    "AWS Command Line Interface (CLI)",
+    "AWS Software Development Kits (SDKs)",
+    "Amazon Marketplace"
+  ],
+  answer: "Amazon Marketplace",
+  explanation: "AWS resources can be managed via the Management Console, CLI, SDKs, or IaC tools like CloudFormation—not through the AWS Marketplace."
+},
+{
+  id: "Cloud_29",
+  domain: "Cloud Concepts",
+  question: "What is Infrastructure as Code (IaC)?",
+  options: [
+    "A system that automatically repairs hardware failures in AWS data centers",
+    "The practice of defining and managing infrastructure using code templates instead of manual configuration",
+    "A pricing model that bills based on infrastructure usage",
+    "The method AWS uses to control physical access to its facilities"
+  ],
+  answer: "The practice of defining and managing infrastructure using code templates instead of manual configuration",
+  explanation: "Infrastructure as Code (IaC) allows developers to define and automate AWS resource creation using templates—improving consistency and reducing manual effort."
+},
+{
+  id: "Cloud_30",
+  domain: "Cloud Concepts",
+  question: "Which tool would you use to interact with AWS through programming languages such as Python or JavaScript?",
+  options: [
+    "AWS Software Development Kit (SDK)",
+    "AWS Command Line Interface (CLI)",
+    "AWS Management Console",
+    "AWS Systems Manager"
+  ],
+  answer: "AWS Software Development Kit (SDK)",
+  explanation: "AWS SDKs provide APIs for multiple programming languages, enabling developers to directly interact with AWS services programmatically."
+},
+{
+  id: "Cloud_31",
+  domain: "Cloud Concepts",
+  question: "A cloud engineer for a government agency is tasked with selecting an AWS Region to deploy the agency's resources. Which factors are MOST important to consider when selecting a Region? (Select TWO.)",
+  options: [
+    "Any regulatory compliance standards the agency requires",
+    "Proximity to users",
+    "Number of files stored",
+    "Personal preference of the chief information officer",
+    "How recently the Region was constructed"
+  ],
+  answer: [
+    "Any regulatory compliance standards the agency requires",
+    "Proximity to users"
+  ],
+  explanation: "When choosing an AWS Region, agencies must consider regulatory compliance and proximity to users. These determine whether data handling meets legal requirements and ensures low-latency access for end users."
+},{
+  id: "Cloud_32",
+  domain: "Cloud Concepts",
+  question: "Match each AWS Global Infrastructure element with its correct definition.",
+  options: [
+    "Edge location",
+    "AWS Region",
+    "Availability Zone"
+  ],
+  answer: {
+    "Edge location": "Locations that cache content to deliver data, video, and applications to users with lower latency",
+    "AWS Region": "A physical location around the world where AWS operates multiple data centers",
+    "Availability Zone": "Separate, distinct locations with one or more data centers that are engineered to be isolated from failures in other areas"
+  },
+  explanation: "AWS Global Infrastructure consists of Regions (geographic groupings of data centers), Availability Zones (isolated data center clusters within Regions), and Edge Locations (local caching endpoints for low-latency content delivery)."
+},
+{
+  id: "Cloud_33",
+  domain: "Cloud Concepts",
+  question: "Which statement BEST describes how AWS Regions, Availability Zones, and Edge Locations work together?",
+  options: [
+    "Regions host data centers; Availability Zones distribute workloads within Regions; Edge Locations cache content closer to end users.",
+    "Edge Locations host the main AWS data centers; Regions handle caching for faster delivery; Availability Zones connect them.",
+    "Regions are for testing, Availability Zones for production, and Edge Locations for backup only.",
+    "Edge Locations and Availability Zones are the same thing in AWS Global Infrastructure."
+  ],
+  answer: "Regions host data centers; Availability Zones distribute workloads within Regions; Edge Locations cache content closer to end users.",
+  explanation: "AWS Regions provide global coverage, Availability Zones ensure redundancy and high availability within Regions, and Edge Locations deliver content with low latency to users."
+},
+{
+  id: "Cloud_34",
+  domain: "Cloud Concepts",
+  question: "A rapidly growing tech startup company is planning to launch a new web application that will require a complex infrastructure setup, including multiple Amazon EC2 instances, Elastic Load Balancing, and Auto Scaling groups. The application must be deployed consistently across different environments. Would AWS CloudFormation be a good solution for managing the company's infrastructure?",
+  options: [
+    "CloudFormation would not be useful in this scenario because it only supports simple infrastructure setups.",
+    "CloudFormation would be ideal because it supports infrastructure as code (IaC), enabling consistent, repeatable deployments across different environments.",
+    "CloudFormation should be used only for setting up static websites, not for complex applications.",
+    "CloudFormation is too complicated and would slow down the deployment process."
+  ],
+  answer: "CloudFormation would be ideal because it supports infrastructure as code (IaC), enabling consistent, repeatable deployments across different environments.",
+  explanation: "AWS CloudFormation enables developers to model and provision infrastructure through code templates, ensuring consistent and repeatable deployments for complex architectures like EC2, Load Balancing, and Auto Scaling."
+},
+
 ];
