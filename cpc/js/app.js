@@ -1,5 +1,5 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER — v7.0 Stable
+   AWS CPC QUIZ TRAINER — v7.2 Stable
    Author: Geoffrey D. Metzger | Integrity Programming
    ========================================================
    - Multi-domain filtering (checkboxes). If none checked → All.
@@ -9,6 +9,7 @@
    - Progress bar
    - Review screen + Retake Missed
    - Progress Dashboard (localStorage; last 20 sessions)
+   - Color-coded Domain Results
    ======================================================== */
 
 /* -----------------------------
@@ -58,10 +59,9 @@ let questionCount = 5;
 let userAnswers = [];
 let domainStats = {};
 
-let selectedDomains = [];        // from checkboxes
+let selectedDomains = [];
 let startTime = 0;
 let endTime = 0;
-let questionStartTime = 0;
 let timerInterval = null;
 
 const STORAGE_KEY = "awsProgress";
@@ -77,13 +77,18 @@ const lsLoad = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 const lsSave = (history) => localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20)));
 const saveResult = (result) => { const h = lsLoad(); h.push(result); lsSave(h); };
 
+const formatTime = (sec) => {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+};
+
 /* -----------------------------
-   DOMAIN FILTER (no “All Domains”)
+   DOMAIN FILTER
 ----------------------------- */
 function getSelectedDomains() {
   const checks = Array.from(document.querySelectorAll(".domain-check"));
   const checked = checks.filter(cb => cb.checked).map(cb => cb.value);
-  // If user didn’t select anything, treat as ALL domains
   return checked.length ? checked : Array.from(new Set(questions.map(q => q.domain)));
 }
 
@@ -111,57 +116,49 @@ function getSelectedDomains() {
   bar.appendChild(fill);
   status.after(bar);
 })();
-
 const progressFill = document.getElementById("progress-fill");
+
+/* -----------------------------
+   TIMER HELPERS
+----------------------------- */
+function startTimer() {
+  clearInterval(timerInterval);
+  startTime = Date.now();
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  endTime = Date.now();
+}
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  timerDisplay.textContent = `Time: ${formatTime(elapsed)}`;
+}
 
 /* -----------------------------
    START QUIZ
 ----------------------------- */
 function startQuiz() {
-  // Read selections
   selectedDomains = getSelectedDomains();
-
   const countInput = document.querySelector('input[name="count"]:checked');
   questionCount = parseInt(countInput?.value || "5", 10);
 
   const pool = questions.filter(q => selectedDomains.includes(q.domain));
-  if (!pool.length) {
-    alert("No questions found for your selection.");
-    return;
-  }
+  if (!pool.length) return alert("No questions found for your selection.");
 
-  // Build quiz set
   quizQuestions = shuffleArray(pool).slice(0, Math.min(pool.length, questionCount));
-
-  // Reset state
   currentQuestionIndex = 0;
   score = 0;
   userAnswers = [];
   domainStats = {};
   progressFill.style.width = "0%";
 
-  // Timer
-  clearInterval(timerInterval);
-  startTime = Date.now();
-  questionStartTime = Date.now();
-  timerInterval = setInterval(updateTimer, 1000);
-  timerDisplay.textContent = "Time: 00:00";
-
+  startTimer();
   fadeSwap(startScreen, quizScreen);
   renderQuestion();
 }
-
-if (startBtn) startBtn.addEventListener("click", startQuiz);
-
-/* -----------------------------
-   TIMER
------------------------------ */
-function updateTimer() {
-  const elapsed = Math.floor((Date.now() - startTime) / 1000);
-  const m = String(Math.floor(elapsed / 60)).padStart(2, "0");
-  const s = String(elapsed % 60).padStart(2, "0");
-  timerDisplay.textContent = `Time: ${m}:${s}`;
-}
+startBtn?.addEventListener("click", startQuiz);
 
 /* -----------------------------
    RENDER QUESTION
@@ -170,16 +167,10 @@ function renderQuestion() {
   const q = quizQuestions[currentQuestionIndex];
   if (!q) return;
 
-  const idxLabel = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
-  questionNumberDisplay.textContent = idxLabel;
-
-  // progress %
+  questionNumberDisplay.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
   progressFill.style.width = `${(currentQuestionIndex / quizQuestions.length) * 100}%`;
 
-  const shortId = q.id?.toString().includes("_") ? q.id.split("_")[1] : q.id;
-  questionText.textContent = `${shortId}. ${q.question}`;
-
-  // build options
+  questionText.textContent = `${q.id}. ${q.question}`;
   optionsList.innerHTML = "";
   const isMulti = Array.isArray(q.answer);
   const opts = shuffleArray(q.options);
@@ -187,7 +178,6 @@ function renderQuestion() {
   opts.forEach((opt, i) => {
     const id = `opt-${currentQuestionIndex}-${i}`;
     const li = document.createElement("li");
-
     const input = document.createElement("input");
     input.type = isMulti ? "checkbox" : "radio";
     input.name = "option";
@@ -206,7 +196,6 @@ function renderQuestion() {
   nextBtn.disabled = false;
   nextBtn.textContent = "Submit";
   nextBtn.onclick = () => gradeCurrent(q);
-  questionStartTime = Date.now();
 }
 
 /* -----------------------------
@@ -216,26 +205,18 @@ function gradeCurrent(q) {
   const isMulti = Array.isArray(q.answer);
   const inputs = Array.from(optionsList.querySelectorAll("input"));
   const picked = inputs.filter(i => i.checked).map(i => norm(i.value));
-
-  if (picked.length === 0) {
-    alert(isMulti ? "Select one or more answers, then submit." : "Select an answer, then submit.");
-    return;
-  }
+  if (!picked.length) return alert(isMulti ? "Select one or more answers, then submit." : "Select an answer, then submit.");
 
   const correct = isMulti ? q.answer.map(norm) : [norm(q.answer)];
-
-  // Update domain stats
   const d = q.domain;
   if (!domainStats[d]) domainStats[d] = { correct: 0, total: 0 };
   domainStats[d].total += 1;
 
-  // Partial credit scoring
   const selectedCorrect = picked.filter(v => correct.includes(v)).length;
   const questionScore = selectedCorrect / correct.length;
   score += questionScore;
   domainStats[d].correct += questionScore;
 
-  // Visual feedback
   optionsList.querySelectorAll("li").forEach(li => {
     const val = norm(li.querySelector("input").value);
     if (correct.includes(val)) li.classList.add("correct");
@@ -252,10 +233,8 @@ function gradeCurrent(q) {
     correct: questionScore === 1
   });
 
-  // Next step
   const last = currentQuestionIndex + 1 === quizQuestions.length;
   progressFill.style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`;
-
   nextBtn.textContent = last ? "Finish Quiz" : "Next Question";
   nextBtn.onclick = () => {
     if (last) showResults();
@@ -264,17 +243,14 @@ function gradeCurrent(q) {
 }
 
 /* -----------------------------
-   RESULTS
+   RESULTS (Color-Coded Domains)
 ----------------------------- */
 function showResults() {
-  clearInterval(timerInterval);
-  endTime = Date.now();
-
-  const totalDuration = (endTime - startTime) / 1000;
-  const avg = (totalDuration / quizQuestions.length).toFixed(1);
+  stopTimer();
+  const totalSec = Math.floor((endTime - startTime) / 1000);
+  const avgTime = (totalSec / quizQuestions.length).toFixed(1);
   const pct = ((score / quizQuestions.length) * 100).toFixed(1);
 
-  // best domain
   const best = Object.keys(domainStats).length
     ? Object.keys(domainStats).reduce((a, b) =>
         (domainStats[a].correct / domainStats[a].total) >
@@ -286,17 +262,16 @@ function showResults() {
     score: Number(pct),
     totalQuestions: quizQuestions.length,
     bestDomain: best,
-    time: totalDuration.toFixed(1),
+    time: totalSec.toFixed(1),
     domains: domainStats
   });
 
   scoreSummary.innerHTML = `
     <p>Score: ${score.toFixed(1)} / ${quizQuestions.length} (${pct}%)</p>
-    <p>Total Time: ${totalDuration.toFixed(1)}s</p>
-    <p>Avg per Question: ${avg}s</p>
+    <p>Total Time: ${formatTime(totalSec)} (${totalSec}s)</p>
+    <p>Avg per Question: ${avgTime}s</p>
   `;
 
-  // domain table
   domainTable.innerHTML = `<tr><th>Domain</th><th>Correct</th><th>Total</th><th>%</th></tr>`;
   Object.entries(domainStats).forEach(([name, stats]) => {
     const p = ((stats.correct / stats.total) * 100).toFixed(1);
@@ -307,20 +282,13 @@ function showResults() {
       <td>${stats.total}</td>
       <td>${p}%</td>
     `;
+
+    if (p >= 80) tr.style.backgroundColor = "rgba(34,197,94,0.15)";   // green tint
+    else if (p >= 60) tr.style.backgroundColor = "rgba(234,179,8,0.15)"; // yellow tint
+    else tr.style.backgroundColor = "rgba(239,68,68,0.15)";           // red tint
+
     domainTable.appendChild(tr);
   });
-
-  // ensure retake button present
-  let retakeBtn = document.getElementById("retake-btn");
-  if (!retakeBtn) {
-    retakeBtn = document.createElement("button");
-    retakeBtn.id = "retake-btn";
-    retakeBtn.className = "warning-btn";
-    retakeBtn.textContent = "Retake Missed Questions";
-    const group = resultScreen.querySelector(".btn-group");
-    if (group) group.insertBefore(retakeBtn, group.firstChild);
-    retakeBtn.addEventListener("click", retakeMissed);
-  }
 
   fadeSwap(quizScreen, resultScreen);
 }
@@ -343,33 +311,8 @@ function renderReview() {
     reviewContainer.appendChild(div);
   });
 }
-
 reviewBtn?.addEventListener("click", () => { renderReview(); fadeSwap(resultScreen, reviewScreen); });
 backToResultsBtn?.addEventListener("click", () => fadeSwap(reviewScreen, resultScreen));
-
-/* -----------------------------
-   RETAKE MISSED
------------------------------ */
-function retakeMissed() {
-  const missedIds = userAnswers.filter(a => !a.correct).map(a => a.id);
-  if (!missedIds.length) { alert("No missed questions to retake!"); return; }
-
-  quizQuestions = questions.filter(q => missedIds.includes(q.id));
-  currentQuestionIndex = 0;
-  score = 0;
-  userAnswers = [];
-  domainStats = {};
-  progressFill.style.width = "0%";
-
-  clearInterval(timerInterval);
-  startTime = Date.now();
-  questionStartTime = Date.now();
-  timerInterval = setInterval(updateTimer, 1000);
-  timerDisplay.textContent = "Time: 00:00";
-
-  fadeSwap(resultScreen, quizScreen);
-  renderQuestion();
-}
 
 /* -----------------------------
    PROGRESS DASHBOARD
@@ -378,7 +321,7 @@ progressBtn?.addEventListener("click", () => { renderProgress(); fadeSwap(result
 backToResultsFromProgress?.addEventListener("click", () => fadeSwap(progressScreen, resultScreen));
 
 resetProgressBtn?.addEventListener("click", () => {
-  if (confirm("This will erase all saved progress. Continue?")) {
+  if (confirm("Erase all saved progress?")) {
     localStorage.removeItem(STORAGE_KEY);
     renderProgress();
   }
@@ -386,13 +329,12 @@ resetProgressBtn?.addEventListener("click", () => {
 
 function renderProgress() {
   const history = lsLoad();
-
   if (!history.length) {
     totalQuizzesEl.textContent = 0;
     avgScoreEl.textContent = "0%";
     bestDomainEl.textContent = "N/A";
     lastSessionEl.textContent = "—";
-    historyList.innerHTML = "<li>No quiz data yet. Take a quiz to see your progress!</li>";
+    historyList.innerHTML = "<li>No quiz data yet.</li>";
     return;
   }
 
@@ -400,15 +342,13 @@ function renderProgress() {
   const avg = (history.reduce((s, h) => s + h.score, 0) / total).toFixed(1);
   const last = history[history.length - 1];
 
-  // aggregate domains
   const agg = {};
   history.forEach(h => {
     const d = h.domains || {};
     Object.keys(d).forEach(name => {
       const { correct, total } = d[name];
       if (!agg[name]) agg[name] = { c: 0, t: 0 };
-      agg[name].c += correct;
-      agg[name].t += total;
+      agg[name].c += correct; agg[name].t += total;
     });
   });
 
@@ -435,23 +375,21 @@ function renderProgress() {
    RESTART
 ----------------------------- */
 restartBtn?.addEventListener("click", () => {
-  quizQuestions = [];
+  clearInterval(timerInterval);
+  timerDisplay.textContent = "Time: 00:00";
   currentQuestionIndex = 0;
   score = 0;
   userAnswers = [];
-  clearInterval(timerInterval);
-  timerDisplay.textContent = "Time: 00:00";
-  questionNumberDisplay.textContent = "";
   progressFill.style.width = "0%";
   fadeSwap(resultScreen, startScreen);
 });
 
 /* -----------------------------
-   QUALITY-OF-LIFE
+   SHORTCUTS
 ----------------------------- */
-// Start with Enter on start screen
 document.addEventListener("keydown", (e) => {
   if (!startScreen.classList.contains("hidden") && e.key === "Enter") {
-    e.preventDefault(); startQuiz();
+    e.preventDefault();
+    startQuiz();
   }
 });
