@@ -733,7 +733,349 @@ const awsModules = [
     These interfaces all communicate with AWS APIs, allowing flexibility in how you automate,
     scale, and manage your cloud resources efficiently.
   `
-}
+},
+// =====================================================
+// 💰 Module 5: Cloud Economics & Billing
+// =====================================================
+
+{
+  id: 501,
+  domain: "Networking & Content Delivery",
+  title: "Amazon VPC and Subnets",
+  duration: "4m",
+  text: `
+    Amazon Virtual Private Cloud (Amazon VPC) lets you create a logically isolated section of the AWS Cloud 
+    where you define and control your own virtual network. Within a VPC, you can launch AWS resources and 
+    manage network settings like IP address ranges, subnets, route tables, and gateways.
+
+    • **Amazon VPC** — Represents your private, segmented network within AWS. It gives you full control over 
+      inbound and outbound traffic, security, and resource placement.
+    
+    • **Availability Zones** — Each Region has multiple AZs, which are independent data centers with 
+      redundant power, networking, and connectivity. Using multiple AZs increases fault tolerance.
+    
+    • **Subnets** — Subnets divide your VPC into smaller network segments. 
+      - **Public subnets** host resources that must communicate with the internet (e.g., web servers).  
+      - **Private subnets** host resources that should not be publicly accessible (e.g., databases).
+    
+    • **Network Diagrams** — Diagrams map how users, services, and resources connect inside AWS. 
+      They help visualize redundancy, security, and scalability and serve as blueprints for deployment.
+
+    In short: VPCs define your private cloud network, and subnets organize resources for better security 
+    and performance.
+  `
+},
+{
+  id: 502,
+  domain: "Networking & Content Delivery",
+  title: "Organizing AWS Cloud Resources: VPCs, Subnets, and Gateways",
+  duration: "5m",
+  text: `
+    Organizing your resources in the AWS Cloud involves creating clear boundaries and secure connections. 
+    Amazon Virtual Private Cloud (Amazon VPC) provides those boundaries by isolating your resources inside 
+    a private virtual network that you control.
+
+    • **Amazon VPC** — A logically isolated section of the AWS Cloud where you can launch AWS resources in 
+      a virtual network that you define. It enhances security by controlling connectivity, screening traffic, 
+      and restricting access to instances. VPCs also simplify setup and management compared to traditional 
+      on-premises networking.
+
+    • **Subnets** — Subnets divide your VPC into smaller segments that organize resources by function and 
+      accessibility. A subnet might contain EC2 instances or databases, and can be designated as public or private.
+
+    • **Internet Gateway (IGW)** — A connection between a VPC and the internet, allowing public traffic to 
+      access resources within your VPC. Without an internet gateway, no external access is possible. Think of 
+      it as the doorway customers use to enter a coffee shop.
+
+    • **Virtual Private Gateway (VGW)** — Enables secure communication between your VPC and an on-premises 
+      or private network using a **VPN connection**. It acts as the AWS endpoint for the encrypted tunnel, 
+      allowing only approved networks to connect.
+
+    • **Virtual Private Network (VPN)** — A secure, encrypted connection through the internet that protects 
+      data as it travels between your organization’s network and AWS.
+
+    Summary:
+    - Amazon VPC → defines the boundary  
+    - Subnets → organize your resources  
+    - Internet Gateway → opens public access  
+    - Virtual Private Gateway + VPN → create secure private connections
+  `
+},
+{
+  id: 503,
+  domain: "Networking & Content Delivery",
+  title: "More Ways to Connect to the AWS Cloud",
+  duration: "6m",
+  text: `
+    As organizations grow, they often need to connect different networks, data centers, and remote workers 
+    securely to the AWS Cloud. AWS provides multiple connection options based on performance, security, and cost needs.
+
+    • **AWS Client VPN** — A fully managed, elastic VPN service that securely connects remote users to AWS 
+      or on-premises resources. It scales automatically with user demand and eliminates the need for hardware.
+      - *Best for:* Remote or hybrid workforces needing secure access from anywhere.
+      - *Key benefit:* Managed, elastic, and supports authentication integration.
+
+    • **AWS Site-to-Site VPN** — Establishes a secure, encrypted connection between your on-premises network 
+      (like a branch office or data center) and your AWS resources in a VPC.
+      - *Best for:* Connecting corporate sites and data centers securely to AWS.
+      - *Key benefit:* High availability and secure communication for hybrid or migration scenarios.
+
+    • **AWS PrivateLink** — Provides private connectivity between your VPC and AWS services, 
+      partner services, or other VPCs without using public IPs, the internet, or VPNs.
+      - *Best for:* Private, secure connections to AWS services or third-party APIs.
+      - *Key benefit:* Simplified, private communication that stays within the AWS network.
+
+    • **AWS Direct Connect** — Creates a dedicated private network connection between your on-premises 
+      environment and AWS. It bypasses the internet to reduce latency and increase bandwidth.
+      - *Best for:* Large-scale data transfers, real-time applications, and hybrid cloud setups.
+      - *Key benefit:* Consistent, low-latency performance with reduced network costs.
+
+    Additional gateway services:
+      - **AWS Transit Gateway:** Connects multiple VPCs and on-premises networks via a central hub for 
+        scalable, simplified management.
+      - **NAT Gateway:** Allows instances in private subnets to connect to the internet without 
+        exposing them to inbound connections.
+      - **Amazon API Gateway:** Builds, publishes, and secures APIs for communication between 
+        software systems at any scale.
+
+    Summary:
+    - Client VPN → Remote user access  
+    - Site-to-Site VPN → Connects offices/data centers  
+    - PrivateLink → Private service access  
+    - Direct Connect → Dedicated private line  
+    - Transit/NAT/API Gateways → Specialized networking functions for larger architectures
+  `
+},
+{
+  id: 504,
+  domain: "Networking & Content Delivery",
+  title: "Subnets, Security Groups, and Network Access Control Lists (ACLs)",
+  duration: "8m",
+  text: `
+    Once your AWS network is built, securing it becomes critical. AWS provides two key mechanisms 
+    for controlling traffic in your Virtual Private Cloud (VPC): **security groups** and 
+    **network access control lists (network ACLs)**.
+
+    • **Subnets**
+      - Subnets divide your VPC into logical sections for organizing resources based on 
+        security or operational needs.
+      - **Public subnets** contain resources that need to be accessible from the internet 
+        (like web servers).
+      - **Private subnets** contain resources that should only be accessed internally 
+        (like databases).
+      - Resources in different subnets can communicate with each other through VPC rules.
+
+    • **Network Traffic in a VPC**
+      - Data travels as **packets**, which move across networks through gateways.
+      - Before entering or exiting a subnet, packets are evaluated against **network ACLs** 
+        that determine whether the traffic is allowed or denied.
+
+    • **Network ACLs (NACLs)**
+      - Act as **virtual firewalls at the subnet level**.
+      - Control both inbound and outbound traffic using numbered rules.
+      - **Stateless filtering:** They do not remember previous requests; every packet is checked 
+        both ways (inbound and outbound).
+      - Default NACL allows all traffic; custom NACLs deny all traffic until rules are added.
+      - Use for broad traffic control and subnet-level filtering.
+
+    • **Security Groups**
+      - Act as **virtual firewalls at the instance level** (e.g., for EC2 instances).
+      - By default, deny all inbound traffic and allow all outbound.
+      - **Stateful filtering:** They remember previous connections. If an outbound request is 
+        allowed, the return traffic is automatically allowed.
+      - Rules only allow traffic (no explicit deny).
+      - Use for fine-grained, instance-specific access control.
+
+    • **Security Groups vs Network ACLs**
+      | Feature | Security Groups | Network ACLs |
+      |----------|----------------|---------------|
+      | Scope | Instance-level | Subnet-level |
+      | State | Stateful | Stateless |
+      | Rule Types | Allow only | Allow + Deny |
+      | Return Traffic | Automatically allowed | Must be explicitly allowed |
+      | Use Case | Fine-grained control | Broad subnet control |
+
+    • **Shared Responsibility**
+      - AWS secures the **infrastructure** of the cloud.
+      - **You** are responsible for securing what’s **in** the cloud, including 
+        configuring network ACLs and security groups.
+
+    Summary:
+    - **Network ACLs:** Stateless, subnet-level, broad traffic control.  
+    - **Security Groups:** Stateful, instance-level, fine-grained access.  
+    - **You are responsible** for managing both under the AWS Shared Responsibility Model.
+  `
+},
+{
+  id: 505,
+  domain: "Networking & Content Delivery",
+  title: "Amazon VPC Demo",
+  duration: "5m",
+  text: `
+    This lesson walks through creating a functional Amazon Virtual Private Cloud (VPC) and 
+    its core networking components using the AWS Management Console. It demonstrates how 
+    to build a secure, highly available network foundation for your AWS workloads.
+
+    • **Create an Amazon VPC**
+      - Start by creating your own isolated Virtual Private Cloud within an AWS Region.
+      - This defines your private virtual network space and forms the base for deploying resources.
+
+    • **Create Subnets**
+      - Design **two public** and **two private** subnets distributed across **two Availability Zones (AZs)**.
+      - This follows AWS best practices for **high availability** and fault tolerance.
+      - Public subnets host internet-facing resources (like web servers).
+      - Private subnets host internal-only resources (like databases).
+
+    • **Create and Attach an Internet Gateway**
+      - An **internet gateway (IGW)** allows public traffic from the internet to reach your VPC.
+      - Once created, it must be **attached** to the VPC to enable connectivity.
+
+    • **Create a Route Table**
+      - Route tables determine how network traffic is directed.
+      - Add routes so that traffic to the internet goes through the internet gateway, 
+        while local traffic stays within the VPC.
+      - Associate public subnets with this route table to allow inbound/outbound internet access.
+
+    • **Security Integration**
+      - After creating your network components, apply **security groups** and **network ACLs** 
+        to control inbound and outbound traffic for subnets and individual resources.
+
+    • **Final Step: Add Resources**
+      - Once the VPC, subnets, gateway, and routes are set up, 
+        you can deploy compute and database resources (like EC2 instances or RDS databases) 
+        into your new network.
+
+    Summary:
+    - Create VPC → Create Subnets → Attach Internet Gateway → Configure Route Table → 
+      Apply Security Groups/ACLs → Launch Resources.
+    - This workflow forms the foundation of every AWS network design, supporting both 
+      scalability and strong security boundaries.
+  `
+},
+{
+  id: 506,
+  domain: "Networking & Content Delivery",
+  title: "Global Networking",
+  duration: "7m",
+  text: `
+    The AWS Global Infrastructure extends beyond Regions and Availability Zones to include 
+    **edge locations**—points of presence strategically distributed worldwide to bring 
+    applications, data, and services closer to users for lower latency and faster performance.
+
+    This lesson explores three key edge networking services: **Amazon Route 53**, 
+    **Amazon CloudFront**, and **AWS Global Accelerator**.
+
+    • **Edge Networking Overview**
+      - Edge networking brings computing and data caching closer to users.
+      - Improves **latency**, **responsiveness**, and **application performance**.
+      - Enables faster delivery of static and dynamic content, better scalability, and 
+        improved global user experience.
+
+    • **Domain Name System (DNS)**
+      - DNS is the “phone book of the internet,” translating domain names (like 
+        *www.example.com*) into IP addresses.
+      - DNS resolution involves:
+        1. User enters a domain name in a browser.
+        2. Customer DNS resolver queries the domain’s DNS server.
+        3. The DNS server responds with the IP address (e.g., 192.0.2.0).
+
+    • **Amazon Route 53**
+      - AWS’s **highly available, scalable DNS service**.
+      - Routes end users to internet applications hosted on AWS or external servers.
+      - Automatically scales globally for low latency and fault tolerance.
+      - Features:
+        - Domain registration and record management in one place.
+        - Health checks for endpoints.
+        - Integration with other AWS services (e.g., CloudFront, Elastic Load Balancing).
+      - **Use cases:** Domain management, failover routing, latency-based routing.
+
+    • **Amazon CloudFront**
+      - AWS’s **Content Delivery Network (CDN)** service.
+      - Caches and delivers content (web pages, videos, APIs, images) 
+        from edge locations near users.
+      - Benefits:
+        - Low latency and high transfer speeds.
+        - Reduced server load and bandwidth costs.
+        - Works seamlessly with Route 53 for optimized routing.
+      - **Use cases:**
+        - Video streaming platforms ensuring smooth playback.
+        - E-commerce sites loading product images quickly.
+        - Mobile apps delivering maps or images globally with minimal lag.
+
+    • **AWS Global Accelerator**
+      - Uses the **AWS global network** to route internet traffic through the fastest 
+        available paths to your applications.
+      - Provides **improved availability, performance, and security** through intelligent routing.
+      - Features:
+        - Static IPs that act as entry points for your application.
+        - Automatic health checks and traffic rerouting for high availability.
+      - **Use cases:**
+        - Global gaming: reduces lag for players worldwide.
+        - Financial services: ensures secure, always-on banking access.
+
+    Summary:
+    - **Amazon Route 53** → DNS routing and domain management.
+    - **Amazon CloudFront** → Global CDN for fast, cached content delivery.
+    - **AWS Global Accelerator** → Optimized, low-latency application routing.
+    Together, these services form the backbone of AWS’s global networking capabilities.
+  `
+},
+{
+  id: 507,
+  domain: "Networking & Content Delivery",
+  title: "Global Architectures",
+  duration: "6m",
+  text: `
+    This lesson demonstrates how AWS networking services—such as VPN, Direct Connect, 
+    CloudFront, and Route 53—work together to create secure, scalable, and globally 
+    distributed architectures.
+
+    • **When to Use VPN vs. Direct Connect**
+      - **VPN (Virtual Private Network)** provides an encrypted tunnel over the public internet 
+        between your on-premises network and AWS. It’s quick to deploy, cost-effective, and 
+        ideal for smaller workloads or as a backup link.
+      - **AWS Direct Connect** establishes a **dedicated private fiber connection** between 
+        your data center and AWS. It delivers consistent, high-bandwidth, low-latency 
+        connectivity suitable for large data transfers, hybrid workloads, and enterprise 
+        applications.
+
+    • **How VPN and Direct Connect Work Together**
+      - Many organizations use both for **redundancy and failover**.  
+      - Direct Connect serves as the **primary link** for predictable performance.  
+      - A VPN connection acts as a **failover path** in case the Direct Connect line 
+        experiences an outage.  
+      - Using multiple Direct Connect circuits can also **aggregate bandwidth** and 
+        increase fault tolerance.
+
+    • **Multi-Region Architectures with Route 53 and CloudFront**
+      - A **multi-Region setup** deploys application stacks in two or more AWS Regions 
+        for resilience, disaster recovery, and proximity to users.
+      - **Amazon Route 53** provides global DNS routing that directs users to the 
+        nearest healthy Region using **latency-based** or **geolocation routing**.  
+      - **Amazon CloudFront** extends this by caching content at **edge locations** 
+        around the world, reducing latency and improving user experience.
+      - Together, these services ensure global users are routed automatically to 
+        the fastest, healthiest endpoint.
+
+    • **Example Scenario**
+      - A global enterprise requires high-bandwidth connectivity for analytics and 
+        data replication between on-prem and AWS.  
+      - They use **two Direct Connect lines** for failover and combined throughput.  
+      - **Route 53** handles DNS-level routing between Regions.  
+      - **CloudFront** caches static assets globally for minimal load times.
+
+    Summary:
+    - Use **VPN** for encrypted connectivity over the internet.
+    - Use **Direct Connect** for private, high-bandwidth, consistent performance.
+    - Combine both for **hybrid network redundancy**.
+    - Leverage **Route 53** and **CloudFront** to route and deliver content 
+      efficiently across multiple Regions worldwide.
+  `
+},
+
+
+
+
 
 
 
