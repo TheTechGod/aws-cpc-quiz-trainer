@@ -651,9 +651,313 @@ const questions = [
   answer: "AWS Global Accelerator",
   explanation: "Global Accelerator routes traffic through AWS’s global network to healthy endpoints for better performance and availability."
 },
+{
+  id: "Network_20",
+  domain: "Networking & Content Delivery",
+  question: "What are the uses of a subnet in an Amazon VPC? (Select THREE.)",
+  options: [
+    "Can be used to share public resources",
+    "Can be used to organize your resources",
+    "Can be used to provide high availability because they consist of one or more discrete data centers",
+    "Can provide a centralized interface for accessing and managing various AWS resources and services",
+    "Can be used to isolate resources and keep them private",
+    "Can be used as an on-demand and scalable computing capacity in the AWS Cloud"
+  ],
+  answer: [
+    "Can be used to share public resources",
+    "Can be used to organize your resources",
+    "Can be used to isolate resources and keep them private"
+  ],
+  explanation: "Subnets in a VPC allow you to organize AWS resources logically. Public subnets can host internet-facing resources, while private subnets keep sensitive systems isolated. They help segment and manage resources efficiently, but do not themselves provide high availability or computing capacity."
+},
+{
+  id: "Network_21",
+  domain: "Networking & Content Delivery",
+  question: "A company is setting up their Amazon VPC. They need to connect their corporate data center through the internet with a secure connection. They also want to make sure the resources are isolated from the public. Which solution would BEST meet their needs?",
+  options: [
+    "An internet gateway with a public subnet holding the resources in the Amazon VPC",
+    "A virtual private gateway with a VPN connection and a private subnet in the Amazon VPC",
+    "An internet gateway with an Amazon VPC and no subnets",
+    "An internet gateway with an Amazon VPC and a public subnet"
+  ],
+  answer: "A virtual private gateway with a VPN connection and a private subnet in the Amazon VPC",
+  explanation: "A virtual private gateway allows secure communication between on-premises networks and AWS over a VPN connection. Using a private subnet keeps the resources isolated from public internet access while maintaining secure connectivity."
+},
+{
+  id: "Network_22",
+  domain: "Networking & Content Delivery",
+  question: "A company is conducting a large-scale migration of their on-premises data center with their data warehouse and data backup. They need a solution that will meet the large amount of bandwidth requirements during migration. The solution will also be used for their ongoing data transfers after the move because they will retain part of their on-premises data center for a hybrid cloud solution. Which AWS solution would best meet their needs?",
+  options: [
+    "AWS Client VPN",
+    "AWS Site-to-Site VPN",
+    "AWS Direct Connect link to their on-premises network and the AWS Cloud",
+    "AWS PrivateLink to their on-premises data center"
+  ],
+  answer: "AWS Direct Connect link to their on-premises network and the AWS Cloud",
+  explanation: "AWS Direct Connect provides a dedicated, high-bandwidth, private network connection between on-premises data centers and AWS. It’s ideal for large-scale data transfers and ongoing hybrid cloud architectures."
+},
+{
+  id: "Network_23",
+  domain: "Networking & Content Delivery",
+  question: "A company is choosing the type of gateway for their network. They need to connect their corporate data center with their private subnet in their Amazon VPC. Their gateway needs to allow only protected internet traffic to enter the VPC and allow connections only from approved networks. Which type of gateway would BEST meet their needs?",
+  options: [
+    "Internet gateway",
+    "Virtual private gateway",
+    "AWS Transit Gateway",
+    "Amazon API Gateway"
+  ],
+  answer: "Virtual private gateway",
+  explanation: "A virtual private gateway enables secure VPN connections between an on-premises network and a VPC. It allows only encrypted, approved network traffic to access private subnets, ensuring protection and isolation."
+},
+{
+  id: "Network_24",
+  domain: "Networking & Content Delivery",
+  question: "A retail customer is setting up their application in the AWS Cloud. The application requires a lot of control in defining traffic rules for the individual Amazon EC2 instances in their public subnet. Which solution would BEST meet the requirements for securing the resources?",
+  options: [
+    "Change all the subnets to private subnets to avoid accessing from the public internet.",
+    "Set up security groups for the EC2 instances based on the application requirements.",
+    "Set up network ACLs for the EC2 instances based on the application requirements.",
+    "Set up a public subnet with strong passwords that meet the customer's requirements."
+  ],
+  answer: "Set up security groups for the EC2 instances based on the application requirements.",
+  explanation: "Security groups act as stateful firewalls at the instance level, allowing fine-grained control over inbound and outbound traffic based on application needs. They are ideal for managing traffic rules per EC2 instance."
+},
+{
+  id: "Network_25",
+  domain: "Networking & Content Delivery",
+  question: "Which network component performs stateless packet filtering?",
+  options: [
+    "Private subnet",
+    "Network access control list (network ACL)",
+    "Amazon VPC",
+    "Security groups"
+  ],
+  answer: "Network access control list (network ACL)",
+  explanation: "Network ACLs operate at the subnet level and use stateless packet filtering, meaning they evaluate each packet individually without remembering previous connections."
+},
+{
+  id: "Network_26",
+  domain: "Networking & Content Delivery",
+  question: "An enterprise customer with a worldwide sales force is looking to deliver their large library of sales training content. They want to make sure their sales force can access the media-rich training content with low latency and reduced costs. Which AWS service would BEST fit the customer's need?",
+  options: [
+    "Amazon VPC",
+    "Amazon Route 53",
+    "Amazon CloudFront",
+    "AWS Global Accelerator"
+  ],
+  answer: "Amazon CloudFront",
+  explanation: "Amazon CloudFront is a content delivery network (CDN) that caches and delivers data globally with low latency, making it ideal for distributing media-rich training content efficiently."
+},
+{
+  id: "Network_27",
+  domain: "Networking & Content Delivery",
+  question: "After years of working with different domain registration companies, a media company is looking for a solution to manage all their existing domain names. They also want to register new domain names. Ideally, they would like to manage all their domain names in a single service. Which AWS service would BEST fit the customer's need?",
+  options: [
+    "Amazon VPC",
+    "Amazon Route 53",
+    "Amazon CloudFront",
+    "AWS Global Accelerator"
+  ],
+  answer: "Amazon Route 53",
+  explanation: "Amazon Route 53 is a scalable DNS service that allows customers to register, manage, and route traffic for multiple domain names in one place."
+},
+{
+  id: "Network_28",
+  domain: "Networking & Content Delivery",
+  question: "A healthcare company is looking to create a dedicated network connection to AWS. They would use this connection for their heavy payloads of data being sent over the internet to AWS. They also have compliance requirements due to the sensitive nature of their patient data. Which type of connection to the AWS Cloud would BEST meet their needs?",
+  options: [
+    "Standard internet connection from the client to an internet gateway in the VPC in the AWS Cloud",
+    "VPN connection from their corporate data center to the AWS Cloud",
+    "VPN connection from their corporate data center to a virtual private gateway to their Amazon VPC",
+    "AWS Direct Connect connection from their corporate data center to a virtual private gateway in their VPC in the AWS Cloud"
+  ],
+  answer: "AWS Direct Connect connection from their corporate data center to a virtual private gateway in their VPC in the AWS Cloud",
+  explanation: "AWS Direct Connect provides a dedicated, private connection between an organization’s data center and AWS, reducing latency, increasing bandwidth, and ensuring compliance for sensitive data transfers like healthcare workloads."
+},
+{
+  id: "Network_29",
+  domain: "Networking & Content Delivery",
+  question: "A customer is creating their application resources in their virtual private cloud (VPC) subnets. They want to secure their resources in the cloud, specifically the networking traffic protection tasks. Which component is the customer responsible for, based on the shared responsibility model?",
+  options: [
+    "Securing access to the AWS data centers and facilities that run AWS Cloud services",
+    "Securing the software that runs the AWS Cloud services",
+    "Securing the hardware that runs the AWS Cloud services",
+    "Securing network traffic with the subnets and resources with Network access control lists (network ACLs) and security groups"
+  ],
+  answer: "Securing network traffic with the subnets and resources with Network access control lists (network ACLs) and security groups",
+  explanation: "Under the AWS Shared Responsibility Model, AWS secures the infrastructure that runs cloud services, while customers are responsible for securing their data, applications, and network configurations — including security groups and network ACLs."
+},
+{
+  id: "Network_30",
+  domain: "Networking & Content Delivery",
+  question: "What is networking in the AWS Cloud?",
+  options: [
+    "Interconnected devices that can exchange data and resources",
+    "Physically isolated data centers or set of data centers within an AWS Region",
+    "Logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network that you define",
+    "System that translates readable domain names to IP addresses"
+  ],
+  answer: "Logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network that you define",
+  explanation: "In AWS, networking is based on Amazon VPC — a logically isolated section of the cloud where you can define your own IP address range, subnets, and route tables to securely manage and connect your resources."
+},
+{
+  id: "Network_31",
+  domain: "Networking & Content Delivery",
+  question: "An enterprise customer just merged with another company and needs a way to quickly scale and provide a way for the new worldwide sales force to access their AWS resources. They want a fully managed service with advanced authentication for their new remote workers. Which solution would BEST meet their needs?",
+  options: [
+    "AWS Client VPN",
+    "AWS Direct Connect",
+    "AWS PrivateLink",
+    "AWS Site-to-Site VPN"
+  ],
+  answer: "AWS Client VPN",
+  explanation: "AWS Client VPN is a fully managed, elastic VPN service that enables secure connections for remote workers to AWS and on-premises networks. It supports advanced authentication and automatically scales with user demand."
+},
+{
+  id: "Network_32",
+  domain: "Networking & Content Delivery",
+  question: "A media company needs a service to manage their domain registrations with different providers. They will also be using the service to route internet traffic to their resources hosted both in the AWS Cloud and elsewhere. Which AWS solution would BEST meet their needs?",
+  options: [
+    "AWS Global Accelerator",
+    "Amazon CloudFront",
+    "Amazon Route 53",
+    "AWS Direct Connect"
+  ],
+  answer: "Amazon Route 53",
+  explanation: "Amazon Route 53 is a scalable Domain Name System (DNS) web service that allows users to register domain names and route traffic to AWS or external resources with high availability and low latency."
+},
+{
+  id: "Network_33",
+  domain: "Networking & Content Delivery",
+  question: "A customer is exploring solutions to establish secure, encrypted connections between their on-premises networks at their data centers and branch offices. They are looking for the MOST cost-effective way to connect their office sites to other sites and their AWS services. They are not looking to increase the amount of bandwidth. Which solution would BEST meet their needs?",
+  options: [
+    "AWS Site-to-Site VPN",
+    "AWS Client VPN",
+    "AWS Direct Connect",
+    "AWS PrivateLink"
+  ],
+  answer: "AWS Site-to-Site VPN",
+  explanation: "AWS Site-to-Site VPN creates a secure and encrypted connection between on-premises networks and AWS resources over the internet, offering a cost-effective solution for securely connecting multiple sites without requiring additional bandwidth."
+},
+{
+  id: "Network_34",
+  domain: "Networking & Content Delivery",
+  question: "A customer wants a way to establish a dedicated connection from their on-premises network to an Amazon VPC. They need a solution that provides a more consistent network experience with increased bandwidth. Which type of connection to the AWS Cloud would BEST meet their needs?",
+  options: [
+    "AWS Direct Connect",
+    "Internet gateway",
+    "Virtual private gateway",
+    "Amazon CloudFront"
+  ],
+  answer: "AWS Direct Connect",
+  explanation: "AWS Direct Connect provides a dedicated, private connection between on-premises networks and AWS, offering increased bandwidth, lower latency, and a more consistent network experience than internet-based connections."
+},
+{
+  id: "Network_35",
+  domain: "Networking & Content Delivery",
+  question: "A retail customer is hosting their application in an Amazon VPC and wants to configure traffic rules for the Amazon EC2 instances running in a public subnet. The application requires multiple rules to be defined at the instance level. Which solution or feature would meet their needs?",
+  options: [
+    "Set up security groups for the Amazon EC2 instances based on the application requirements.",
+    "Change the public subnet to a private subnet to avoid public internet access.",
+    "Set up a virtual private gateway based on the application requirements.",
+    "Set up network access control lists (network ACLs) for the Amazon EC2 instances based on the application requirements."
+  ],
+  answer: "Set up security groups for the Amazon EC2 instances based on the application requirements.",
+  explanation: "Security groups act as virtual firewalls at the instance level in a VPC, allowing you to define multiple inbound and outbound rules to control traffic for specific Amazon EC2 instances."
+},
+{
+  id: "Network_36",
+  domain: "Networking & Content Delivery",
+  question: "A company wants to establish a secure, private connection between their on-premises data center and their Amazon VPC to create a hybrid cloud architecture. Which component should they use to help ensure a secure connection?",
+  options: [
+    "Internet gateway",
+    "Subnet",
+    "Route table",
+    "Virtual private gateway"
+  ],
+  answer: "Virtual private gateway",
+  explanation: "A virtual private gateway enables secure, encrypted communication between an on-premises data center and an Amazon VPC through a VPN connection, making it ideal for hybrid cloud architectures."
+},
+{
+  id: "Network_37",
+  domain: "Networking & Content Delivery",
+  question: "A customer is exploring edge networking services to improve application availability, performance, and security. They need a solution for traffic routing when something goes wrong in one of their application's locations. Specifically, it takes into account the endpoint health, user location, and policies. Which AWS solution would BEST meet their needs?",
+  options: [
+    "AWS Global Accelerator",
+    "Amazon CloudFront",
+    "Amazon Route 53",
+    "AWS Direct Connect"
+  ],
+  answer: "AWS Global Accelerator",
+  explanation: "AWS Global Accelerator uses the AWS global network to route traffic to the nearest healthy endpoint based on user location, configured policies, and endpoint health—improving application performance and availability."
+},
+{
+  id: "Network_38",
+  domain: "Networking & Content Delivery",
+  question: "A customer is creating an Amazon VPC for their application. They want to create a private segment in the Amazon VPC so that resources launched can be isolated from users on the internet. Which network component would BEST meet their needs?",
+  options: [
+    "A private subnet",
+    "Either a public subnet or a private subnet would work",
+    "A public subnet",
+    "An Availability Zone instead of a subnet"
+  ],
+  answer: "A private subnet",
+  explanation: "A private subnet in an Amazon VPC isolates resources from direct access to the internet, allowing only internal communication or access through secure connections such as VPN or NAT gateways."
+},
+{
+  id: "Network_39",
+  domain: "Networking & Content Delivery",
+  question: "What is the primary function of an Availability Zone in the AWS Cloud?",
+  options: [
+    "It filters inbound and outbound traffic to EC2 instances in a VPC.",
+    "It enhances application availability and fault tolerance by allowing resources to be deployed across multiple zones.",
+    "It allows you to create a subsection of a virtual private cloud (VPC) where you can isolate resources and control access.",
+    "It provisions a logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network that you define."
+  ],
+  answer: "It enhances application availability and fault tolerance by allowing resources to be deployed across multiple zones.",
+  explanation: "Availability Zones are isolated locations within an AWS Region that are designed to prevent failures from affecting other zones. Deploying resources across multiple Availability Zones increases fault tolerance and application availability."
+},
+{
+  id: "Network_40",
+  domain: "Networking & Content Delivery",
+  question: "What is the primary function of a domain name service (DNS)?",
+  options: [
+    "It translates human-readable domain names to machine readable IP addresses.",
+    "It filters inbound and outbound traffic to Amazon EC2 instances in a virtual private cloud (VPC).",
+    "It provisions a logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network that you define.",
+    "It allows you to create a subsection of a virtual private cloud (VPC) where you can isolate resources and control access."
+  ],
+  answer: "It translates human-readable domain names to machine readable IP addresses.",
+  explanation: "A domain name service (DNS) translates domain names like www.example.com into IP addresses that computers use to identify each other on the network. AWS provides Route 53 as a scalable DNS service for this purpose."
+},
+{
+  id: "Network_41",
+  domain: "Networking & Content Delivery",
+  question: "A customer is moving their application to an Amazon VPC and wants to set up traffic control at the subnet level. They need broad control of traffic in and out and would like to use both allow and deny type rules. Which solution or feature would meet their needs?",
+  options: [
+    "Change the public subnet to a private subnet to avoid public internet access.",
+    "Set up a virtual private gateway based on the application requirements.",
+    "Use security groups.",
+    "Use network access control lists (network ACLs)."
+  ],
+  answer: "Use network access control lists (network ACLs).",
+  explanation: "Network access control lists (network ACLs) operate at the subnet level and support both allow and deny rules. They provide stateless, broad control over inbound and outbound traffic for subnets, unlike security groups which operate at the instance level and only support allow rules."
+},
+{
+  id: "Network_42",
+  domain: "Networking & Content Delivery",
+  question: "A financial customer needs a content delivery solution to deliver required training videos and static content to their financial consultants worldwide. They want to make sure the solution provides low latency. Which AWS solution would BEST meet their needs?",
+  options: [
+    "Amazon Route 53",
+    "Amazon CloudFront",
+    "AWS Global Accelerator",
+    "AWS Direct Connect"
+  ],
+  answer: "Amazon CloudFront",
+  explanation: "Amazon CloudFront is a global content delivery network (CDN) that securely delivers static and dynamic content with low latency by caching copies at AWS edge locations around the world. This ensures faster access for users regardless of location."
+},
 
-
-  // === Security & Compliance ===
+// === Security & Compliance ===
   {
   id: "Security_01",
   domain: "Security & Compliance",
