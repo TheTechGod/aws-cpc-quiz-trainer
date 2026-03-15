@@ -1,6 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\cpc",
+    "\\cpc\\js",
+    "\\cpc\\standalonefolder"
   ],
+  "SelectedNode": "\\cpc\\standalonefolder",
   "PreviewInSolutionExplorer": false
 }

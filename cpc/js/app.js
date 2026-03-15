@@ -1,395 +1,276 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER — v7.2 Stable
+   AWS CPC QUIZ TRAINER — v8.2 (Fixed & Analytics Enabled)
    Author: Geoffrey D. Metzger | Integrity Programming
-   ========================================================
-   - Multi-domain filtering (checkboxes). If none checked → All.
-   - Shuffled questions + options
-   - Multi-answer support with partial credit
-   - Timer + avg time/question
-   - Progress bar
-   - Review screen + Retake Missed
-   - Progress Dashboard (localStorage; last 20 sessions)
-   - Color-coded Domain Results
    ======================================================== */
 
-/* -----------------------------
-   ELEMENTS
------------------------------ */
 const el = (id) => document.getElementById(id);
 
-const startBtn = el("start-btn");
-const restartBtn = el("restart-btn");
-
-const startScreen   = el("start-screen");
-const quizScreen    = el("quiz-screen");
-const resultScreen  = el("result-screen");
-const reviewScreen  = el("review-screen");
-const progressScreen= el("progress-screen");
-
-const nextBtn = el("next-btn");
-const questionText = el("question-text");
-const optionsList = el("options");
-const timerDisplay = el("timer");
-const questionNumberDisplay = el("question-number");
-
-const scoreSummary = el("score-summary");
-const domainTable  = el("domain-stats");
-
-const reviewBtn = el("review-btn");
-const reviewContainer = el("review-container");
-const backToResultsBtn = el("back-to-results-btn");
-
-const progressBtn = el("progress-btn");
-const backToResultsFromProgress = el("back-to-results-from-progress");
-
-const totalQuizzesEl = el("total-quizzes");
-const avgScoreEl     = el("avg-score");
-const bestDomainEl   = el("best-domain");
-const lastSessionEl  = el("last-session");
-const historyList    = el("history-list");
-const resetProgressBtn = el("reset-progress-btn");
-
-/* -----------------------------
-   STATE
------------------------------ */
-let quizQuestions = [];
-let currentQuestionIndex = 0;
-let score = 0;
-let questionCount = 5;
-let userAnswers = [];
-let domainStats = {};
-
-let selectedDomains = [];
-let startTime = 0;
-let endTime = 0;
-let timerInterval = null;
-
-const STORAGE_KEY = "awsProgress";
-
-/* -----------------------------
-   HELPERS
------------------------------ */
-const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
-const fadeSwap = (hide, show) => { hide.classList.add("hidden"); show.classList.remove("hidden"); };
-const norm = (s) => String(s).replace(/\s+/g, " ").trim();
-
-const lsLoad = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-const lsSave = (history) => localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-20)));
-const saveResult = (result) => { const h = lsLoad(); h.push(result); lsSave(h); };
-
-const formatTime = (sec) => {
-  const m = String(Math.floor(sec / 60)).padStart(2, "0");
-  const s = String(sec % 60).padStart(2, "0");
-  return `${m}:${s}`;
+// Official CLF-C02 Blueprint Weights for "Practice Mode"
+const CLF_BLUEPRINT = {
+    "Cloud Concepts": 16,
+    "Security and Compliance": 20,
+    "Technology": 22,
+    "Billing and Pricing": 7
 };
 
-/* -----------------------------
-   DOMAIN FILTER
------------------------------ */
-function getSelectedDomains() {
-  const checks = Array.from(document.querySelectorAll(".domain-check"));
-  const checked = checks.filter(cb => cb.checked).map(cb => cb.value);
-  return checked.length ? checked : Array.from(new Set(questions.map(q => q.domain)));
+// --- APP STATE ---
+let questions = [];
+let filteredQuestions = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let userAnswers = []; 
+let timerInterval;
+let startTime;
+let questionStartTime; // For Lap Timer analytics
+let isLoading = true;
+
+/* =====================================================
+   1. DATA FETCHING & PARSING
+   ===================================================== */
+async function loadQuestionsFromAPI(selectedDomainId = null) {
+    try {
+        let url = "https://xgob5q5wo5.execute-api.us-east-2.amazonaws.com/questions";
+        if (selectedDomainId) {
+            url += `?domain_id=${selectedDomainId}`;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        
+        const data = await response.json(); // Fixed: was missing this line in your snippet
+
+        questions = data.map((q, i) => ({
+            id: i + 1,
+            question: q.QuestionText,
+            options: (q.Options || []).map(opt =>
+                typeof opt === "object" ? opt.S || JSON.stringify(opt) : opt
+            ),
+            answer: Array.isArray(q.CorrectAnswer)
+                ? q.CorrectAnswer
+                : [q.CorrectAnswer],
+            explanation: q.Explanation || "No explanation provided.",
+            domain: parseDomain(q.SK)
+        }));
+
+        console.log(`✅ Loaded ${questions.length} questions.`);
+        isLoading = false;
+        updateDomainUI(); 
+
+    } catch (err) {
+        console.error("❌ Connection Error:", err);
+        isLoading = false;
+        alert("Couldn't reach Shanda's database. Check your connection.");
+    }
 }
 
-/* -----------------------------
-   PROGRESS BAR
------------------------------ */
-(function mountProgressBar() {
-  const status = document.getElementById("quiz-status");
-  if (!status) return;
-  const bar = document.createElement("div");
-  bar.id = "progress-bar";
-  bar.style.height = "8px";
-  bar.style.background = "#2b3240";
-  bar.style.borderRadius = "4px";
-  bar.style.overflow = "hidden";
-  bar.style.marginTop = "10px";
-
-  const fill = document.createElement("div");
-  fill.id = "progress-fill";
-  fill.style.height = "100%";
-  fill.style.width = "0%";
-  fill.style.background = "linear-gradient(90deg, #3b82f6, #10b981)";
-  fill.style.transition = "width 0.3s ease";
-
-  bar.appendChild(fill);
-  status.after(bar);
-})();
-const progressFill = document.getElementById("progress-fill");
-
-/* -----------------------------
-   TIMER HELPERS
------------------------------ */
-function startTimer() {
-  clearInterval(timerInterval);
-  startTime = Date.now();
-  updateTimer();
-  timerInterval = setInterval(updateTimer, 1000);
-}
-function stopTimer() {
-  clearInterval(timerInterval);
-  endTime = Date.now();
-}
-function updateTimer() {
-  const elapsed = Math.floor((Date.now() - startTime) / 1000);
-  timerDisplay.textContent = `Time: ${formatTime(elapsed)}`;
+function parseDomain(sk) {
+    if (!sk) return "General";
+    const parts = sk.split("#");
+    const raw = parts[1] || "General";
+    return raw.replace(/([a-z])([A-Z])/g, "$1 $2").trim();
 }
 
-/* -----------------------------
-   START QUIZ
------------------------------ */
-function startQuiz() {
-  selectedDomains = getSelectedDomains();
-  const countInput = document.querySelector('input[name="count"]:checked');
-  questionCount = parseInt(countInput?.value || "5", 10);
+/* =====================================================
+   2. DYNAMIC UI GENERATION
+   ===================================================== */
+function updateDomainUI() {
+    const container = el("dynamic-domain-options");
+    if (!container) return;
 
-  const pool = questions.filter(q => selectedDomains.includes(q.domain));
-  if (!pool.length) return alert("No questions found for your selection.");
+    const officialDomains = Object.keys(CLF_BLUEPRINT);
 
-  quizQuestions = shuffleArray(pool).slice(0, Math.min(pool.length, questionCount));
-  currentQuestionIndex = 0;
-  score = 0;
-  userAnswers = [];
-  domainStats = {};
-  progressFill.style.width = "0%";
+    const uniqueDomains = [...new Set(questions.map(q => q.domain))]
+        .filter(d => officialDomains.includes(d)) 
+        .sort();
 
-  startTimer();
-  fadeSwap(startScreen, quizScreen);
-  renderQuestion();
-}
-startBtn?.addEventListener("click", startQuiz);
+    container.innerHTML = ""; 
 
-/* -----------------------------
-   RENDER QUESTION
------------------------------ */
-function renderQuestion() {
-  const q = quizQuestions[currentQuestionIndex];
-  if (!q) return;
-
-  questionNumberDisplay.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
-  progressFill.style.width = `${(currentQuestionIndex / quizQuestions.length) * 100}%`;
-
-  questionText.textContent = `${q.id}. ${q.question}`;
-  optionsList.innerHTML = "";
-  const isMulti = Array.isArray(q.answer);
-  const opts = shuffleArray(q.options);
-
-  opts.forEach((opt, i) => {
-    const id = `opt-${currentQuestionIndex}-${i}`;
-    const li = document.createElement("li");
-    const input = document.createElement("input");
-    input.type = isMulti ? "checkbox" : "radio";
-    input.name = "option";
-    input.value = opt;
-    input.id = id;
-
-    const label = document.createElement("label");
-    label.setAttribute("for", id);
-    label.textContent = opt;
-
-    li.appendChild(input);
-    li.appendChild(label);
-    optionsList.appendChild(li);
-  });
-
-  nextBtn.disabled = false;
-  nextBtn.textContent = "Submit";
-  nextBtn.onclick = () => gradeCurrent(q);
-}
-
-/* -----------------------------
-   GRADE CURRENT QUESTION
------------------------------ */
-function gradeCurrent(q) {
-  const isMulti = Array.isArray(q.answer);
-  const inputs = Array.from(optionsList.querySelectorAll("input"));
-  const picked = inputs.filter(i => i.checked).map(i => norm(i.value));
-  if (!picked.length) return alert(isMulti ? "Select one or more answers, then submit." : "Select an answer, then submit.");
-
-  const correct = isMulti ? q.answer.map(norm) : [norm(q.answer)];
-  const d = q.domain;
-  if (!domainStats[d]) domainStats[d] = { correct: 0, total: 0 };
-  domainStats[d].total += 1;
-
-  const selectedCorrect = picked.filter(v => correct.includes(v)).length;
-  const questionScore = selectedCorrect / correct.length;
-  score += questionScore;
-  domainStats[d].correct += questionScore;
-
-  optionsList.querySelectorAll("li").forEach(li => {
-    const val = norm(li.querySelector("input").value);
-    if (correct.includes(val)) li.classList.add("correct");
-    if (picked.includes(val) && !correct.includes(val)) li.classList.add("incorrect");
-    li.querySelector("input").disabled = true;
-  });
-
-  userAnswers.push({
-    id: q.id,
-    question: q.question,
-    yourAnswer: picked.join("; "),
-    correctAnswer: correct.join("; "),
-    explanation: q.explanation || "No explanation provided.",
-    correct: questionScore === 1
-  });
-
-  const last = currentQuestionIndex + 1 === quizQuestions.length;
-  progressFill.style.width = `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`;
-  nextBtn.textContent = last ? "Finish Quiz" : "Next Question";
-  nextBtn.onclick = () => {
-    if (last) showResults();
-    else { currentQuestionIndex += 1; renderQuestion(); }
-  };
-}
-
-/* -----------------------------
-   RESULTS (Color-Coded Domains)
------------------------------ */
-function showResults() {
-  stopTimer();
-  const totalSec = Math.floor((endTime - startTime) / 1000);
-  const avgTime = (totalSec / quizQuestions.length).toFixed(1);
-  const pct = ((score / quizQuestions.length) * 100).toFixed(1);
-
-  const best = Object.keys(domainStats).length
-    ? Object.keys(domainStats).reduce((a, b) =>
-        (domainStats[a].correct / domainStats[a].total) >
-        (domainStats[b].correct / domainStats[b].total) ? a : b)
-    : "N/A";
-
-  saveResult({
-    date: new Date().toLocaleString(),
-    score: Number(pct),
-    totalQuestions: quizQuestions.length,
-    bestDomain: best,
-    time: totalSec.toFixed(1),
-    domains: domainStats
-  });
-
-  scoreSummary.innerHTML = `
-    <p>Score: ${score.toFixed(1)} / ${quizQuestions.length} (${pct}%)</p>
-    <p>Total Time: ${formatTime(totalSec)} (${totalSec}s)</p>
-    <p>Avg per Question: ${avgTime}s</p>
-  `;
-
-  domainTable.innerHTML = `<tr><th>Domain</th><th>Correct</th><th>Total</th><th>%</th></tr>`;
-  Object.entries(domainStats).forEach(([name, stats]) => {
-    const p = ((stats.correct / stats.total) * 100).toFixed(1);
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${name}</td>
-      <td>${stats.correct.toFixed(1)}</td>
-      <td>${stats.total}</td>
-      <td>${p}%</td>
-    `;
-
-    if (p >= 80) tr.style.backgroundColor = "rgba(34,197,94,0.15)";   // green tint
-    else if (p >= 60) tr.style.backgroundColor = "rgba(234,179,8,0.15)"; // yellow tint
-    else tr.style.backgroundColor = "rgba(239,68,68,0.15)";           // red tint
-
-    domainTable.appendChild(tr);
-  });
-
-  fadeSwap(quizScreen, resultScreen);
-}
-
-/* -----------------------------
-   REVIEW
------------------------------ */
-function renderReview() {
-  reviewContainer.innerHTML = "";
-  userAnswers.forEach((a, i) => {
-    const div = document.createElement("div");
-    div.className = "review-item";
-    div.innerHTML = `
-      <h4>${i + 1}. ${a.question}</h4>
-      <p><strong>Your Answer:</strong> <span class="${a.correct ? "correct" : "incorrect"}">${a.yourAnswer || "—"}</span></p>
-      <p><strong>Correct Answer:</strong> ${a.correctAnswer}</p>
-      <p><strong>Explanation:</strong> ${a.explanation}</p>
-      <hr/>
-    `;
-    reviewContainer.appendChild(div);
-  });
-}
-reviewBtn?.addEventListener("click", () => { renderReview(); fadeSwap(resultScreen, reviewScreen); });
-backToResultsBtn?.addEventListener("click", () => fadeSwap(reviewScreen, resultScreen));
-
-/* -----------------------------
-   PROGRESS DASHBOARD
------------------------------ */
-progressBtn?.addEventListener("click", () => { renderProgress(); fadeSwap(resultScreen, progressScreen); });
-backToResultsFromProgress?.addEventListener("click", () => fadeSwap(progressScreen, resultScreen));
-
-resetProgressBtn?.addEventListener("click", () => {
-  if (confirm("Erase all saved progress?")) {
-    localStorage.removeItem(STORAGE_KEY);
-    renderProgress();
-  }
-});
-
-function renderProgress() {
-  const history = lsLoad();
-  if (!history.length) {
-    totalQuizzesEl.textContent = 0;
-    avgScoreEl.textContent = "0%";
-    bestDomainEl.textContent = "N/A";
-    lastSessionEl.textContent = "—";
-    historyList.innerHTML = "<li>No quiz data yet.</li>";
-    return;
-  }
-
-  const total = history.length;
-  const avg = (history.reduce((s, h) => s + h.score, 0) / total).toFixed(1);
-  const last = history[history.length - 1];
-
-  const agg = {};
-  history.forEach(h => {
-    const d = h.domains || {};
-    Object.keys(d).forEach(name => {
-      const { correct, total } = d[name];
-      if (!agg[name]) agg[name] = { c: 0, t: 0 };
-      agg[name].c += correct; agg[name].t += total;
+    uniqueDomains.forEach(domain => {
+        const label = document.createElement("label");
+        label.className = "flex items-center space-x-2 p-2 bg-white rounded shadow-sm hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200 transition";
+        label.innerHTML = `
+            <input type="checkbox" class="domain-check" value="${domain}">
+            <span class="text-gray-700">${domain}</span>
+        `;
+        container.appendChild(label);
     });
-  });
 
-  let best = "N/A", bestRate = 0;
-  Object.keys(agg).forEach(k => {
-    const r = agg[k].c / agg[k].t;
-    if (r > bestRate) { bestRate = r; best = k; }
-  });
-
-  totalQuizzesEl.textContent = total;
-  avgScoreEl.textContent = `${avg}%`;
-  bestDomainEl.textContent = best;
-  lastSessionEl.textContent = `${last.date} — ${last.score}%`;
-
-  historyList.innerHTML = "";
-  history.slice(-5).reverse().forEach(h => {
-    const li = document.createElement("li");
-    li.textContent = `${h.date} — ${h.score}% (${h.bestDomain || "N/A"})`;
-    historyList.appendChild(li);
-  });
+    if (el("start-btn")) el("start-btn").disabled = false;
 }
 
-/* -----------------------------
-   RESTART
------------------------------ */
-restartBtn?.addEventListener("click", () => {
-  clearInterval(timerInterval);
-  timerDisplay.textContent = "Time: 00:00";
-  currentQuestionIndex = 0;
-  score = 0;
-  userAnswers = [];
-  progressFill.style.width = "0%";
-  fadeSwap(resultScreen, startScreen);
-});
+/* =====================================================
+   3. QUIZ ENGINE
+   ===================================================== */
+function startQuiz(isPracticeMode = false) {
+    if (isLoading) return alert("Still loading questions...");
 
-/* -----------------------------
-   SHORTCUTS
------------------------------ */
-document.addEventListener("keydown", (e) => {
-  if (!startScreen.classList.contains("hidden") && e.key === "Enter") {
-    e.preventDefault();
-    startQuiz();
-  }
-});
+    const selectedDomains = Array.from(
+        document.querySelectorAll(".domain-check:checked")
+    ).map(cb => cb.value);
+
+    // If Practice Mode is pushed, we use the Blueprint scaling
+    if (isPracticeMode) {
+        if (selectedDomains.length === 0) return alert("Select at least one domain for Practice Mode!");
+        
+        filteredQuestions = [];
+        selectedDomains.forEach(domain => {
+            const countForDomain = CLF_BLUEPRINT[domain] || 5;
+            const domainPool = questions.filter(q => q.domain === domain)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, countForDomain);
+            filteredQuestions.push(...domainPool);
+        });
+    } else {
+        // Standard Quiz Mode
+        const countInput = document.querySelector('input[name="count"]:checked');
+        const count = countInput ? parseInt(countInput.value) : 10;
+
+        filteredQuestions = selectedDomains.length > 0
+            ? questions.filter(q => selectedDomains.includes(q.domain))
+            : [...questions];
+
+        filteredQuestions = filteredQuestions
+            .sort(() => 0.5 - Math.random())
+            .slice(0, count);
+    }
+
+    if (filteredQuestions.length === 0) return alert("No questions found!");
+
+    currentQuestionIndex = 0;
+    score = 0;
+    userAnswers = filteredQuestions.map(() => ({ selected: new Set(), timeSpent: 0 }));
+
+    el("start-screen").classList.add("hidden");
+    el("quiz-screen").classList.remove("hidden");
+
+    showQuestion();
+    startTimer();
+}
+
+function showQuestion() {
+    questionStartTime = Date.now(); // Reset Lap Timer
+    const q = filteredQuestions[currentQuestionIndex];
+    const isMulti = q.answer.length > 1;
+
+    el("question-number").innerText = `Question ${currentQuestionIndex + 1} of ${filteredQuestions.length}`;
+    el("question-text").innerText = q.question;
+
+    const optionsList = el("options");
+    optionsList.innerHTML = "";
+
+    if (isMulti) {
+        const hint = document.createElement("p");
+        hint.className = "text-blue-600 font-bold mb-2";
+        hint.innerText = `(Select ${q.answer.length})`;
+        optionsList.appendChild(hint);
+    }
+
+    q.options.forEach(opt => {
+        const li = document.createElement("li");
+        li.className = "option-item p-3 mb-2 border rounded cursor-pointer hover:bg-gray-100 transition";
+        li.innerText = opt;
+        li.onclick = () => selectOption(li, opt, isMulti);
+        optionsList.appendChild(li);
+    });
+
+    el("next-btn").disabled = true;
+}
+
+function selectOption(li, val, isMulti) {
+    const currentSet = userAnswers[currentQuestionIndex].selected;
+    const q = filteredQuestions[currentQuestionIndex];
+
+    if (isMulti) {
+        currentSet.has(val) ? currentSet.delete(val) : currentSet.add(val);
+        li.classList.toggle("bg-blue-100");
+        li.classList.toggle("border-blue-500");
+        el("next-btn").disabled = currentSet.size !== q.answer.length;
+    } else {
+        document.querySelectorAll(".option-item").forEach(i => i.classList.remove("bg-blue-100", "border-blue-500"));
+        currentSet.clear();
+        currentSet.add(val);
+        li.classList.add("bg-blue-100", "border-blue-500");
+        el("next-btn").disabled = false;
+    }
+}
+
+el("next-btn").onclick = () => {
+    const q = filteredQuestions[currentQuestionIndex];
+    const userAnswer = userAnswers[currentQuestionIndex];
+    
+    // Capture time spent on THIS question
+    userAnswer.timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+
+    const isCorrect = userAnswer.selected.size === q.answer.length && 
+                      q.answer.every(ans => userAnswer.selected.has(ans));
+
+    if (isCorrect) score++;
+
+    currentQuestionIndex++;
+    currentQuestionIndex < filteredQuestions.length ? showQuestion() : endQuiz();
+};
+
+/* =====================================================
+   4. RESULTS & ANALYTICS
+   ===================================================== */
+function endQuiz() {
+    clearInterval(timerInterval);
+    el("quiz-screen").classList.add("hidden");
+    el("result-screen").classList.remove("hidden");
+    const pct = Math.round((score / filteredQuestions.length) * 100);
+    
+    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+    const avgTime = Math.round(totalTime / filteredQuestions.length);
+
+    el("score-summary").innerHTML = `
+        <h3 class="text-2xl font-bold">Score: ${score}/${filteredQuestions.length} (${pct}%)</h3>
+        <p class="text-gray-600">Average Pace: ${avgTime}s per question</p>
+        <p class="text-sm ${avgTime <= 83 ? 'text-green-600' : 'text-red-600'}">
+            ${avgTime <= 83 ? '✅ On track for exam pace!' : '⚠️ Try to speed up (Target: 83s)'}
+        </p>
+    `;
+}
+
+function renderReview() {
+    el("result-screen").classList.add("hidden");
+    el("review-screen").classList.remove("hidden");
+    const container = el("review-container");
+    container.innerHTML = "";
+
+    filteredQuestions.forEach((q, i) => {
+        const userAnswer = userAnswers[i];
+        const isCorrect = q.answer.every(ans => userAnswer.selected.has(ans)) && userAnswer.selected.size === q.answer.length;
+
+        const div = document.createElement("div");
+        div.className = "review-item mb-6 p-4 border rounded shadow-sm bg-white";
+        div.innerHTML = `
+            <div class="flex justify-between items-start">
+                <p class="font-bold">${i + 1}. ${q.question}</p>
+                <span class="text-xs px-2 py-1 bg-gray-100 rounded">${userAnswer.timeSpent}s</span>
+            </div>
+            <p class="text-sm mt-2"><strong>Correct:</strong> ${q.answer.join(", ")}</p>
+            <p class="text-sm ${isCorrect ? 'text-green-600' : 'text-red-600'}"><strong>Yours:</strong> ${[...userAnswer.selected].join(", ") || 'None'}</p>
+            <p class="text-xs text-gray-500 italic mt-2">${q.explanation}</p>
+        `;
+        container.appendChild(div);
+    });
+}
+
+/* =====================================================
+   5. INITIALIZATION
+   ===================================================== */
+function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - startTime) / 1000);
+        el("timer").innerText = `Time: ${String(Math.floor(diff / 60)).padStart(2, '0')}:${String(diff % 60).padStart(2, '0')}`;
+    }, 1000);
+}
+
+// Wire up buttons
+if (el("start-btn")) el("start-btn").onclick = () => startQuiz(false);
+if (el("practice-btn")) el("practice-btn").onclick = () => startQuiz(true); 
+if (el("review-btn")) el("review-btn").onclick = renderReview;
+if (el("restart-btn")) el("restart-btn").onclick = () => window.location.reload();
+
+window.addEventListener("DOMContentLoaded", () => loadQuestionsFromAPI());
