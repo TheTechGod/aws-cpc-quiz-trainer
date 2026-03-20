@@ -5,12 +5,19 @@
 
 const el = (id) => document.getElementById(id);
 
+const DOMAIN_MAP = {
+    "Cloud Concepts": "Cloud Concepts",
+    "Security and Compliance": "Security and Compliance",
+    "Technology": "Cloud Technology and Services",
+    "Billing and Pricing": "Billing, Pricing, and Support"
+};
+
 // Official CLF-C02 Blueprint Weights for "Practice Mode"
 const CLF_BLUEPRINT = {
-    "Cloud Concepts": 16,
-    "Security and Compliance": 20,
-    "Technology": 22,
-    "Billing and Pricing": 7
+    "Cloud Concepts": 24,
+    "Security and Compliance": 30,
+    "Cloud Technology and Services": 34,
+    "Billing, Pricing, and Support": 12
 };
 
 // --- APP STATE ---
@@ -77,8 +84,8 @@ function updateDomainUI() {
     const container = el("dynamic-domain-options");
     if (!container) return;
 
-    const officialDomains = Object.keys(CLF_BLUEPRINT);
-
+    // 1. Get unique domains from the questions we just loaded
+    const officialDomains = Object.keys(DOMAIN_MAP);
     const uniqueDomains = [...new Set(questions.map(q => q.domain))]
         .filter(d => officialDomains.includes(d)) 
         .sort();
@@ -86,11 +93,17 @@ function updateDomainUI() {
     container.innerHTML = ""; 
 
     uniqueDomains.forEach(domain => {
+        // 2. Map the DB name (e.g., "Technology") to the Official name
+        // This uses the mapping we discussed, or defaults to the DB name if not found
+        const officialName = DOMAIN_MAP[domain] || domain; 
+
         const label = document.createElement("label");
         label.className = "flex items-center space-x-2 p-2 bg-white rounded shadow-sm hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200 transition";
+        
+        // Note: The 'value' stays the DB name so the filter logic still works!
         label.innerHTML = `
             <input type="checkbox" class="domain-check" value="${domain}">
-            <span class="text-gray-700">${domain}</span>
+            <span class="text-gray-700">${officialName}</span>
         `;
         container.appendChild(label);
     });
