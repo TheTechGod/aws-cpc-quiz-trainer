@@ -1,0 +1,667 @@
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
+
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
+
+export const handler = async (event) => {
+    const questions = [ {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#097",
+    "CorrectAnswer": "Dedicated Hosts",
+    "Explanation": "Dedicated Hosts provide full control over physical servers for compliance and licensing.",
+    "Options": [{"S":"Dedicated Hosts"},{"S":"Savings Plans"},{"S":"On Demand"},{"S":"Spot Instances"}],
+    "QuestionText": "A company needs complete control over the physical server for industry regulations. Which pricing option should they choose?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#098",
+    "CorrectAnswer": "Spot Instances",
+    "Explanation": "Spot Instances offer up to 90% off for fault-tolerant workloads using unused capacity.",
+    "Options": [{"S":"Reserved Instances"},{"S":"Savings Plans"},{"S":"On Demand"},{"S":"Spot Instances"}],
+    "QuestionText": "A startup wants to reduce costs for a batch process that can handle interruptions. Which option offers the most savings?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#099",
+    "CorrectAnswer": "On Demand",
+    "Explanation": "On-Demand is best for unpredictable workloads without long-term commitments.",
+    "Options": [{"S":"Reserved Instances"},{"S":"Savings Plans"},{"S":"On Demand"},{"S":"Spot Instances"}],
+    "QuestionText": "A customer is unsure of usage patterns but expects growth and wants no long-term commitment. Which option should they use?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#000",
+    "CorrectAnswer": "[\"Regulatory compliance\",\"Proximity to users\"]",
+    "Explanation": "Compliance and latency (proximity) are the primary drivers for Region selection.",
+    "Options": [{"S":"Regulatory compliance"},{"S":"Proximity to users"},{"S":"Number of files"},{"S":"CIO preference"},{"S":"Region age"}],
+    "QuestionText": "Which factors are MOST important when selecting an AWS Region? (Select TWO.)"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#001",
+    "CorrectAnswer": "Trade fixed expense for variable expense",
+    "Explanation": "This represents the shift from Capital Expenditure (CapEx) to Operational Expenditure (OpEx).",
+    "Options": [{"S":"Trade fixed expense for variable expense"},{"S":"Economies of scale"},{"S":"Stop guessing capacity"},{"S":"Increase speed"}],
+    "QuestionText": "A company migrates to transition from upfront CapEx to variable OpEx. Which cloud advantage is this?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#002",
+    "CorrectAnswer": "Reliability",
+    "Explanation": "The Reliability pillar focuses on a system's ability to recover from disruptions.",
+    "Options": [{"S":"Operational Excellence"},{"S":"Reliability"},{"S":"Performance Efficiency"},{"S":"Security"}],
+    "QuestionText": "Which Well-Architected pillar focuses on consistent and correct intended functions?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#003",
+    "CorrectAnswer": "Elasticity",
+    "Explanation": "Elasticity allows for automatic scaling to match changing traffic patterns.",
+    "Options": [{"S":"Global reach"},{"S":"High availability"},{"S":"Elasticity"},{"S":"Economy of scale"}],
+    "QuestionText": "Which cloud benefit allows a startup to adjust resource levels automatically as traffic grows?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#004",
+    "CorrectAnswer": "Patching the guest OS on EC2",
+    "Explanation": "In the Shared Responsibility Model, the customer is responsible for 'Security in the Cloud' (OS/Apps).",
+    "Options": [{"S":"Physical security"},{"S":"Patching the guest OS on EC2"},{"S":"Virtualization software"},{"S":"Disk disposal"}],
+    "QuestionText": "Under the Shared Responsibility Model, which is a customer responsibility?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#005",
+    "CorrectAnswer": "Design for failure",
+    "Explanation": "This principle ensures systems remain functional despite individual component failures.",
+    "Options": [{"S":"Design for failure"},{"S":"Scale vertically"},{"S":"Loose coupling"},{"S":"Monolithic architecture"}],
+    "QuestionText": "Which design principle suggests systems should withstand individual component failure?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#006",
+    "CorrectAnswer": "Edge Locations",
+    "Explanation": "Edge locations cache content closer to users via CloudFront.",
+    "Options": [{"S":"Availability Zones"},{"S":"AWS Regions"},{"S":"Edge Locations"},{"S":"VPC Peering"}],
+    "QuestionText": "Which component is used to cache content closer to users globally for low latency?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#007",
+    "CorrectAnswer": "Increased speed to develop and ship",
+    "Explanation": "Agility in the cloud refers to how fast IT resources can be made available to developers.",
+    "Options": [{"S":"Deploy globally in minutes"},{"S":"Cost reduction"},{"S":"Increased speed to develop and ship"},{"S":"Auto-scaling CPU"}],
+    "QuestionText": "Which of the following describes the 'Agility' benefit of cloud computing?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#008",
+    "CorrectAnswer": "To provide high availability and fault tolerance",
+    "Explanation": "Multiple AZs protect against data center failures.",
+    "Options": [{"S":"Data residency"},{"S":"High availability and fault tolerance"},{"S":"Reduce transfer costs"},{"S":"Connect on-premises"}],
+    "QuestionText": "What is the primary purpose of having multiple Availability Zones (AZs) in a Region?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#009",
+    "CorrectAnswer": "Platform Perspective",
+    "Explanation": "The Platform Perspective focuses on infrastructure transformation in the AWS CAF.",
+    "Options": [{"S":"Governance"},{"S":"Operations"},{"S":"Business"},{"S":"Platform"}],
+    "QuestionText": "Which AWS CAF perspective focuses on transforming IT infrastructure?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#010",
+    "CorrectAnswer": "AWS Pricing Calculator",
+    "Explanation": "The Pricing Calculator estimates costs before resources are deployed.",
+    "Options": [{"S":"AWS Pricing Calculator"},{"S":"AWS Budgets"},{"S":"AWS Cost Explorer"},{"S":"AWS Trusted Advisor"}],
+    "QuestionText": "Which tool estimates cost savings for moving an on-premises data center to AWS?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#011",
+    "CorrectAnswer": "Operational Excellence",
+    "Explanation": "Operational Excellence encourages automation and serverless to reduce overhead.",
+    "Options": [{"S":"Cost Optimization"},{"S":"Sustainability"},{"S":"Operational Excellence"},{"S":"Performance Efficiency"}],
+    "QuestionText": "Which pillar emphasizes serverless to reduce management overhead?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#012",
+    "CorrectAnswer": "AWS passing savings to customers",
+    "Explanation": "Economies of scale happen when high-volume usage lowers overall costs.",
+    "Options": [{"S":"AWS passing savings to customers"},{"S":"Scaling EC2"},{"S":"Multiple regions"},{"S":"Database provisioning"}],
+    "QuestionText": "Which of the following is an example of 'Economies of Scale'?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#013",
+    "CorrectAnswer": "Deploy across multiple AZs",
+    "Explanation": "Deploying in multiple AZs ensures availability if a single data center fails.",
+    "Options": [{"S":"Multiple Edge Locations"},{"S":"Multiple AZs"},{"S":"Single VPC"},{"S":"Direct Connect"}],
+    "QuestionText": "A developer needs to ensure application availability if a single data center fails. Which strategy?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#014",
+    "CorrectAnswer": "Scale based on actual demand",
+    "Explanation": "Stopping guessing capacity means scaling dynamically instead of predicting peaks.",
+    "Options": [{"S":"Over-provisioning"},{"S":"Scale based on actual demand"},{"S":"Flat monthly fee"},{"S":"AWS predicts patterns"}],
+    "QuestionText": "What does the 'Stop Guessing Capacity' benefit mean?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#015",
+    "CorrectAnswer": "The Customer",
+    "Explanation": "Customers manage network access controls and security group rules.",
+    "Options": [{"S":"AWS"},{"S":"The Customer"},{"S":"Third-party"},{"S":"Both"}],
+    "QuestionText": "Under the Shared Responsibility Model, who configures Security Groups?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#016",
+    "CorrectAnswer": "Sustainability",
+    "Explanation": "The Sustainability pillar focuses on environmental impact and energy efficiency.",
+    "Options": [{"S":"Sustainability"},{"S":"Cost Optimization"},{"S":"Operational Excellence"},{"S":"Reliability"}],
+    "QuestionText": "Which pillar focuses on minimizing environmental impact?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#017",
+    "CorrectAnswer": "Hybrid Deployment",
+    "Explanation": "Hybrid deployment mixes on-premises and cloud resources.",
+    "Options": [{"S":"Public Cloud"},{"S":"Private Cloud"},{"S":"Hybrid Deployment"},{"S":"SaaS"}],
+    "QuestionText": "Which model involves running some resources on-premises and some in AWS?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#018",
+    "CorrectAnswer": "Deploying globally in minutes",
+    "Explanation": "Global reach allows rapid worldwide application deployment.",
+    "Options": [{"S":"Local currency payment"},{"S":"Deploying globally in minutes"},{"S":"Reserved Instance costs"},{"S":"Running any OS"}],
+    "QuestionText": "Which of the following is a benefit of AWS 'Global Reach'?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#019",
+    "CorrectAnswer": "Infrastructure as Code",
+    "Explanation": "IaC services like CloudFormation automate environment setup to save time.",
+    "Options": [{"S":"Free support"},{"S":"Infrastructure as Code"},{"S":"Long-term contracts"},{"S":"Eliminating testing"}],
+    "QuestionText": "How does AWS help customers reduce 'Time to Market'?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#020",
+    "CorrectAnswer": "AWS CloudFormation",
+    "Explanation": "CloudFormation automates resource deployment via code templates.",
+    "Options": [{"S":"CloudWatch"},{"S":"CloudFormation"},{"S":"AWS Config"},{"S":"Inspector"}],
+    "QuestionText": "Which service automates deployment through templates?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#021",
+    "CorrectAnswer": "Operating without intervention",
+    "Explanation": "High availability means a system stays accessible even during failures.",
+    "Options": [{"S":"Operating without intervention"},{"S":"Scaling infinitely"},{"S":"Lowest cost"},{"S":"Unlimited storage"}],
+    "QuestionText": "What is the AWS definition of 'High Availability'?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#022",
+    "CorrectAnswer": "Physical security of hardware",
+    "Explanation": "AWS manages 'Security of the Cloud,' including hardware and data center access.",
+    "Options": [{"S":"Client encryption"},{"S":"Physical hardware security"},{"S":"IAM"},{"S":"Firewall config"}],
+    "QuestionText": "Under the Shared Responsibility Model, what is AWS responsible for?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#023",
+    "CorrectAnswer": "Business Perspective",
+    "Explanation": "The Business Perspective aligns IT investments with business outcomes.",
+    "Options": [{"S":"Business"},{"S":"Governance"},{"S":"Security"},{"S":"People"}],
+    "QuestionText": "Which AWS CAF perspective ensures IT investments support business outcomes?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#024",
+    "CorrectAnswer": "Components interacting independently",
+    "Explanation": "Loose coupling means failures in one part don't crash others.",
+    "Options": [{"S":"Single file connection"},{"S":"Components interacting independently"},{"S":"Using one AZ"},{"S":"Manual capacity"}],
+    "QuestionText": "Which describes 'Loose Coupling' in cloud architecture?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#025",
+    "CorrectAnswer": "AWS Artifact",
+    "Explanation": "AWS Artifact provides on-demand access to compliance reports.",
+    "Options": [{"S":"AWS Artifact"},{"S":"AWS Shield"},{"S":"AWS WAF"},{"S":"Trusted Advisor"}],
+    "QuestionText": "Which service helps manage compliance reports?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#026",
+    "CorrectAnswer": "Security of the cloud vs in the cloud",
+    "Explanation": "AWS secures infrastructure; customers secure data and configuration.",
+    "Options": [{"S":"Security of the cloud vs in the cloud"},{"S":"Customer manages all"},{"S":"AWS manages data"},{"S":"Identical responsibilities"}],
+    "QuestionText": "What is the core idea of the Shared Responsibility Model?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#027",
+    "CorrectAnswer": "Barista serving customer",
+    "Explanation": "The client (customer) requests, and the server (barista) responds.",
+    "Options": [{"S":"Self-serve station"},{"S":"Proactive barista"},{"S":"Customer makes own"},{"S":"Barista serving customer"}],
+    "QuestionText": "Which scenario describes the client-server model in the coffee shop analogy?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#028",
+    "CorrectAnswer": "[\"Compliance\",\"Proximity\"]",
+    "Explanation": "Regions are chosen based on legal compliance and user latency.",
+    "Options": [{"S":"Compliance"},{"S":"Proximity"},{"S":"EC2 availability"},{"S":"Default account settings"},{"S":"Renewable energy"}],
+    "QuestionText": "Which are key factors when choosing a Region? (Select TWO.)"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#029",
+    "CorrectAnswer": "Regions contain AZs; AZs are data centers",
+    "Explanation": "Regions are geographic areas; AZs are isolated data center groups within them.",
+    "Options": [{"S":"Region is a server"},{"S":"Regions contain AZs; AZs are data centers"},{"S":"AZ spans Regions"},{"S":"They are the same"}],
+    "QuestionText": "What is the difference between AWS Regions and Availability Zones?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#030",
+    "CorrectAnswer": "Amazon CloudFront",
+    "Explanation": "CloudFront uses edge locations to cache content close to users.",
+    "Options": [{"S":"Global Accelerator"},{"S":"Amazon CloudFront"},{"S":"Direct Connect"},{"S":"Route 53"}],
+    "QuestionText": "Which component caches content closer to users to reduce latency?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#031",
+    "CorrectAnswer": "Hybrid",
+    "Explanation": "Hybrid combines on-premises and cloud-based infrastructure.",
+    "Options": [{"S":"On-premises"},{"S":"Public Cloud"},{"S":"Hybrid"},{"S":"Data-compliance"}],
+    "QuestionText": "Keeping sensitive data on-premises while using the cloud for scaling describes what?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#032",
+    "CorrectAnswer": "AWS CloudFormation",
+    "Explanation": "CloudFormation models and automates infrastructure setup.",
+    "Options": [{"S":"Elastic Beanstalk"},{"S":"AWS CloudFormation"},{"S":"OpsWorks"},{"S":"Systems Manager"}],
+    "QuestionText": "Which service allows modeling infrastructure using templates?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#033",
+    "CorrectAnswer": "[\"Fault tolerance\",\"Redundancy\"]",
+    "Explanation": "Multiple AZs provide failover and protection from infrastructure outages.",
+    "Options": [{"S":"Fault tolerance"},{"S":"Reduced pricing"},{"S":"Auto-compliance"},{"S":"Increased latency"},{"S":"Redundancy"}],
+    "QuestionText": "What are the main advantages of multi-AZ deployment? (Select TWO.)"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#034",
+    "CorrectAnswer": "Elasticity",
+    "Explanation": "Elasticity allows resources to adjust automatically to demand.",
+    "Options": [{"S":"Elasticity"},{"S":"High availability"},{"S":"Durability"},{"S":"Compliance"}],
+    "QuestionText": "Which benefit allows automatic scaling as demand changes?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#035",
+    "CorrectAnswer": "Amazon Marketplace",
+    "Explanation": "The Marketplace is for buying software, not managing AWS resources.",
+    "Options": [{"S":"Console"},{"S":"CLI"},{"S":"SDKs"},{"S":"Amazon Marketplace"}],
+    "QuestionText": "Which method is NOT used to interact with AWS resources?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#036",
+    "CorrectAnswer": "Managing infrastructure via code templates",
+    "Explanation": "IaC defines infrastructure in code rather than manual steps.",
+    "Options": [{"S":"Automatic repairs"},{"S":"Managing infrastructure via code templates"},{"S":"Pricing model"},{"S":"Physical access control"}],
+    "QuestionText": "What is Infrastructure as Code (IaC)?"
+  },
+
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#041",
+    "CorrectAnswer": "Interconnected devices exchanging data",
+    "Explanation": "Networking in AWS refers to the communication and data exchange between interconnected systems and services.",
+    "Options": [{"S":"DNS translation"},{"S":"Isolated VPC section"},{"S":"Isolated data centers"},{"S":"Interconnected devices exchanging data"}],
+    "QuestionText": "What is the general definition of networking in the AWS Cloud?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#043",
+    "CorrectAnswer": "Amazon Route 53",
+    "Explanation": "Route 53 provides domain registration, DNS routing, and health checking.",
+    "Options": [{"S":"Amazon CloudFront"},{"S":"Amazon Route 53"},{"S":"AWS Direct Connect"},{"S":"AWS Global Accelerator"}],
+    "QuestionText": "Which AWS service is used to register and manage domain names?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#046",
+    "CorrectAnswer": "AWS Direct Connect",
+    "Explanation": "Direct Connect establishes a private, dedicated connection between on-premises and AWS.",
+    "Options": [{"S":"AWS VPN"},{"S":"AWS PrivateLink"},{"S":"AWS Direct Connect"},{"S":"AWS Global Accelerator"}],
+    "QuestionText": "Which service provides a dedicated network connection from an on-premises data center to AWS?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#049",
+    "CorrectAnswer": "Network ACLs",
+    "Explanation": "Network ACLs operate at the subnet level and support both allow and deny rules.",
+    "Options": [{"S":"Security Groups"},{"S":"Network ACLs"},{"S":"Route Tables"},{"S":"PrivateLink"}],
+    "QuestionText": "A company wants broad control of traffic in and out of a subnet using both allow and deny rules. What should they use?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#054",
+    "CorrectAnswer": "Security Groups",
+    "Explanation": "Security groups act as virtual firewalls for EC2 instances, controlling traffic at the instance level.",
+    "Options": [{"S":"Network ACLs"},{"S":"Security Groups"},{"S":"Route Tables"},{"S":"Private Subnets"}],
+    "QuestionText": "Which network component allows traffic control at the instance level within a VPC?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Compute#ID#101",
+    "CorrectAnswer": "Managing data access permissions",
+    "Explanation": "Under the Shared Responsibility Model, customers are responsible for IAM roles and permissions for Lambda functions.",
+    "Options": [{"S":"Patching the OS"},{"S":"Scaling infrastructure"},{"S":"Managing data access permissions"},{"S":"Server availability"}],
+    "QuestionText": "Which task is the customer's responsibility when using AWS Lambda?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Compute#ID#103",
+    "CorrectAnswer": "Packaging the app and dependencies into one environment",
+    "Explanation": "Containers bundle the application and dependencies to ensure consistency across environments.",
+    "Options": [{"S":"Accessing multiple OS types"},{"S":"Packaging the app and dependencies into one environment"},{"S":"Auto-scaling across providers"},{"S":"Eliminating config files"}],
+    "QuestionText": "How do containers solve the problem of an application crashing due to missing dependencies in a new environment?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Compute#ID#106",
+    "CorrectAnswer": "AWS Outposts",
+    "Explanation": "AWS Outposts extends AWS infrastructure and services to on-premises environments.",
+    "Options": [{"S":"AWS Elastic Beanstalk"},{"S":"Amazon Lightsail"},{"S":"AWS Batch"},{"S":"AWS Outposts"}],
+    "QuestionText": "A company must run workloads on-premises for compliance but wants to use AWS services. Which service meets their needs?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#202",
+    "CorrectAnswer": "AWS Shield",
+    "Explanation": "AWS Shield is a managed DDoS protection service for AWS resources.",
+    "Options": [{"S":"AWS WAF"},{"S":"AWS Shield"},{"S":"Amazon Inspector"},{"S":"AWS KMS"}],
+    "QuestionText": "Which AWS service provides managed protection against Distributed Denial of Service (DDoS) attacks?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#203",
+    "CorrectAnswer": "Multi-Factor Authentication (MFA)",
+    "Explanation": "MFA adds an extra layer of protection on top of passwords for account security.",
+    "Options": [{"S":"Password complexity"},{"S":"Multi-Factor Authentication (MFA)"},{"S":"Key pairs"},{"S":"Security Groups"}],
+    "QuestionText": "What should be enabled to add an extra layer of security to an AWS account root user?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#204",
+    "CorrectAnswer": "AWS IAM",
+    "Explanation": "IAM allows you to securely control access to AWS services and resources for your users.",
+    "Options": [{"S":"AWS IAM"},{"S":"AWS Secrets Manager"},{"S":"AWS CloudTrail"},{"S":"Amazon GuardDuty"}],
+    "QuestionText": "Which service is used to manage user identities and their specific permissions in AWS?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#205",
+    "CorrectAnswer": "Amazon GuardDuty",
+    "Explanation": "GuardDuty is a threat detection service that continuously monitors for malicious activity.",
+    "Options": [{"S":"AWS Shield"},{"S":"Amazon GuardDuty"},{"S":"AWS WAF"},{"S":"Amazon Inspector"}],
+    "QuestionText": "Which service provides intelligent threat detection and continuous monitoring to protect AWS accounts?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#206",
+    "CorrectAnswer": "AWS Key Management Service (KMS)",
+    "Explanation": "KMS makes it easy to create and manage cryptographic keys used to encrypt data.",
+    "Options": [{"S":"AWS KMS"},{"S":"AWS Artifact"},{"S":"AWS CloudTrail"},{"S":"Amazon Macie"}],
+    "QuestionText": "Which service is used to create and control the keys used to encrypt your data?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#207",
+    "CorrectAnswer": "Amazon Macie",
+    "Explanation": "Macie uses machine learning to automatically discover, classify, and protect sensitive data in S3.",
+    "Options": [{"S":"Amazon Macie"},{"S":"Amazon Inspector"},{"S":"AWS WAF"},{"S":"AWS Shield"}],
+    "QuestionText": "Which service uses machine learning to discover and protect sensitive data in Amazon S3?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#208",
+    "CorrectAnswer": "Amazon Inspector",
+    "Explanation": "Inspector is an automated security assessment service that helps improve the security and compliance of applications deployed on AWS.",
+    "Options": [{"S":"AWS Config"},{"S":"Amazon Inspector"},{"S":"AWS Shield"},{"S":"Amazon Macie"}],
+    "QuestionText": "Which service provides automated security assessments to help improve the security of applications on EC2?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Storage#ID#302",
+    "CorrectAnswer": "Amazon EBS",
+    "Explanation": "Amazon Elastic Block Store (EBS) provides block-level storage volumes for use with EC2 instances.",
+    "Options": [{"S":"Amazon S3"},{"S":"Amazon EBS"},{"S":"Amazon EFS"},{"S":"AWS Storage Gateway"}],
+    "QuestionText": "Which service provides persistent block-level storage volumes for Amazon EC2 instances?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Storage#ID#303",
+    "CorrectAnswer": "Amazon EFS",
+    "Explanation": "Amazon Elastic File System (EFS) provides a simple, scalable, fully managed cloud native file system for use with AWS and on-premises resources.",
+    "Options": [{"S":"Amazon S3"},{"S":"Amazon EBS"},{"S":"Amazon EFS"},{"S":"Amazon FSx"}],
+    "QuestionText": "Which service provides a scalable, managed file system that can be mounted on multiple EC2 instances simultaneously?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Storage#ID#304",
+    "CorrectAnswer": "AWS Snowball",
+    "Explanation": "Snowball is a data transport solution that uses physical storage devices to transfer large amounts of data into and out of AWS.",
+    "Options": [{"S":"AWS Direct Connect"},{"S":"AWS Snowball"},{"S":"AWS Storage Gateway"},{"S":"Amazon S3 Transfer Acceleration"}],
+    "QuestionText": "A company needs to migrate 50 Terabytes of data to AWS but has limited internet bandwidth. Which service should they use?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Databases#ID#402",
+    "CorrectAnswer": "Amazon Aurora",
+    "Explanation": "Aurora is a MySQL and PostgreSQL-compatible relational database built for the cloud.",
+    "Options": [{"S":"Amazon DynamoDB"},{"S":"Amazon Aurora"},{"S":"Amazon Redshift"},{"S":"Amazon ElastiCache"}],
+    "QuestionText": "Which AWS database engine is fully managed and compatible with MySQL and PostgreSQL, offering high performance and availability?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Databases#ID#403",
+    "CorrectAnswer": "Amazon ElastiCache",
+    "Explanation": "ElastiCache improves application performance by allowing you to retrieve information from fast, managed, in-memory caches.",
+    "Options": [{"S":"Amazon RDS"},{"S":"Amazon ElastiCache"},{"S":"Amazon DynamoDB"},{"S":"Amazon DocumentDB"}],
+    "QuestionText": "Which service should a company use to improve database performance by adding an in-memory caching layer?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Databases#ID#404",
+    "CorrectAnswer": "Amazon Redshift",
+    "Explanation": "Amazon Redshift is a fast, fully managed data warehouse that makes it simple and cost-effective to analyze all your data using standard SQL.",
+    "Options": [{"S":"Amazon RDS"},{"S":"Amazon Redshift"},{"S":"Amazon DynamoDB"},{"S":"Amazon Neptune"}],
+    "QuestionText": "Which AWS service is a fully managed data warehouse used for large-scale data analysis and business intelligence?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Databases#ID#405",
+    "CorrectAnswer": "Amazon Neptune",
+    "Explanation": "Amazon Neptune is a fast, reliable, fully managed graph database service.",
+    "Options": [{"S":"Amazon RDS"},{"S":"Amazon Neptune"},{"S":"Amazon DocumentDB"},{"S":"Amazon Aurora"}],
+    "QuestionText": "Which AWS service should be used for applications that need a highly available graph database?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#502",
+    "CorrectAnswer": "Amazon CloudWatch",
+    "Explanation": "CloudWatch is a monitoring and observability service that provides data and actionable insights for AWS resources.",
+    "Options": [{"S":"AWS CloudTrail"},{"S":"Amazon CloudWatch"},{"S":"AWS Config"},{"S":"AWS Trusted Advisor"}],
+    "QuestionText": "Which service monitors your AWS resources and applications, providing metrics and alarms?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#503",
+    "CorrectAnswer": "AWS CloudTrail",
+    "Explanation": "CloudTrail enables governance, compliance, operational auditing, and risk auditing by logging API calls.",
+    "Options": [{"S":"Amazon CloudWatch"},{"S":"AWS CloudTrail"},{"S":"AWS Systems Manager"},{"S":"AWS Artifact"}],
+    "QuestionText": "Which service records AWS API calls and delivers log files for auditing and compliance?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#504",
+    "CorrectAnswer": "AWS Organizations",
+    "Explanation": "AWS Organizations helps you centrally manage and govern your environment as you scale your AWS resources.",
+    "Options": [{"S":"AWS IAM"},{"S":"AWS Organizations"},{"S":"AWS Control Tower"},{"S":"AWS Config"}],
+    "QuestionText": "Which service allows you to centrally manage billing and control access across multiple AWS accounts?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#505",
+    "CorrectAnswer": "AWS Config",
+    "Explanation": "AWS Config provides a detailed inventory of your AWS resources and their current configurations.",
+    "Options": [{"S":"AWS CloudTrail"},{"S":"AWS Trusted Advisor"},{"S":"AWS Config"},{"S":"Amazon Inspector"}],
+    "QuestionText": "Which service enables you to assess, audit, and evaluate the configurations of your AWS resources?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#506",
+    "CorrectAnswer": "AWS Systems Manager",
+    "Explanation": "Systems Manager gives you visibility and control of your infrastructure on AWS.",
+    "Options": [{"S":"AWS Systems Manager"},{"S":"AWS CloudFormation"},{"S":"AWS OpsWorks"},{"S":"AWS Config"}],
+    "QuestionText": "Which service provides a central user interface to view operational data and automate tasks across AWS resources?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#101",
+    "CorrectAnswer": "AWS Cost Explorer",
+    "Explanation": "Cost Explorer has an easy-to-use interface that lets you visualize, understand, and manage your AWS costs and usage over time.",
+    "Options": [{"S":"AWS Budgets"},{"S":"AWS Pricing Calculator"},{"S":"AWS Cost Explorer"},{"S":"AWS Trusted Advisor"}],
+    "QuestionText": "Which tool allows you to visualize and analyze your AWS costs and usage over the last 12 months?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#102",
+    "CorrectAnswer": "AWS Budgets",
+    "Explanation": "AWS Budgets gives you the ability to set custom budgets that alert you when your costs or usage exceed your budgeted amount.",
+    "Options": [{"S":"AWS Cost Explorer"},{"S":"AWS Budgets"},{"S":"AWS Free Tier"},{"S":"AWS Organizations"}],
+    "QuestionText": "Which service allows you to set custom alerts when your costs or resource usage exceed a specified threshold?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#103",
+    "CorrectAnswer": "Enterprise Support",
+    "Explanation": "The Enterprise Support plan includes a dedicated Technical Account Manager (TAM) to provide proactive guidance.",
+    "Options": [{"S":"Developer Support"},{"S":"Business Support"},{"S":"Enterprise Support"},{"S":"Basic Support"}],
+    "QuestionText": "Which AWS Support plan provides access to a dedicated Technical Account Manager (TAM)?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#507",
+    "CorrectAnswer": "AWS Service Health Dashboard",
+    "Explanation": "The Service Health Dashboard displays the general status of AWS services, while the Personal Health Dashboard (AWS Health) shows alerts specific to your account.",
+    "Options": [{"S":"AWS Service Health Dashboard"},{"S":"Amazon CloudWatch"},{"S":"AWS Trusted Advisor"},{"S":"AWS Systems Manager"}],
+    "QuestionText": "Which AWS resource provides a public, real-time status view of all AWS services across all regions?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#508",
+    "CorrectAnswer": "AWS Control Tower",
+    "Explanation": "Control Tower is the easiest way to set up and govern a new, secure, multi-account AWS environment based on best practices.",
+    "Options": [{"S":"AWS Organizations"},{"S":"AWS Control Tower"},{"S":"AWS Launch Wizard"},{"S":"AWS OpsWorks"}],
+    "QuestionText": "A company needs to set up a new multi-account environment with automated governance and 'guardrails.' Which service should they use?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Management#ID#509",
+    "CorrectAnswer": "AWS Compute Optimizer",
+    "Explanation": "Compute Optimizer uses machine learning to recommend optimal AWS resources for your workloads to reduce costs and improve performance.",
+    "Options": [{"S":"AWS Cost Explorer"},{"S":"AWS Compute Optimizer"},{"S":"AWS Budgets"},{"S":"AWS Trusted Advisor"}],
+    "QuestionText": "Which service recommends the best EC2 instance types for your existing workloads by analyzing historical usage data?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#209",
+    "CorrectAnswer": "AWS WAF",
+    "Explanation": "AWS WAF is a web application firewall that helps protect your web applications or APIs against common web exploits like SQL injection.",
+    "Options": [{"S":"AWS Shield"},{"S":"AWS WAF"},{"S":"Security Groups"},{"S":"Network ACLs"}],
+    "QuestionText": "Which AWS service helps protect web applications from common web exploits and bots that may affect availability or security?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Security&Compliance#ID#210",
+    "CorrectAnswer": "AWS Secrets Manager",
+    "Explanation": "Secrets Manager helps you protect secrets needed to access your applications, services, and IT resources, like database passwords and API keys.",
+    "Options": [{"S":"AWS KMS"},{"S":"AWS Secrets Manager"},{"S":"AWS IAM"},{"S":"AWS Artifact"}],
+    "QuestionText": "A developer needs to securely store and automatically rotate database credentials. Which AWS service is best for this?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#037",
+    "CorrectAnswer": "Operational Excellence",
+    "Explanation": "The Operational Excellence pillar focuses on running and monitoring systems and continually improving processes.",
+    "Options": [{"S":"Security"},{"S":"Reliability"},{"S":"Operational Excellence"},{"S":"Sustainability"}],
+    "QuestionText": "Which pillar of the Well-Architected Framework focuses on frequent, small, and reversible changes?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#CloudConcepts#ID#038",
+    "CorrectAnswer": "AWS Professional Services",
+    "Explanation": "AWS Professional Services is a global team of experts that can help you realize your desired business outcomes when using the AWS Cloud.",
+    "Options": [{"S":"AWS Support"},{"S":"AWS Professional Services"},{"S":"AWS Trusted Advisor"},{"S":"AWS Partner Network"}],
+    "QuestionText": "Which group of AWS experts assists customers with specialized advice to accelerate their cloud migration and projects?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Billing&Pricing#ID#104",
+    "CorrectAnswer": "All-upfront Reserved Instance",
+    "Explanation": "In general, the more you pay upfront, the more you save. An 'All-upfront' RI offers the highest discount compared to Partial or No Upfront options.",
+    "Options": [{"S":"No-upfront Reserved Instance"},{"S":"Partial-upfront Reserved Instance"},{"S":"All-upfront Reserved Instance"},{"S":"On-Demand Instance"}],
+    "QuestionText": "Which purchasing option for Amazon EC2 provides the largest discount compared to On-Demand pricing?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#072",
+    "CorrectAnswer": "Amazon VPC Peering",
+    "Explanation": "VPC Peering is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 or IPv6 addresses.",
+    "Options": [{"S":"VPC Peering"},{"S":"AWS Direct Connect"},{"S":"Internet Gateway"},{"S":"NAT Gateway"}],
+    "QuestionText": "Which feature allows two VPCs to communicate with each other as if they were on the same network?"
+  },
+  {
+    "PK": "EXAM#CLF-C02",
+    "SK": "DOMAIN#Networking&ContentDelivery#ID#073",
+    "CorrectAnswer": "NAT Gateway",
+    "Explanation": "A NAT (Network Address Translation) Gateway allows instances in a private subnet to connect to the internet while preventing the internet from initiating a connection with those instances.",
+    "Options": [{"S":"Internet Gateway"},{"S":"Virtual Private Gateway"},{"S":"NAT Gateway"},{"S":"Transit Gateway"}],
+    "QuestionText": "Which component allows an EC2 instance in a private subnet to download software updates from the internet securely?"
+  } ];
+    
+    // Split the 120 questions into chunks of 25
+    for (let i = 0; i < questions.length; i += 25) {
+        const chunk = questions.slice(i, i + 25);
+        const params = {
+            RequestItems: {
+                "Integrity_LMS_Table": chunk.map(q => ({
+                    PutRequest: { Item: q }
+                }))
+            }
+        };
+        await docClient.send(new BatchWriteCommand(params));
+        console.log(`Uploaded batch starting at index ${i}`);
+    }
+    
+    return { statusCode: 200, body: "Seed Successful!" };
+};
+
+

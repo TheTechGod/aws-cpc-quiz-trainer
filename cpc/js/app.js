@@ -1,3 +1,4 @@
+// js/app.js
 /* ========================================================
    AWS CPC QUIZ TRAINER — v8.2 (Fixed & Analytics Enabled)
    Author: Geoffrey D. Metzger | Integrity Programming
@@ -6,10 +7,21 @@
 const el = (id) => document.getElementById(id);
 
 const DOMAIN_MAP = {
+    // Domain 1: Cloud Concepts
     "Cloud Concepts": "Cloud Concepts",
-    "Security and Compliance": "Security and Compliance",
-    "Technology": "Cloud Technology and Services",
-    "Billing and Pricing": "Billing, Pricing, and Support"
+    
+    // Domain 2: Security and Compliance
+    "Security & Compliance": "Security and Compliance",
+    
+    // Domain 3: Cloud Technology and Services (Consolidated)
+    "Compute": "Cloud Technology and Services",
+    "Storage": "Cloud Technology and Services",
+    "Databases": "Cloud Technology and Services",
+    "Networking & Content Delivery": "Cloud Technology and Services",
+    
+    // Domain 4: Billing, Pricing, and Support
+    "Billing & Pricing": "Billing, Pricing, and Support",
+    "Management": "Billing, Pricing, and Support"
 };
 
 // Official CLF-C02 Blueprint Weights for "Practice Mode"
@@ -84,25 +96,21 @@ function updateDomainUI() {
     const container = el("dynamic-domain-options");
     if (!container) return;
 
-    // 1. Get unique domains from the questions we just loaded
-    const officialDomains = Object.keys(DOMAIN_MAP);
-    const uniqueDomains = [...new Set(questions.map(q => q.domain))]
-        .filter(d => officialDomains.includes(d)) 
-        .sort();
+    // 1. Map all question domains to their "Official" names from the DOMAIN_MAP
+    const mappedDomains = questions.map(q => DOMAIN_MAP[q.domain] || q.domain);
+    
+    // 2. Get the unique set of those official names
+    const uniqueOfficialDomains = [...new Set(mappedDomains)].sort();
 
     container.innerHTML = ""; 
 
-    uniqueDomains.forEach(domain => {
-        // 2. Map the DB name (e.g., "Technology") to the Official name
-        // This uses the mapping we discussed, or defaults to the DB name if not found
-        const officialName = DOMAIN_MAP[domain] || domain; 
-
+    uniqueOfficialDomains.forEach(officialName => {
         const label = document.createElement("label");
         label.className = "flex items-center space-x-2 p-2 bg-white rounded shadow-sm hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200 transition";
         
-        // Note: The 'value' stays the DB name so the filter logic still works!
+        // The checkbox 'value' is now the Official Name
         label.innerHTML = `
-            <input type="checkbox" class="domain-check" value="${domain}">
+            <input type="checkbox" class="domain-check" value="${officialName}">
             <span class="text-gray-700">${officialName}</span>
         `;
         container.appendChild(label);
@@ -117,20 +125,23 @@ function updateDomainUI() {
 function startQuiz(isPracticeMode = false) {
     if (isLoading) return alert("Still loading questions...");
 
-    const selectedDomains = Array.from(
+    // 1. Get the official domain names selected by the user
+    const selectedOfficialDomains = Array.from(
         document.querySelectorAll(".domain-check:checked")
     ).map(cb => cb.value);
 
-    // If Practice Mode is pushed, we use the Blueprint scaling
     if (isPracticeMode) {
-        if (selectedDomains.length === 0) return alert("Select at least one domain for Practice Mode!");
+        if (selectedOfficialDomains.length === 0) return alert("Select at least one domain for Practice Mode!");
         
         filteredQuestions = [];
-        selectedDomains.forEach(domain => {
-            const countForDomain = CLF_BLUEPRINT[domain] || 5;
-            const domainPool = questions.filter(q => q.domain === domain)
+        selectedOfficialDomains.forEach(officialDomain => {
+            const countForDomain = CLF_BLUEPRINT[officialDomain] || 5;
+            
+            // Filter questions where their mapped official name matches the selection
+            const domainPool = questions.filter(q => (DOMAIN_MAP[q.domain] || q.domain) === officialDomain)
                 .sort(() => 0.5 - Math.random())
                 .slice(0, countForDomain);
+                
             filteredQuestions.push(...domainPool);
         });
     } else {
@@ -138,8 +149,9 @@ function startQuiz(isPracticeMode = false) {
         const countInput = document.querySelector('input[name="count"]:checked');
         const count = countInput ? parseInt(countInput.value) : 10;
 
-        filteredQuestions = selectedDomains.length > 0
-            ? questions.filter(q => selectedDomains.includes(q.domain))
+        // Map the question's domain to its official name before checking if it's selected
+        filteredQuestions = selectedOfficialDomains.length > 0
+            ? questions.filter(q => selectedOfficialDomains.includes(DOMAIN_MAP[q.domain] || q.domain))
             : [...questions];
 
         filteredQuestions = filteredQuestions
