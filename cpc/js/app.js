@@ -503,9 +503,43 @@ function bindEvents() {
 /* =====================================================
    11. INIT
    ===================================================== */
+window.addEventListener("DOMContentLoaded", async () => {
+  bindEvents();
+  showScreen("setup-screen");
 
+  state.isLoading = true;
+  disableStartButtons(true);
+
+  try {
+    state.questions = await loadQuestionsFromLocalJson();
+    state.source = "local-json";
+    state.isLoading = false;
+
+    updateDomainUI();
+    disableStartButtons(false);
+
+    const status = el("data-source");
+    if (status) {
+      status.textContent = `Loaded from: ${state.source}`;
+    }
+
+    console.log("Loaded local domains:", [...new Set(state.questions.map(q => q.domain))]);
+  } catch (err) {
+    console.error("❌ Failed to load local JSON", err);
+    state.isLoading = false;
+    alert("Couldn't load local questions.json file.");
+  }
+});
+
+
+
+
+
+
+/*
 window.addEventListener("DOMContentLoaded", async () => {
   bindEvents();
   showScreen("setup-screen");
   await loadQuestions();
 });
+*/
