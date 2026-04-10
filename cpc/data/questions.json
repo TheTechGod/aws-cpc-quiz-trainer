@@ -1,0 +1,734 @@
+[
+  {
+    "id": 101,
+    "domain": "Cloud Concepts",
+    "question": "Which AWS Cloud benefit refers to the ability to scale resources up or down based on demand changes?",
+    "answers": ["High Availability", "Agility", "Elasticity", "Reliability"],
+    "correct": [2]
+  },
+  {
+    "id": 102,
+    "domain": "Cloud Concepts",
+    "question": "What is the primary benefit of 'Pay-as-you-go' pricing?",
+    "answers": ["Fixed monthly costs", "Replacing capital expense with variable expense", "Unlimited storage for free", "Reduced latency for all users"],
+    "correct": [1]
+  },
+  {
+    "id": 103,
+    "domain": "Cloud Concepts",
+    "question": "Which of the following is an example of PaaS (Platform as a Service)?",
+    "answers": ["Amazon EC2", "AWS Lambda", "AWS Elastic Beanstalk", "Amazon S3"],
+    "correct": [2]
+  },
+  {
+    "id": 104,
+    "domain": "Cloud Concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework focuses on the ability to prevent and quickly recover from failures?",
+    "answers": ["Operational Excellence", "Security", "Reliability", "Performance Efficiency"],
+    "correct": [2]
+  },
+  {
+    "id": 105,
+    "domain": "Cloud Concepts",
+    "question": "How does AWS help customers achieve 'Economies of Scale'?",
+    "answers": ["By charging more for high-demand services", "By aggregating usage from hundreds of thousands of customers", "By requiring long-term contracts", "By offering free hardware to large enterprises"],
+    "correct": [1]
+  },
+  {
+    "id": 106,
+    "domain": "Cloud Concepts",
+    "question": "Which cloud deployment model is used by a company that runs some resources on-premises and others in the AWS Cloud?",
+    "answers": ["All-in cloud", "Hybrid", "Private", "Community"],
+    "correct": [1]
+  },
+  {
+    "id": 107,
+    "domain": "Cloud Concepts",
+    "question": "What does 'Agility' mean in the context of the AWS Cloud?",
+    "answers": ["The ability to host apps globally", "The speed at which IT resources can be provisioned", "The physical durability of data storage", "The security of the physical data centers"],
+    "correct": [1]
+  },
+  {
+    "id": 108,
+    "domain": "Cloud Concepts",
+    "question": "Which of the following is a core component of the AWS Global Infrastructure?",
+    "answers": ["Internet Gateways", "Edge Locations", "Security Groups", "VPC Peering"],
+    "correct": [1]
+  },
+  {
+    "id": 109,
+    "domain": "Cloud Concepts",
+    "question": "Which AWS benefit allows you to deploy your application to multiple regions around the world in minutes?",
+    "answers": ["Go Global in minutes", "Increased speed and agility", "Stop guessing capacity", "Benefit from massive economies of scale"],
+    "correct": [0]
+  },
+  {
+    "id": 110,
+    "domain": "Cloud Concepts",
+    "question": "In the Shared Responsibility Model, which of the following is AWS responsible for?",
+    "answers": ["Customer Data", "IAM user password policies", "Physical security of data centers", "Encryption of data at rest"],
+    "correct": [2]
+  },
+  {
+    "id": 111,
+    "domain": "Cloud Concepts",
+    "question": "Which pillar of the Well-Architected Framework focuses on running systems to deliver business value and continually improving processes?",
+    "answers": ["Sustainability", "Operational Excellence", "Cost Optimization", "Reliability"],
+    "correct": [1]
+  },
+  {
+    "id": 112,
+    "domain": "Cloud Concepts",
+    "question": "A company wants to migrate to AWS to avoid the large upfront cost of buying hardware. Which benefit does this describe?",
+    "answers": ["Trade variable expense for capital expense", "Trade capital expense for variable expense", "Increased speed", "Massive economies of scale"],
+    "correct": [1]
+  },
+  {
+    "id": 113,
+    "domain": "Cloud Concepts",
+    "question": "What is an AWS Availability Zone (AZ)?",
+    "answers": ["A single data center", "One or more discrete data centers with redundant power and networking", "A collection of AWS Regions", "A location where content is cached for low latency"],
+    "correct": [1]
+  },
+  {
+    "id": 114,
+    "domain": "Cloud Concepts",
+    "question": "Which service model gives the customer the most control over the underlying operating system and hardware?",
+    "answers": ["SaaS", "PaaS", "IaaS", "Serverless"],
+    "correct": [2]
+  },
+  {
+    "id": 115,
+    "domain": "Cloud Concepts",
+    "question": "What does the 'S' in SaaS stand for?",
+    "answers": ["System", "Security", "Service", "Storage"],
+    "correct": [2]
+  },
+  {
+    "id": 116,
+    "domain": "Cloud Concepts",
+    "question": "Which of the following is a benefit of moving to the AWS Cloud?",
+    "answers": ["Manual software patching", "High latency for global users", "Stop spending money running and maintaining data centers", "Increased CapEx"],
+    "correct": [2]
+  },
+  {
+    "id": 117,
+    "domain": "Cloud Concepts",
+    "question": "Which AWS Global Infrastructure component consists of one or more Availability Zones?",
+    "answers": ["Edge Location", "Region", "Local Zone", "Direct Connect"],
+    "correct": [1]
+  },
+  {
+    "id": 118,
+    "domain": "Cloud Concepts",
+    "question": "Which AWS service is an example of a Serverless compute service?",
+    "answers": ["Amazon EC2", "AWS Lambda", "Amazon RDS", "Amazon Lightsail"],
+    "correct": [1]
+  },
+  {
+    "id": 119,
+    "domain": "Cloud Concepts",
+    "question": "What is the term for the ability of a system to grow in proportion to the amount of work it is given?",
+    "answers": ["Scalability", "Reliability", "Availability", "Durability"],
+    "correct": [0]
+  },
+  {
+    "id": 120,
+    "domain": "Cloud Concepts",
+    "question": "The 'Least Privilege' principle is associated with which Well-Architected Framework pillar?",
+    "answers": ["Cost Optimization", "Performance Efficiency", "Security", "Operational Excellence"],
+    "correct": [2]
+  },
+  {
+    "id": 121,
+    "domain": "Cloud Concepts",
+    "question": "Which AWS Cloud benefit ensures that you don't have to pay for idle resources?",
+    "answers": ["Reliability", "Scalability", "Pay-as-you-go", "Durability"],
+    "correct": [2]
+  },
+  {
+    "id": 122,
+    "domain": "Cloud Concepts",
+    "question": "What is the main advantage of using Edge Locations?",
+    "answers": ["Long-term data archival", "Reducing latency for end users", "Running heavy database workloads", "Managing encryption keys"],
+    "correct": [1]
+  },
+  {
+    "id": 123,
+    "domain": "Cloud Concepts",
+    "question": "Which AWS service helps customers design and build a Well-Architected environment?",
+    "answers": ["AWS Trusted Advisor", "AWS Well-Architected Tool", "AWS Config", "AWS Artifact"],
+    "correct": [1]
+  },
+  {
+    "id": 124,
+    "domain": "Cloud Concepts",
+    "question": "In the Cloud, what is the term used to describe a system that can endure a component failure and still remain functional?",
+    "answers": ["Elasticity", "Fault Tolerance", "Agility", "Scalability"],
+    "correct": [1]
+  },
+
+  
+
+
+
+
+
+
+
+
+  {
+    "id": 201,
+    "domain": "Security and Compliance",
+    "question": "Which AWS service is used to manage and store encryption keys?",
+    "answers": ["AWS Shield", "AWS CloudTrail", "AWS KMS", "AWS Secrets Manager"],
+    "correct": [2]
+  },
+  {
+    "id": 202,
+    "domain": "Security and Compliance",
+    "question": "Under the Shared Responsibility Model, who is responsible for managing the guest operating system on an Amazon EC2 instance?",
+    "answers": ["AWS", "The Customer", "Both AWS and the Customer", "The Hardware Provider"],
+    "correct": [1]
+  },
+  {
+    "id": 203,
+    "domain": "Security and Compliance",
+    "question": "Which service provides a central place to manage permissions for multiple AWS accounts?",
+    "answers": ["AWS Organizations", "AWS IAM", "AWS Control Tower", "AWS Config"],
+    "correct": [0]
+  },
+  {
+    "id": 204,
+    "domain": "Security and Compliance",
+    "question": "What is the primary function of AWS WAF?",
+    "answers": ["Protecting against DDoS attacks at the network layer", "Filtering malicious web traffic based on IP or headers", "Managing SSH keys", "Encrypting S3 buckets"],
+    "correct": [1]
+  },
+  {
+    "id": 205,
+    "domain": "Security and Compliance",
+    "question": "Which AWS service automatically discovers and protects sensitive data, such as PII, in Amazon S3?",
+    "answers": ["AWS Shield", "Amazon Macie", "Amazon GuardDuty", "AWS Inspector"],
+    "correct": [1]
+  },
+  {
+    "id": 206,
+    "domain": "Security and Compliance",
+    "question": "Which feature of AWS IAM allows you to add an extra layer of security by requiring a code from a physical or virtual device?",
+    "answers": ["Access Keys", "MFA (Multi-Factor Authentication)", "Password Policy", "IAM Groups"],
+    "correct": [1]
+  },
+  {
+    "id": 207,
+    "domain": "Security and Compliance",
+    "question": "A company needs a report of their AWS compliance with regulatory standards like PCI DSS. Where can they find this?",
+    "answers": ["AWS Trusted Advisor", "AWS Artifact", "AWS Config", "Amazon Inspector"],
+    "correct": [1]
+  },
+  {
+    "id": 208,
+    "domain": "Security and Compliance",
+    "question": "Which service uses machine learning to monitor for malicious activity and unauthorized behavior within an AWS account?",
+    "answers": ["AWS CloudTrail", "Amazon GuardDuty", "AWS Shield", "AWS WAF"],
+    "correct": [1]
+  },
+  {
+    "id": 209,
+    "domain": "Security and Compliance",
+    "question": "Which AWS responsibility is defined as 'Security OF the Cloud'?",
+    "answers": ["Configuring Security Groups", "Patching application code", "Physical security of the infrastructure", "Managing IAM users"],
+    "correct": [2]
+  },
+  {
+    "id": 210,
+    "domain": "Security and Compliance",
+    "question": "What does an IAM Policy define?",
+    "answers": ["A collection of users", "Permissions to allow or deny access to AWS resources", "The physical region of a user", "The billing threshold for an account"],
+    "correct": [1]
+  },
+  {
+    "id": 211,
+    "domain": "Security and Compliance",
+    "question": "Which service allows you to inspect EC2 instances for common vulnerabilities or deviations from best practices?",
+    "answers": ["AWS Shield", "Amazon Inspector", "AWS CloudTrail", "Amazon Macie"],
+    "correct": [1]
+  },
+  {
+    "id": 212,
+    "domain": "Security and Compliance",
+    "question": "Which AWS service provides free, automatic protection against common DDoS attacks like SYN floods?",
+    "answers": ["AWS WAF", "AWS Shield Standard", "AWS Shield Advanced", "AWS Network Firewall"],
+    "correct": [1]
+  },
+  {
+    "id": 213,
+    "domain": "Security and Compliance",
+    "question": "What is the best practice for protecting the AWS 'Root' user account?",
+    "answers": ["Share the credentials with the IT team", "Delete the account immediately", "Enable MFA and stop using it for daily tasks", "Store the password in a text file on S3"],
+    "correct": [2]
+  },
+  {
+    "id": 214,
+    "domain": "Security and Compliance",
+    "question": "Which IAM entity is intended to be 'assumed' by a service or a federated user rather than being a long-term credential?",
+    "answers": ["IAM Group", "IAM Role", "IAM User", "IAM Access Key"],
+    "correct": [1]
+  },
+  {
+    "id": 215,
+    "domain": "Security and Compliance",
+    "question": "Which service records API calls and account activity for auditing purposes?",
+    "answers": ["Amazon CloudWatch", "AWS CloudTrail", "AWS Config", "AWS Trusted Advisor"],
+    "correct": [1]
+  },
+  {
+    "id": 216,
+    "domain": "Security and Compliance",
+    "question": "Which AWS tool provides a 'Security Hub' to aggregate security alerts from multiple AWS services?",
+    "answers": ["AWS Security Hub", "AWS Control Tower", "AWS Artifact", "AWS Shield"],
+    "correct": [0]
+  },
+  {
+    "id": 217,
+    "domain": "Security and Compliance",
+    "question": "Which component acts as a virtual firewall for an EC2 instance to control inbound and outbound traffic?",
+    "answers": ["Network ACL", "Security Group", "IAM Policy", "Internet Gateway"],
+    "correct": [1]
+  },
+  {
+    "id": 218,
+    "domain": "Security and Compliance",
+    "question": "What is the function of the AWS Key Management Service (KMS)?",
+    "answers": ["To manage SSH keys for EC2", "To create and control keys used to encrypt data", "To store passwords for database users", "To manage SSL certificates for websites"],
+    "correct": [1]
+  },
+  {
+    "id": 219,
+    "domain": "Security and Compliance",
+    "question": "Which service helps you rotate, manage, and retrieve database credentials and API keys throughout their lifecycle?",
+    "answers": ["AWS KMS", "AWS Secrets Manager", "AWS Systems Manager", "AWS Config"],
+    "correct": [1]
+  },
+  {
+    "id": 220,
+    "domain": "Security and Compliance",
+    "question": "Under the Shared Responsibility Model, which of the following is an AWS responsibility for managed services like RDS?",
+    "answers": ["Managing firewall rules", "Patching the underlying OS and database engine", "User password complexity", "Application-level optimization"],
+    "correct": [1]
+  },
+  {
+    "id": 221,
+    "domain": "Security and Compliance",
+    "question": "Which AWS document provides a list of all AWS users and the status of their various credentials, such as passwords and access keys?",
+    "answers": ["IAM Policy", "IAM Credential Report", "CloudTrail Log", "AWS Artifact"],
+    "correct": [1]
+  },
+  {
+    "id": 222,
+    "domain": "Security and Compliance",
+    "question": "What is the purpose of an 'IAM Group'?",
+    "answers": ["To group AWS resources by region", "To manage permissions for a collection of users", "To define the billing structure of an organization", "To speed up EC2 instance performance"],
+    "correct": [1]
+  },
+  {
+    "id": 223,
+    "domain": "Security and Compliance",
+    "question": "Which AWS service provides on-demand downloads of AWS security and compliance reports?",
+    "answers": ["AWS CloudTrail", "AWS Trusted Advisor", "AWS Artifact", "AWS Config"],
+    "correct": [2]
+  },
+  {
+    "id": 224,
+    "domain": "Security and Compliance",
+    "question": "Which of the following is a managed DDoS protection service?",
+    "answers": ["AWS Shield", "Amazon Inspector", "AWS WAF", "Amazon Macie"],
+    "correct": [0]
+  },
+  {
+    "id": 225,
+    "domain": "Security and Compliance",
+    "question": "Which service can be used to continuously monitor and record AWS resource configurations for compliance auditing?",
+    "answers": ["AWS CloudTrail", "AWS Config", "Amazon CloudWatch", "AWS Artifact"],
+    "correct": [1]
+  },
+  {
+    "id": 226,
+    "domain": "Security and Compliance",
+    "question": "If you want to grant a Lambda function access to an S3 bucket, which IAM entity should you use?",
+    "answers": ["IAM User", "IAM Group", "IAM Role", "IAM Access Key"],
+    "correct": [2]
+  },
+  {
+    "id": 227,
+    "domain": "Security and Compliance",
+    "question": "Which AWS service provides certificates for SSL/TLS to be used with AWS services like Elastic Load Balancing?",
+    "answers": ["AWS KMS", "AWS Secrets Manager", "AWS Certificate Manager (ACM)", "AWS Directory Service"],
+    "correct": [2]
+  },
+  {
+    "id": 228,
+    "domain": "Security and Compliance",
+    "question": "Which security principle suggests giving users only the permissions they need to perform their job?",
+    "answers": ["High Availability", "Least Privilege", "Root Access", "Shared Responsibility"],
+    "correct": [1]
+  },
+  {
+    "id": 229,
+    "domain": "Security and Compliance",
+    "question": "Which service helps protect web applications from common web exploits that could affect application availability?",
+    "answers": ["AWS Shield Standard", "AWS WAF", "Amazon GuardDuty", "AWS Secrets Manager"],
+    "correct": [1]
+  },
+  {
+    "id": 230,
+    "domain": "Security and Compliance",
+    "question": "Who is responsible for the encryption of data at rest within an Amazon S3 bucket?",
+    "answers": ["AWS exclusively", "The Customer", "The Internet Service Provider", "The Hardware Manufacturer"],
+    "correct": [1]
+  },
+
+
+
+
+
+
+
+
+
+
+  {
+    "id": 301,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service provides highly durable object storage for data such as images, videos, and logs?",
+    "answers": ["Amazon EBS", "Amazon EFS", "Amazon S3", "Amazon RDS"],
+    "correct": [2]
+  },
+  {
+    "id": 302,
+    "domain": "Cloud Technology and Services",
+    "question": "A developer needs to run a short-lived snippet of code in response to an S3 upload without managing a server. Which service should they use?",
+    "answers": ["Amazon EC2", "AWS Lambda", "AWS Fargate", "Amazon Lightsail"],
+    "correct": [1]
+  },
+  {
+    "id": 303,
+    "domain": "Cloud Technology and Services",
+    "question": "Which Amazon RDS feature allows for high availability and automatic failover by maintaining a synchronous standby replica in a different AZ?",
+    "answers": ["Read Replicas", "Multi-AZ Deployment", "Amazon Aurora", "Database Snapshots"],
+    "correct": [1]
+  },
+  {
+    "id": 304,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service acts as a content delivery network (CDN) to deliver data to global users with low latency?",
+    "answers": ["Amazon Route 53", "AWS Direct Connect", "Amazon CloudFront", "AWS Global Accelerator"],
+    "correct": [2]
+  },
+  {
+    "id": 305,
+    "domain": "Cloud Technology and Services",
+    "question": "Which compute service is specifically designed for running Docker containers without managing the underlying infrastructure?",
+    "answers": ["Amazon EC2", "AWS Fargate", "AWS Elastic Beanstalk", "Amazon SageMaker"],
+    "correct": [1]
+  },
+  {
+    "id": 306,
+    "domain": "Cloud Technology and Services",
+    "question": "Which database service is a fully managed NoSQL database that provides single-digit millisecond latency at any scale?",
+    "answers": ["Amazon RDS", "Amazon Redshift", "Amazon DynamoDB", "Amazon ElastiCache"],
+    "correct": [2]
+  },
+  {
+    "id": 307,
+    "domain": "Cloud Technology and Services",
+    "question": "A company wants a private, dedicated network connection between their on-premises data center and AWS. Which service should they use?",
+    "answers": ["AWS Site-to-Site VPN", "AWS Direct Connect", "Amazon VPC", "AWS Client VPN"],
+    "correct": [1]
+  },
+  {
+    "id": 308,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service allows you to provision a logically isolated section of the AWS Cloud where you can launch AWS resources?",
+    "answers": ["Amazon Route 53", "Amazon VPC", "AWS CloudFormation", "AWS Config"],
+    "correct": [1]
+  },
+  {
+    "id": 309,
+    "domain": "Cloud Technology and Services",
+    "question": "What is the primary use case for Amazon Redshift?",
+    "answers": ["Relational database for OLTP", "NoSQL database for high-speed transactions", "Data warehousing and complex analytics", "Storing unstructured media files"],
+    "correct": [2]
+  },
+  {
+    "id": 310,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service is used to automate the process of deploying and scaling web applications?",
+    "answers": ["AWS CloudFormation", "AWS Elastic Beanstalk", "AWS OpsWorks", "AWS Lambda"],
+    "correct": [1]
+  },
+  {
+    "id": 311,
+    "domain": "Cloud Technology and Services",
+    "question": "Which Amazon S3 storage class is best for data that is rarely accessed but requires millisecond retrieval?",
+    "answers": ["S3 Standard", "S3 Intelligent-Tiering", "S3 Standard-IA", "S3 Glacier Deep Archive"],
+    "correct": [2]
+  },
+  {
+    "id": 312,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service provides a managed message broker for Apache ActiveMQ or RabbitMQ?",
+    "answers": ["Amazon SQS", "Amazon SNS", "Amazon MQ", "AWS Step Functions"],
+    "correct": [2]
+  },
+  {
+    "id": 313,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service is a highly available and scalable Domain Name System (DNS) web service?",
+    "answers": ["Amazon CloudFront", "AWS Direct Connect", "Amazon Route 53", "AWS App Runner"],
+    "correct": [2]
+  },
+  {
+    "id": 314,
+    "domain": "Cloud Technology and Services",
+    "question": "What is the function of an Amazon EC2 Auto Scaling group?",
+    "answers": ["Distributing incoming traffic across multiple instances", "Adding or removing instances based on demand", "Securing instances with firewall rules", "Storing persistent data for instances"],
+    "correct": [1]
+  },
+  {
+    "id": 315,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service allows you to run Kubernetes on AWS without needing to install or operate your own Kubernetes control plane?",
+    "answers": ["Amazon ECS", "Amazon EKS", "AWS Fargate", "AWS Lambda"],
+    "correct": [1]
+  },
+  {
+    "id": 316,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service is used to manage and orchestrate microservices through visual workflows?",
+    "answers": ["AWS Glue", "AWS Step Functions", "Amazon SNS", "AWS Batch"],
+    "correct": [1]
+  },
+  {
+    "id": 317,
+    "domain": "Cloud Technology and Services",
+    "question": "Which storage service provides a scalable file system for use with both AWS Cloud services and on-premises resources via the NFS protocol?",
+    "answers": ["Amazon EBS", "Amazon S3", "Amazon EFS", "Amazon FSx"],
+    "correct": [2]
+  },
+  {
+    "id": 318,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service enables you to assess, audit, and evaluate the configurations of your AWS resources?",
+    "answers": ["AWS CloudTrail", "AWS Config", "Amazon CloudWatch", "AWS Trusted Advisor"],
+    "correct": [1]
+  },
+  {
+    "id": 319,
+    "domain": "Cloud Technology and Services",
+    "question": "What is the primary purpose of an Elastic Load Balancer (ELB)?",
+    "answers": ["Scaling the number of EC2 instances", "Distributing incoming application traffic across multiple targets", "Caching content for faster delivery", "Providing a fixed IP address for an instance"],
+    "correct": [1]
+  },
+  {
+    "id": 320,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service is a web service that helps you model and set up your AWS resources using a template file (Infrastructure as Code)?",
+    "answers": ["AWS CloudFormation", "AWS Elastic Beanstalk", "AWS Systems Manager", "AWS CodeDeploy"],
+    "correct": [0]
+  },
+  {
+    "id": 321,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service allows users to discover and subscribe to thousands of software listings from independent software vendors?",
+    "answers": ["AWS Artifact", "AWS Marketplace", "AWS Service Catalog", "AWS App2Container"],
+    "correct": [1]
+  },
+  {
+    "id": 322,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service provides an interactive query service that makes it easy to analyze data in Amazon S3 using standard SQL?",
+    "answers": ["Amazon Redshift", "Amazon Athena", "Amazon EMR", "AWS Glue"],
+    "correct": [1]
+  },
+  {
+    "id": 323,
+    "domain": "Cloud Technology and Services",
+    "question": "What is the main benefit of using Amazon CloudWatch?",
+    "answers": ["Automating resource deployment", "Monitoring resources and applications in real-time", "Storing long-term backup data", "Encrypting database volumes"],
+    "correct": [1]
+  },
+  {
+    "id": 324,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service is a fully managed extract, transform, and load (ETL) service?",
+    "answers": ["AWS Batch", "AWS Glue", "Amazon Athena", "Amazon Quicksight"],
+    "correct": [1]
+  },
+  {
+    "id": 325,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service provides a way to create and manage virtual private clouds that connect to your on-premises data centers via a VPN or Direct Connect?",
+    "answers": ["AWS Transit Gateway", "AWS Client VPN", "AWS Direct Connect", "Amazon VPC"],
+    "correct": [3]
+  },
+  {
+    "id": 326,
+    "domain": "Cloud Technology and Services",
+    "question": "Which Amazon EC2 instance type is best suited for workloads that require high memory for large datasets?",
+    "answers": ["Compute Optimized", "General Purpose", "Memory Optimized", "Storage Optimized"],
+    "correct": [2]
+  },
+  {
+    "id": 327,
+    "domain": "Cloud Technology and Services",
+    "question": "What is Amazon EBS (Elastic Block Store)?",
+    "answers": ["An object storage service", "Block-level storage volumes for use with EC2", "A network file system for multiple instances", "A serverless compute engine"],
+    "correct": [1]
+  },
+  {
+    "id": 328,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service is used to create and manage a searchable inventory of your AWS resources?",
+    "answers": ["AWS CloudTrail", "AWS Config", "AWS Systems Manager", "Amazon Inspector"],
+    "correct": [1]
+  },
+  {
+    "id": 329,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service is a managed relational database engine that is compatible with MySQL and PostgreSQL and is up to 5 times faster?",
+    "answers": ["Amazon DynamoDB", "Amazon Redshift", "Amazon Aurora", "Amazon Neptune"],
+    "correct": [2]
+  },
+  {
+    "id": 330,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service would you use to send automated emails or SMS notifications to your customers?",
+    "answers": ["Amazon SQS", "Amazon SNS", "Amazon MQ", "AWS Step Functions"],
+    "correct": [1]
+  },
+  {
+    "id": 331,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS tool is used to estimate the cost of moving an on-premises workload to AWS?",
+    "answers": ["AWS Cost Explorer", "AWS Pricing Calculator", "AWS Budgets", "AWS Trusted Advisor"],
+    "correct": [1]
+  },
+  {
+    "id": 332,
+    "domain": "Cloud Technology and Services",
+    "question": "What is the primary purpose of Amazon Kinesis?",
+    "answers": ["Processing large-scale data warehouses", "Collecting and processing real-time streaming data", "Storing encrypted passwords", "Launching virtual desktops"],
+    "correct": [1]
+  },
+  {
+    "id": 333,
+    "domain": "Cloud Technology and Services",
+    "question": "Which service provides a simple way to build, train, and deploy machine learning models quickly?",
+    "answers": ["Amazon Rekognition", "Amazon SageMaker", "Amazon Polly", "Amazon Lex"],
+    "correct": [1]
+  },
+  {
+    "id": 334,
+    "domain": "Cloud Technology and Services",
+    "question": "Which AWS service allows you to run code at Edge Locations to improve performance for your end users?",
+    "answers": ["AWS Lambda@Edge", "Amazon CloudFront", "AWS Global Accelerator", "Amazon Route 53"],
+    "correct": [0]
+  },
+
+
+
+
+
+
+
+
+
+
+  {
+    "id": 401,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which AWS Support plan includes a dedicated Technical Account Manager (TAM)?",
+    "answers": ["Developer", "Business", "Enterprise On-Ramp", "Enterprise"],
+    "correct": [3]
+  },
+  {
+    "id": 402,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which pricing model allows you to use spare AWS capacity at a significant discount, but can be reclaimed by AWS with a 2-minute notice?",
+    "answers": ["On-Demand", "Reserved Instances", "Spot Instances", "Dedicated Hosts"],
+    "correct": [2]
+  },
+  {
+    "id": 403,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which tool allows you to consolidate billing for multiple AWS accounts under a single paying account?",
+    "answers": ["AWS Budgets", "AWS Organizations", "AWS Cost Explorer", "AWS Trusted Advisor"],
+    "correct": [1]
+  },
+  {
+    "id": 404,
+    "domain": "Billing, Pricing, and Support",
+    "question": "A company wants to receive an alert when their AWS costs exceed a specific threshold. Which service should they use?",
+    "answers": ["AWS Budgets", "AWS Cost Explorer", "AWS Pricing Calculator", "AWS Trusted Advisor"],
+    "correct": [0]
+  },
+  {
+    "id": 405,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which of the following is a free AWS tool that provides recommendations for cost optimization, security, and performance?",
+    "answers": ["AWS Config", "AWS Trusted Advisor", "AWS Inspector", "AWS Shield"],
+    "correct": [1]
+  },
+  {
+    "id": 406,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which AWS pricing model is best for a long-term, predictable workload with a 1-year or 3-year commitment?",
+    "answers": ["On-Demand", "Spot Instances", "Reserved Instances", "Pay-as-you-go"],
+    "correct": [2]
+  },
+  {
+    "id": 407,
+    "domain": "Billing, Pricing, and Support",
+    "question": "What is the primary factor that determines the cost of using Amazon S3?",
+    "answers": ["Number of IAM users", "Storage class and amount of data stored", "Number of VPCs", "The type of EC2 instance connected to it"],
+    "correct": [1]
+  },
+  {
+    "id": 408,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which AWS Support plan provides 24/7 access to Cloud Support Engineers via email, chat, and phone, with a 1-hour response time for production system downs?",
+    "answers": ["Basic", "Developer", "Business", "Enterprise"],
+    "correct": [2]
+  },
+  {
+    "id": 409,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which service helps you estimate your monthly AWS bill based on the resources you plan to use?",
+    "answers": ["AWS Cost Explorer", "AWS Pricing Calculator", "AWS Budgets", "AWS Artifact"],
+    "correct": [1]
+  },
+  {
+    "id": 410,
+    "domain": "Billing, Pricing, and Support",
+    "question": "In AWS, what does 'Consolidated Billing' provide?",
+    "answers": ["A discount on all services automatically", "One bill for multiple accounts and the ability to share volume discounts", "The ability to pay for AWS with cryptocurrency", "Free support for all accounts"],
+    "correct": [1]
+  },
+  {
+    "id": 411,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which AWS service is provided for free to help you manage your billing and costs?",
+    "answers": ["AWS Cost Explorer", "AWS Support Enterprise Plan", "AWS Managed Services", "AWS Premium Support"],
+    "correct": [0]
+  },
+  {
+    "id": 412,
+    "domain": "Billing, Pricing, and Support",
+    "question": "Which of the following is NOT a fundamental cost driver for AWS?",
+    "answers": ["Compute", "Storage", "Inbound Data Transfer", "Outbound Data Transfer"],
+    "correct": [2]
+  }
+  ]
+    
+
