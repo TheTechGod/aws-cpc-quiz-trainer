@@ -6,6 +6,9 @@
     <title>AWS CPC Quiz Trainer | Integrity Programming</title>
 
     <link rel="stylesheet" href="../css/swag.css" />
+
+    <!-- 🔥 CHART.JS (REQUIRED) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -80,7 +83,8 @@
         <ul id="options" class="option-list"></ul>
 
         <div class="btn-group mt-3">
-            <button id="next-btn" class="blue-btn" disabled>
+            <!-- 🔥 switched to primary-btn for consistency -->
+            <button id="next-btn" class="primary-btn" disabled>
                 Next
             </button>
         </div>
@@ -91,6 +95,9 @@
         <h2>Results</h2>
 
         <div id="score-summary" class="score-display"></div>
+
+        <!-- 🔥 CHART ADDED HERE -->
+        <canvas id="domainChart" height="200"></canvas>
 
         <div class="btn-group mt-4">
             <button id="review-btn" class="green-btn">
