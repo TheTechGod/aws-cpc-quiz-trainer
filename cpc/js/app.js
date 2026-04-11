@@ -215,8 +215,7 @@ async function loadQuestions() {
    ===================================================== */
 
 function disableStartButtons(disabled) {
-  if (el("start-btn")) el("start-btn").disabled = disabled;
-  if (el("practice-btn")) el("practice-btn").disabled = disabled;
+  if (el("start-btn")) el("start-btn").disabled = disabled;\git status
 }
 
 function updateDomainUI() {
@@ -284,14 +283,19 @@ function startQuiz(isPracticeMode = false) {
     state.filteredQuestions = shuffle(practiceQuestions);
   } else {
     const countInput = document.querySelector('input[name="count"]:checked');
-    const count = countInput ? parseInt(countInput.value, 10) : 10;
+    const countValue = countInput ? countInput.value : "10";
 
     const pool =
       selectedDomains.length > 0
         ? state.questions.filter(q => selectedDomains.includes(q.domain))
         : [...state.questions];
 
+    if (countValue === "all") {
+    state.filteredQuestions = shuffle(pool); // NO LIMIT
+    } else {
+    const count = parseInt(countValue, 10);
     state.filteredQuestions = shuffle(pool).slice(0, count);
+}
   }
 
   if (!state.filteredQuestions.length) {
@@ -303,6 +307,7 @@ function startQuiz(isPracticeMode = false) {
   startTimer();
   showScreen("quiz-screen");
   showQuestion();
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 /* =====================================================
@@ -494,9 +499,6 @@ function bindEvents() {
     el("start-btn").onclick = () => startQuiz(false);
   }
 
-  if (el("practice-btn")) {
-    el("practice-btn").onclick = () => startQuiz(true);
-  }
 
   if (el("next-btn")) {
     el("next-btn").onclick = handleNextQuestion;
