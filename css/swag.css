@@ -57,16 +57,28 @@ a {
 
 /* ================= CARD ================= */
 .card {
-  background: var(--card-bg);
+  background: rgba(30, 41, 59, 0.75); /* semi-transparent dark */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Safari support */
+
   border-radius: 16px;
   padding: 28px;
   margin-bottom: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  transition: 0.2s ease;
+
+  border: 1px solid rgba(255, 255, 255, 0.08); /* subtle glass edge */
+
+  box-shadow: 
+    0 10px 25px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.05); /* subtle inner glow */
+
+  transition: all 0.25s ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 15px 35px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .hidden {
@@ -186,7 +198,7 @@ button:disabled {
 }
 
 #options li:hover {
-  background: #e0e7ff;
+  background: #000000;
 }
 
 #options li.selected {
@@ -204,20 +216,22 @@ button:disabled {
 
 /* ================= REVIEW ================= */
 .option-review {
-  padding: 10px;
+  padding: 10px 14px;
+  margin: 6px 0;
   border-radius: 8px;
-  margin-bottom: 6px;
+  border: 1px solid transparent;
 }
 
+/* 🟢 CORRECT */
 .option-review.correct {
-  background: #d1fae5;
-  border-left: 4px solid var(--green);
+  border-left: 4px solid #22c55e;
 }
 
+/* 🔴 WRONG */
 .option-review.wrong {
-  background: #fee2e2;
-  border-left: 4px solid var(--red);
+  border-left: 4px solid #ef4444;
 }
+
 
 /* ================= DOMAIN FILTER ================= */
 .filter-options {

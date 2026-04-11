@@ -58,14 +58,27 @@ async function loadQuestions() {
   const res = await fetch(CONFIG.JSON_PATH);
   const data = await res.json();
 
-  state.questions = data.map((q, i) => ({
+  state.questions = data.map((q, i) => {
+  const options = q.options || q.answers || [];
+
+  // Normalize correct answers safely
+  let correctIndexes = [];
+
+  if (Array.isArray(q.correct)) {
+    correctIndexes = q.correct;
+  } else if (typeof q.correct === "number") {
+    correctIndexes = [q.correct];
+  }
+
+  return {
     id: q.id ?? i + 1,
     question: q.question,
-    options: q.options || q.answers || [],
-    answer: (q.correct || []).map(i => (q.options || [])[i]),
+    options,
+    answer: correctIndexes.map(idx => options[idx]?.trim()),
     explanation: q.explanation || "",
     domain: q.domain || "General"
-  }));
+  };
+});
 
   state.isLoading = false;
   renderDomains();
@@ -178,9 +191,13 @@ function nextQuestion() {
   const q = state.filteredQuestions[state.currentQuestionIndex];
   const a = state.userAnswers[state.currentQuestionIndex];
 
-  const correct =
-    q.answer.length === a.selected.size &&
-    q.answer.every(x => a.selected.has(x));
+  const selected = [...a.selected].map(x => x.trim().toLowerCase());
+const correctAnswers = q.answer.map(x => x.trim().toLowerCase());
+
+const correct =
+  selected.length === correctAnswers.length &&
+  correctAnswers.every(ans => selected.includes(ans));
+  
 
   if (correct) state.score++;
 
