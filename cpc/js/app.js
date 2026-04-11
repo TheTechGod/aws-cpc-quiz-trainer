@@ -216,6 +216,7 @@ async function loadQuestions() {
 
 function disableStartButtons(disabled) {
   if (el("start-btn")) el("start-btn").disabled = disabled;
+  if (el("test-btn")) el("test-btn").disabled = disabled;
 }
 
 function updateDomainUI() {
@@ -413,6 +414,69 @@ function handleNextQuestion() {
 }
 
 /* =====================================================
+    TEST MODE
+   ===================================================== */
+
+function startTestMode() {
+  if (state.isLoading) {
+    alert("Still loading questions...");
+    return;
+  }
+
+  if (!state.questions.length) {
+    alert("No questions available.");
+    return;
+  }
+
+  resetQuizState();
+
+  const TEST_DISTRIBUTION = {
+    "Cloud Concepts": 12,
+    "Security and Compliance": 15,
+    "Cloud Technology and Services": 17,
+    "Billing, Pricing, and Support": 6
+  };
+
+  let testQuestions = [];
+
+  Object.entries(TEST_DISTRIBUTION).forEach(([domain, count]) => {
+    const pool = state.questions.filter(q => q.domain === domain);
+
+    if (pool.length === 0) {
+      console.warn(`No questions for domain: ${domain}`);
+      return;
+    }
+
+      let selected = [];
+
+      if (pool.length >= count) {
+        selected = shuffle(pool).slice(0, count);
+      } else {
+        // Not enough questions → reuse pool
+        const expanded = [];
+        while (expanded.length < count) {
+          expanded.push(...shuffle(pool));
+        }
+        selected = expanded.slice(0, count);
+      }
+
+testQuestions.push(...selected);
+  });
+
+  state.filteredQuestions = shuffle(testQuestions);
+
+  if (state.filteredQuestions.length < 50) {
+    console.warn("Not enough questions for full test");
+  }
+
+  initializeUserAnswers();
+  startTimer();
+  showScreen("quiz-screen");
+  showQuestion();
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+/* =====================================================
    8. TIMER
    ===================================================== */
 
@@ -514,6 +578,10 @@ function bindEvents() {
       showScreen("setup-screen");
     };
   }
+
+  if (el("test-btn")) {
+  el("test-btn").onclick = startTestMode;
+}
 }
 
 /* =====================================================
