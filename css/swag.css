@@ -1,11 +1,8 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER v6.0 — Unified + Dark Mode Edition
-   Author: Geoffrey D. Metzger | Integrity Programming
+   AWS CPC QUIZ TRAINER — CLEAN FINAL UI SYSTEM
    ======================================================== */
 
-/* ========================================================
-   ROOT COLORS
-   ======================================================== */
+/* ================= ROOT THEME ================= */
 :root {
   --blue: #2563eb;
   --blue-dark: #1d4ed8;
@@ -14,690 +11,227 @@
   --gray-text: #374151;
   --gray-light: #f9fafb;
   --gray-border: #e5e7eb;
-  --green: #059669;
-  --green-light: #bbf7d0;
+  --green: #10b981;
+  --green-light: #d1fae5;
   --red: #ef4444;
-  --red-light: #fecaca;
+  --red-light: #fee2e2;
   --amber: #f59e0b;
-  --amber-dark: #d97706;
-  --card-bg: #fff;
+  --card-bg: #ffffff;
 }
 
-/* 🌙 Dark Mode */
+/* 🌙 DARK MODE */
 @media (prefers-color-scheme: dark) {
   :root {
-    --blue: #3b82f6;
-    --blue-dark: #2563eb;
     --gray-bg: #0f172a;
     --gray-ink: #f8fafc;
-    --gray-text: #e2e8f0;
+    --gray-text: #cbd5f5;
     --gray-light: #1e293b;
     --gray-border: #334155;
-    --green: #10b981;
-    --green-light: #064e3b;
-    --red: #f87171;
-    --red-light: #7f1d1d;
-    --amber: #fbbf24;
-    --amber-dark: #b45309;
     --card-bg: #1e293b;
   }
 }
 
-/* ========================================================
-   BASE
-   ======================================================== */
+/* ================= BASE ================= */
 * { box-sizing: border-box; }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, sans-serif;
   background: var(--gray-bg);
   color: var(--gray-ink);
   margin: 0;
-  padding: 2rem;
+  padding: 20px;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 720px;
   width: 100%;
-  margin: 0 auto;
 }
 
-/* ========================================================
-   CARD LAYOUT
-   ======================================================== */
+/* ================= CARD ================= */
 .card {
   background: var(--card-bg);
   border-radius: 14px;
-  padding: 1.75rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
+  padding: 24px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 
-.card.hidden { opacity: 0; display: none !important; }
+.hidden {
+  display: none;
+}
 
-h1, h2, h3 { margin-top: 0; color: var(--gray-ink); }
+/* ================= HEADINGS ================= */
+h1, h2, h3 {
+  margin-top: 0;
+}
 
-/* ========================================================
-   QUIZ STATUS BAR
-   ======================================================== */
+/* ================= BUTTONS ================= */
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.primary-btn { background: var(--blue); color: white; }
+.primary-btn:hover { background: var(--blue-dark); }
+
+.secondary-btn { background: #6b7280; color: white; }
+.warning-btn { background: var(--amber); color: white; }
+.green-btn { background: var(--green); color: white; }
+
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+/* ================= QUIZ ================= */
 .quiz-status-bar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   background: var(--gray-light);
-  border: 1px solid var(--gray-border);
+  padding: 8px;
   border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--gray-text);
+  margin-bottom: 10px;
 }
 
-#question-number { color: var(--gray-ink); }
-#timer { color: var(--blue-dark); font-weight: bold; }
-
-/* ========================================================
-   BUTTONS
-   ======================================================== */
-button, .primary-btn, .green-btn, .secondary-btn, .warning-btn {
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  margin: 0.4rem;
-  transition: background 0.2s ease, transform 0.1s ease;
-}
-
-button:hover { transform: translateY(-1px); }
-
-.primary-btn { background: var(--blue); }
-.primary-btn:hover { background: var(--blue-dark); }
-
-.green-btn { background: var(--green); }
-.green-btn:hover { background: #047857; }
-
-.secondary-btn {
-  background-color: #dbe4f3;
-  color: #0b5ed7;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.secondary-btn:hover {
-  background-color: #0b5ed7; /* hover background */
-  color: #fff; /* white text when hovered */
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.warning-btn { background: var(--amber); }
-.warning-btn:hover { background: var(--amber-dark); }
-
-button:disabled { background: #94a3b8; cursor: not-allowed; }
-
-/* ========================================================
-   FORM ELEMENTS
-   ======================================================== */
-.form-group { margin-bottom: 1.25rem; text-align: center; }
-
-.form-group h3 { margin-bottom: 0.75rem;}
-
-/* ========================================================
-   QUIZ QUESTION / OPTIONS
-   ======================================================== */
 #question-text {
-  font-size: 1.15rem;
-  margin-top: 0.75rem;
-  color: var(--gray-ink);
-  line-height: 1.45;
+  font-size: 1.1rem;
 }
 
-#options { padding: 0; margin: 1rem 0; }
+/* ================= OPTIONS ================= */
+#options {
+  padding: 0;
+}
 
 #options li {
   list-style: none;
   background: var(--gray-light);
-  margin: 0.5rem 0;
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--gray-border);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-#options li:hover { background: #eff6ff; transform: scale(1.02); }
-#options li.correct { background: var(--green-light); border-color: #16a34a; }
-#options li.incorrect { background: var(--red-light); border-color: var(--red); }
-
-/* ========================================================
-   RESULTS / REVIEW / PROGRESS
-   ======================================================== */
-#domain-stats {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  font-size: 0.95rem;
-}
-
-#domain-stats th, #domain-stats td {
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--gray-border);
-}
-
-#domain-stats th {
-  background: #eff6ff;
-  color: #1e3a8a;
-  font-weight: 700;
-}
-
-.review-item {
-  background: var(--gray-light);
-  border: 1px solid var(--gray-border);
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  transition: transform 0.2s ease;
-}
-
-.review-item:hover { transform: scale(1.01); }
-
-/* ========================================================
-   STYLED RADIO BUTTONS (Question Count)
-   ======================================================== */
-.form-group label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background-color: rgba(255, 255, 255, 0.07);
-  padding: 0.5rem 1rem;
-  margin: 0.4rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.form-group label:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
-}
-
-/* Hide native radio */
-.form-group input[type="radio"] {
-  appearance: none;
-  width: 1.1rem;
-  height: 1.1rem;
-  border: 2px solid #9ca3af;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* Checked glow */
-.form-group input[type="radio"]:checked {
-  border-color: #00ffcc;
-  background: radial-gradient(circle at center, #00ffcc 45%, transparent 46%);
-  box-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
-  animation: pop 0.15s ease-out;
-}
-
-/* ========================================================
-   DOMAIN FILTER (Unified for Learn + Quiz)
-   ======================================================== */
-#domain-filter, .domain-filter {
-  text-align: center;
-  margin-bottom: 1.75rem;
-}
-
-#domain-filter .filter-title,
-.domain-filter .filter-title {
-  display: block;
-  font-weight: 700;
-  font-size: 1.1rem;
-  text-align: center;
-  margin-bottom: 0.85rem;
-}
-
-#domain-filter .filter-options,
-.domain-filter .filter-options {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-}
-
-/* Checkbox pills */
-#domain-filter label,
-.domain-filter label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background-color: rgba(255, 255, 255, 0.07);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-#domain-filter label:hover,
-.domain-filter label:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
-}
-
-/* Hide default checkbox */
-#domain-filter input[type="checkbox"],
-.domain-filter input[type="checkbox"] {
-  appearance: none;
-  width: 1.1rem;
-  height: 1.1rem;
-  border: 2px solid #9ca3af;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* Checked glow */
-#domain-filter input[type="checkbox"]:checked,
-.domain-filter input[type="checkbox"]:checked {
-  border-color: #00ffcc;
-  background: #00ffcc;
-  box-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
-  animation: pop 0.15s ease-out;
-}
-
-#domain-filter input[type="checkbox"]:checked + label,
-.domain-filter input[type="checkbox"]:checked + label {
-  color: #00ffcc;
-  font-weight: 600;
-}
-
-/* ========================================================
-   UTILITIES
-   ======================================================== */
-.fw-bold { font-weight: 700; }
-.lead { font-size: 1.1rem; color: var(--black-text); }
-.mt-3 { margin-top: 1rem; }
-.mt-4 { margin-top: 1.5rem; }
-.mb-3 { margin-bottom: 1rem; }
-
-/* ========================================================
-   POP ANIMATION
-   ======================================================== */
-@keyframes pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-
-/* ========================================================
-   DARK MODE SHADOWS
-   ======================================================== */
-@media (prefers-color-scheme: dark) {
-  .card, .cert-card {
-    box-shadow: 0 2px 12px rgba(255, 255, 255, 0.05);
-  }
-
-  #options li:hover {
-    background: rgba(59,130,246,0.15);
-  }
-
-  #domain-stats th {
-    background: rgba(59,130,246,0.15);
-    color: #93c5fd;
-  }
-  .secondary-btn {
-    background-color: #1e293b;
-    color: #60a5fa;
-  }
-  .secondary-btn:hover {
-    background-color: #2563eb;
-    color: #fff;
-  }
-}
-
-/* ========================================================
-   RESPONSIVE
-   ======================================================== */
-@media (max-width: 640px) {
-  body { padding: 1rem; }
-  .card { padding: 1.25rem; }
-  .quiz-status-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-    font-size: 0.9rem;
-  }
-  #options li { font-size: 0.95rem; }
-  button { width: 100%; }
-  #domain-filter .filter-options,
-  .domain-filter .filter-options {
-    gap: 0.6rem;
-  }
-  #domain-filter label,
-  .domain-filter label {
-    flex: 1 1 calc(45% - 0.5rem);
-    justify-content: center;
-  }
-}
-
-#clear-filters-btn {
-  margin-top: 0.75rem;
-  background: var(--amber);
-}
-
-#clear-filters-btn:hover {
-  background: var(--amber-dark);
-}
-
-/* ========================================================
-   MODULE NAVIGATION BUTTONS (Prev / Next)
-   ======================================================== */
-#modules-screen .btn-group,
-#modules-screen .mt-4 {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-#modules-screen button {
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.7rem 1.6rem;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-/* 🔵 Next button — blue gradient */
-#next-module {
-  background: linear-gradient(90deg, var(--blue), var(--blue-dark));
-  color: #fff;
-  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
-}
-#next-module:hover {
-  background: linear-gradient(90deg, #60a5fa, #2563eb);
-  transform: translateY(-1px);
-}
-
-/* 🔙 Previous button — gray secondary */
-#prev-module {
-  background: #374151;
-  color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
-}
-#prev-module:hover {
-  background: #4b5563;
-  transform: translateY(-1px);
-}
-/* ========================================================
-   FIX: Next Question button visibility (override)
-   ======================================================== */
-#next-btn {
-  background: var(--blue);
-  color: #fff;
-  border-radius: 8px;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  transition: background 0.25s ease, transform 0.1s ease;
-}
-
-#next-btn:hover:not(:disabled) {
-  background: var(--blue-dark);
-  transform: translateY(-2px);
-}
-
-/* ✅ Disabled state readable on both dark/light mode */
-#next-btn:disabled {
-  background: #d1d5db; /* light gray */
-  color: #1e293b;      /* dark gray text */
-  opacity: 0.9;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-group {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.btn-group button {
-  margin: 0;
-  display: inline-block;
-}
-
-.option-review {
   padding: 10px;
-  margin: 6px 0;
-  border-radius: 6px;
-  border: 1px solid var(--gray-border);
+  margin: 8px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.option-review.correct {
-  border: 2px solid var(--green);
+#options li:hover {
+  background: #e0e7ff;
+}
+
+#options li.selected {
+  background: var(--blue);
+  color: white;
+}
+
+#options li.correct {
   background: var(--green-light);
 }
 
-.option-review.wrong {
-  border: 2px solid var(--red);
+#options li.incorrect {
   background: var(--red-light);
 }
 
-/* ================= DOMAIN PROGRESS BARS ================= */
-
-.domain-bar {
-  margin-bottom: 15px;
+/* ================= REVIEW ================= */
+.option-review {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 6px;
 }
 
-.domain-label {
+.option-review.correct {
+  background: var(--green-light);
+  border-left: 4px solid var(--green);
+}
+
+.option-review.wrong {
+  background: var(--red-light);
+  border-left: 4px solid var(--red);
+}
+
+/* ================= DOMAIN FILTER ================= */
+.domain-filter {
+  text-align: center;
+}
+
+.filter-options {
   display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-  margin-bottom: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
-.bar {
-  width: 100%;
-  height: 10px;
+.domain-filter label {
   background: var(--gray-light);
-  border-radius: 6px;
-  overflow: hidden;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.fill {
-  height: 10px;
-  background: var(--blue);
-  border-radius: 6px;
-  transition: width 0.4s ease;
+/* ================= PROGRESS ================= */
+.history-container {
+  margin-top: 10px;
 }
 
-/* ========================================================
-   RESULTS DASHBOARD UPGRADE (🔥 NEW)
-   ======================================================== */
-
+/* ================= SCORE ================= */
 .score-display {
   text-align: center;
-  margin-top: 1rem;
 }
 
 .score-display h2 {
   font-size: 2rem;
-  margin-bottom: 0.5rem;
 }
 
 .score-display h3 {
-  font-size: 1.5rem;
-  margin: 0.5rem 0;
+  font-size: 1.4rem;
 }
 
-/* Readiness emphasis */
-.score-display h3 {
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-/* Divider spacing */
-.score-display hr {
-  margin: 1.2rem 0;
-  opacity: 0.2;
-}
-
-/* ========================================================
-   DOMAIN PROGRESS BARS (ENHANCED)
-   ======================================================== */
-
+/* ================= DOMAIN BARS ================= */
 .domain-bar {
-  margin-bottom: 18px;
-}
-
-.domain-label {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
+  margin-bottom: 12px;
 }
 
 .bar {
   width: 100%;
-  height: 12px; /* 🔥 slightly bigger */
+  height: 10px;
   background: var(--gray-light);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+  border-radius: 6px;
 }
 
 .fill {
-  height: 12px;
-  border-radius: 8px;
-  transition: width 0.5s ease;
+  height: 10px;
+  background: var(--blue);
+  border-radius: 6px;
 }
 
-/* ========================================================
-   STRONG / WEAK TAGS
-   ======================================================== */
-
-.score-display p strong {
-  display: inline-block;
-  margin-top: 4px;
-}
-
-/* ========================================================
-   FOCUS AREA HIGHLIGHT
-   ======================================================== */
-
-.score-display p:nth-of-type(3) {
-  font-weight: 600;
-  color: var(--amber);
-}
-
-/* ========================================================
-   REVIEW IMPROVEMENT
-   ======================================================== */
-
-.review-item {
-  background: var(--gray-light);
-  border: 1px solid var(--gray-border);
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.2rem;
-  transition: all 0.2s ease;
-}
-
-.review-item h4 {
-  margin-bottom: 0.4rem;
-}
-
-.review-item small {
-  display: block;
-  margin-top: 0.5rem;
-  opacity: 0.7;
-}
-
-/* ========================================================
-   BUTTON GROUP POLISH
-   ======================================================== */
-
-.btn-group {
-  margin-top: 1.5rem;
-}
-
-.btn-group button {
-  min-width: 140px;
-}
-
-/* ================= ANIMATIONS ================= */
-
-.fade-in {
-  animation: fadeIn 0.4s ease-in-out;
-}
-
-.slide-up {
-  animation: slideUp 0.4s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(15px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
+/* ================= CHART ================= */
 canvas {
-  margin-top: 25px;
-  background: white;
+  margin-top: 20px;
   border-radius: 10px;
-  padding: 10px;
 }
 
-/* ================= FINAL UI POLISH ================= */
+/* ================= UTIL ================= */
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.text-center { text-align: center; }
 
-.container {
-  max-width: 700px;
-  margin: auto;
-  padding: 20px;
-}
-
-/* Cards */
-.card {
-  background: white;
-  border-radius: 14px;
-  padding: 25px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  transition: all 0.2s ease;
-}
-
-/* Slight hover lift (feels modern) */
-.card:hover {
-  transform: translateY(-2px);
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+  button { width: 100%; }
 }
