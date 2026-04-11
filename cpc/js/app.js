@@ -21,6 +21,17 @@ const CLF_BLUEPRINT = {
 };
 
 /* =====================================================
+   ORDER DOMAIN
+   ===================================================== */
+
+const DOMAIN_ORDER = [
+  "Cloud Concepts",
+  "Security and Compliance",
+  "Cloud Technology and Services",
+  "Billing, Pricing, and Support"
+];
+
+/* =====================================================
    2. APP STATE
    ===================================================== */
 
@@ -212,18 +223,21 @@ function updateDomainUI() {
   const container = el("dynamic-domain-options");
   if (!container) return;
 
-  const uniqueDomains = [...new Set(state.questions.map(q => q.domain))].sort();
+  const rawDomains = [...new Set(state.questions.map(q => q.domain))];
 
+    const uniqueDomains = DOMAIN_ORDER.filter(domain =>
+    rawDomains.includes(domain)
+    );
   container.innerHTML = "";
 
-  uniqueDomains.forEach((domainName) => {
+    uniqueDomains.forEach((domainName, index) => {
     const label = document.createElement("label");
     label.className =
       "flex items-center space-x-2 p-2 bg-white rounded shadow-sm hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200 transition";
 
     label.innerHTML = `
       <input type="checkbox" class="domain-check" value="${domainName}">
-      <span class="text-gray-700">${domainName}</span>
+      <span class="text-gray-700">${index + 1}. ${domainName}</span>
     `;
 
     container.appendChild(label);
