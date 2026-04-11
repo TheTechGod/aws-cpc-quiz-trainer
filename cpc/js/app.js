@@ -1,28 +1,12 @@
 /* ========================================================
-   AWS CPC QUIZ TRAINER — Rebuilt Clean Version
-   Author: Geoffrey D. Metzger | Integrity Programming
+   AWS CPC QUIZ TRAINER — CLEAN PRODUCTION VERSION
    ======================================================== */
 
 const el = (id) => document.getElementById(id);
 
-/* =====================================================
-   1. CONFIG
-   ===================================================== */
+/* ================= CONFIG ================= */
 
-const API_URL = "https://xgob5q5wo5.execute-api.us-east-2.amazonaws.com/questions";
 const LOCAL_JSON_PATH = "./data/questions.json";
-
-// Practice-mode question counts by domain
-const CLF_BLUEPRINT = {
-  "Cloud Concepts": 6,
-  "Security and Compliance": 8,
-  "Cloud Technology and Services": 10,
-  "Billing, Pricing, and Support": 6
-};
-
-/* =====================================================
-   ORDER DOMAIN
-   ===================================================== */
 
 const DOMAIN_ORDER = [
   "Cloud Concepts",
@@ -31,9 +15,7 @@ const DOMAIN_ORDER = [
   "Billing, Pricing, and Support"
 ];
 
-/* =====================================================
-   2. APP STATE
-   ===================================================== */
+/* ================= STATE ================= */
 
 const state = {
   questions: [],
@@ -44,200 +26,68 @@ const state = {
   timerInterval: null,
   startTime: null,
   questionStartTime: null,
-  isLoading: true,
-  source: null
+  isLoading: true
 };
 
-/* =====================================================
-   3. HELPERS
-   ===================================================== */
+/* ================= HELPERS ================= */
 
-function parseDomain(sk) {
-  if (!sk || typeof sk !== "string") return "General";
-  const parts = sk.split("#");
-  const raw = parts[1] || "General";
-  return raw.replace(/([a-z])([A-Z])/g, "$1 $2").trim();
-}
-
-function shuffle(array) {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  return arr;
+  return a;
 }
 
-function normalizeOptions(options) {
-  if (!Array.isArray(options)) return [];
-  return options.map((opt) => {
-    if (typeof opt === "string") return opt;
-    if (opt && typeof opt === "object" && "S" in opt) return opt.S;
-    return String(opt);
-  });
-}
-
-function normalizeAnswers(correctAnswer, options = []) {
-  if (Array.isArray(correctAnswer)) return correctAnswer.map(String);
-
-  if (correctAnswer === null || correctAnswer === undefined) return [];
-
-  return [String(correctAnswer)];
-}
-
-function normalizeApiQuestion(q, index) {
-  return {
-    id: q.id ?? index + 1,
-    question: q.QuestionText || q.question || "Untitled question",
-    options: normalizeOptions(q.Options || q.options),
-    answer: normalizeAnswers(q.CorrectAnswer ?? q.correct, q.Options || q.options),
-    explanation: q.Explanation || q.explanation || "No explanation provided.",
-    domain: q.domain || parseDomain(q.SK)
-  };
-}
-
-function normalizeLocalQuestion(q, index) {
+function normalizeLocalQuestion(q, i) {
   const options = q.answers || q.options || [];
-  const correctIndexes = Array.isArray(q.correct) ? q.correct : [];
-
-  const normalizedCorrectAnswers = correctIndexes
-    .map((i) => options[i])
-    .filter(Boolean)
-    .map(String);
+  const correctIndexes = q.correct || [];
 
   return {
-    id: q.id ?? index + 1,
-    question: q.question || "Untitled question",
-    options: options.map(String),
-    answer: normalizedCorrectAnswers,
-    explanation: q.explanation || "No explanation provided.",
-    domain: q.domain || "General"
+    id: q.id ?? i,
+    question: q.question,
+    options,
+    answer: correctIndexes.map(idx => options[idx]),
+    explanation: q.explanation || "",
+    domain: q.domain
   };
 }
 
-function resetQuizState() {
-  state.filteredQuestions = [];
-  state.currentQuestionIndex = 0;
-  state.score = 0;
-  state.userAnswers = [];
-  clearInterval(state.timerInterval);
-  state.timerInterval = null;
-  state.startTime = null;
-  state.questionStartTime = null;
-}
-
-function initializeUserAnswers() {
-  state.userAnswers = state.filteredQuestions.map(() => ({
-    selected: new Set(),
-    timeSpent: 0
-  }));
-}
-
-function hideAllScreens() {
-  ["setup-screen", "quiz-screen", "result-screen", "review-screen"].forEach((id) => {
-    const node = el(id);
-    if (node) node.classList.add("hidden");
-  });
-}
-
-function showScreen(screenId) {
-  hideAllScreens();
-  const node = el(screenId);
-  if (node) node.classList.remove("hidden");
-}
-
-function formatTime(totalSeconds) {
-  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-  return `${minutes}:${seconds}`;
-}
-
-/* =====================================================
-   4. DATA LOADING
-   ===================================================== */
-
-async function loadQuestionsFromAPI() {
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.map(normalizeApiQuestion).filter(q => q.question && q.options.length > 0);
-}
-
-async function loadQuestionsFromLocalJson() {
-  const response = await fetch(LOCAL_JSON_PATH);
-  if (!response.ok) {
-    throw new Error(`Local JSON error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.map(normalizeLocalQuestion).filter(q => q.question && q.options.length > 0);
-}
+/* ================= INIT ================= */
 
 async function loadQuestions() {
-  state.isLoading = true;
-  disableStartButtons(true);
+  const res = await fetch(LOCAL_JSON_PATH);
+  const data = await res.json();
 
-  try {
-    state.questions = await loadQuestionsFromAPI();
-    state.source = "api";
-    console.log(`✅ Loaded ${state.questions.length} questions from API`);
-  } catch (apiErr) {
-    console.warn("API failed, trying local JSON...", apiErr);
-
-    try {
-      state.questions = await loadQuestionsFromLocalJson();
-      state.source = "local-json";
-      console.log(`✅ Loaded ${state.questions.length} questions from local JSON`);
-    } catch (jsonErr) {
-      console.error("❌ Failed to load questions from both API and local JSON", jsonErr);
-      alert("Couldn't load questions from the API or local JSON file.");
-      state.isLoading = false;
-      disableStartButtons(true);
-      return;
-    }
-  }
-
+  state.questions = data.map(normalizeLocalQuestion);
   state.isLoading = false;
-  updateDomainUI();
-  disableStartButtons(false);
 
-  const status = el("data-source");
-  if (status) {
-    status.textContent = `Loaded from: ${state.source}`;
-  }
+  updateDomainUI();
+  disableButtons(false);
 }
 
-/* =====================================================
-   5. UI SETUP
-   ===================================================== */
+/* ================= UI ================= */
 
-function disableStartButtons(disabled) {
+function disableButtons(disabled) {
   if (el("start-btn")) el("start-btn").disabled = disabled;
   if (el("test-btn")) el("test-btn").disabled = disabled;
 }
 
 function updateDomainUI() {
   const container = el("dynamic-domain-options");
-  if (!container) return;
-
-  const rawDomains = [...new Set(state.questions.map(q => q.domain))];
-
-    const uniqueDomains = DOMAIN_ORDER.filter(domain =>
-    rawDomains.includes(domain)
-    );
   container.innerHTML = "";
 
-    uniqueDomains.forEach((domainName, index) => {
+  const raw = [...new Set(state.questions.map(q => q.domain))];
+
+  const domains = DOMAIN_ORDER.filter(d => raw.includes(d));
+
+  domains.forEach((d, i) => {
     const label = document.createElement("label");
-    label.className =
-      "flex items-center space-x-2 p-2 bg-white rounded shadow-sm hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200 transition";
 
     label.innerHTML = `
-      <input type="checkbox" class="domain-check" value="${domainName}">
-      <span class="text-gray-700">${index + 1}. ${domainName}</span>
+      <input type="checkbox" class="domain-check" value="${d}">
+      <span>${i + 1}. ${d}</span>
     `;
 
     container.appendChild(label);
@@ -245,164 +95,119 @@ function updateDomainUI() {
 }
 
 function getSelectedDomains() {
-  return Array.from(document.querySelectorAll(".domain-check:checked")).map(cb => cb.value);
+  return [...document.querySelectorAll(".domain-check:checked")]
+    .map(cb => cb.value);
 }
 
-/* =====================================================
-   6. QUIZ START
-   ===================================================== */
+/* ================= QUIZ ================= */
 
-function startQuiz(isPracticeMode = false) {
-  if (state.isLoading) {
-    alert("Still loading questions...");
-    return;
-  }
+function startQuiz() {
+  reset();
 
-  if (!state.questions.length) {
-    alert("No questions available.");
-    return;
-  }
+  const selected = getSelectedDomains();
+  const countVal = document.querySelector('input[name="count"]:checked').value;
 
-  resetQuizState();
+  let pool = selected.length
+    ? state.questions.filter(q => selected.includes(q.domain))
+    : state.questions;
 
-  const selectedDomains = getSelectedDomains();
+  state.filteredQuestions =
+    countVal === "all"
+      ? shuffle(pool)
+      : shuffle(pool).slice(0, parseInt(countVal));
 
-  if (isPracticeMode) {
-    if (selectedDomains.length === 0) {
-      alert("Select at least one domain for Practice Mode.");
-      return;
-    }
-
-    let practiceQuestions = [];
-
-    selectedDomains.forEach((domain) => {
-      const targetCount = CLF_BLUEPRINT[domain] || 5;
-      const pool = state.questions.filter(q => q.domain === domain);
-      practiceQuestions.push(...shuffle(pool).slice(0, targetCount));
-    });
-
-    state.filteredQuestions = shuffle(practiceQuestions);
-  } else {
-    const countInput = document.querySelector('input[name="count"]:checked');
-    const countValue = countInput ? countInput.value : "10";
-
-    const pool =
-      selectedDomains.length > 0
-        ? state.questions.filter(q => selectedDomains.includes(q.domain))
-        : [...state.questions];
-
-    if (countValue === "all") {
-    state.filteredQuestions = shuffle(pool); // NO LIMIT
-    } else {
-    const count = parseInt(countValue, 10);
-    state.filteredQuestions = shuffle(pool).slice(0, count);
-}
-  }
-
-  if (!state.filteredQuestions.length) {
-    alert("No questions matched your selection.");
-    return;
-  }
-
-  initializeUserAnswers();
+  initAnswers();
   startTimer();
   showScreen("quiz-screen");
   showQuestion();
-  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
-/* =====================================================
-   7. QUIZ ENGINE
-   ===================================================== */
+function startTestMode() {
+  reset();
+
+  const DIST = {
+    "Cloud Concepts": 12,
+    "Security and Compliance": 15,
+    "Cloud Technology and Services": 17,
+    "Billing, Pricing, and Support": 6
+  };
+
+  let questions = [];
+
+  Object.entries(DIST).forEach(([domain, count]) => {
+    const pool = state.questions.filter(q => q.domain === domain);
+
+    let selected = [];
+
+    if (pool.length >= count) {
+      selected = shuffle(pool).slice(0, count);
+    } else {
+      while (selected.length < count) {
+        selected.push(...shuffle(pool));
+      }
+      selected = selected.slice(0, count);
+    }
+
+    questions.push(...selected);
+  });
+
+  state.filteredQuestions = shuffle(questions).slice(0, 50);
+
+  initAnswers();
+  startTimer();
+  showScreen("quiz-screen");
+  showQuestion();
+}
+
+/* ================= ENGINE ================= */
 
 function showQuestion() {
   const q = state.filteredQuestions[state.currentQuestionIndex];
-  if (!q) return;
-
   state.questionStartTime = Date.now();
 
-  if (el("question-number")) {
-    el("question-number").innerText =
-      `Question ${state.currentQuestionIndex + 1} of ${state.filteredQuestions.length}`;
-  }
+  el("question-text").innerText = q.question;
+  el("question-number").innerText =
+    `Question ${state.currentQuestionIndex + 1} of ${state.filteredQuestions.length}`;
 
-  if (el("question-text")) {
-    el("question-text").innerText = q.question;
-  }
+  const list = el("options");
+  list.innerHTML = "";
 
-  const optionsList = el("options");
-  if (!optionsList) return;
-
-  optionsList.innerHTML = "";
-
-  const isMulti = q.answer.length > 1;
-
-  if (isMulti) {
-    const hint = document.createElement("p");
-    hint.className = "text-blue-600 font-bold mb-2";
-    hint.innerText = `(Select ${q.answer.length})`;
-    optionsList.appendChild(hint);
-  }
-
-  q.options.forEach((opt) => {
+  q.options.forEach(opt => {
     const li = document.createElement("li");
-    li.className = "option-item p-3 mb-2 border rounded cursor-pointer hover:bg-gray-100 transition";
     li.innerText = opt;
-    li.onclick = () => selectOption(li, opt, isMulti);
-    optionsList.appendChild(li);
+    li.className = "option";
+
+    li.onclick = () => selectOption(li, opt);
+
+    list.appendChild(li);
   });
 
-  if (el("next-btn")) el("next-btn").disabled = true;
+  el("next-btn").disabled = true;
 }
 
-function selectOption(li, value, isMulti) {
-  const answerState = state.userAnswers[state.currentQuestionIndex];
-  const q = state.filteredQuestions[state.currentQuestionIndex];
+function selectOption(li, value) {
+  const ans = state.userAnswers[state.currentQuestionIndex];
 
-  if (!answerState || !q) return;
+  document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
 
-  const currentSet = answerState.selected;
+  ans.selected.clear();
+  ans.selected.add(value);
 
-  if (isMulti) {
-    if (currentSet.has(value)) {
-      currentSet.delete(value);
-      li.classList.remove("bg-blue-100", "border-blue-500");
-    } else {
-      currentSet.add(value);
-      li.classList.add("bg-blue-100", "border-blue-500");
-    }
-
-    if (el("next-btn")) {
-      el("next-btn").disabled = currentSet.size !== q.answer.length;
-    }
-  } else {
-    document.querySelectorAll(".option-item").forEach((item) => {
-      item.classList.remove("bg-blue-100", "border-blue-500");
-    });
-
-    currentSet.clear();
-    currentSet.add(value);
-    li.classList.add("bg-blue-100", "border-blue-500");
-
-    if (el("next-btn")) el("next-btn").disabled = false;
-  }
+  li.classList.add("selected");
+  el("next-btn").disabled = false;
 }
 
-function handleNextQuestion() {
+function nextQuestion() {
   const q = state.filteredQuestions[state.currentQuestionIndex];
-  const userAnswer = state.userAnswers[state.currentQuestionIndex];
+  const ans = state.userAnswers[state.currentQuestionIndex];
 
-  if (!q || !userAnswer) return;
+  const correct =
+    q.answer.length === ans.selected.size &&
+    q.answer.every(a => ans.selected.has(a));
 
-  userAnswer.timeSpent = Math.floor((Date.now() - state.questionStartTime) / 1000);
+  if (correct) state.score++;
 
-  const isCorrect =
-    userAnswer.selected.size === q.answer.length &&
-    q.answer.every(ans => userAnswer.selected.has(ans));
-
-  if (isCorrect) {
-    state.score++;
-  }
+  ans.timeSpent = Math.floor((Date.now() - state.questionStartTime) / 1000);
 
   state.currentQuestionIndex++;
 
@@ -413,217 +218,106 @@ function handleNextQuestion() {
   }
 }
 
-/* =====================================================
-    TEST MODE
-   ===================================================== */
-
-function startTestMode() {
-  if (state.isLoading) {
-    alert("Still loading questions...");
-    return;
-  }
-
-  if (!state.questions.length) {
-    alert("No questions available.");
-    return;
-  }
-
-  resetQuizState();
-
-  const TEST_DISTRIBUTION = {
-    "Cloud Concepts": 12,
-    "Security and Compliance": 15,
-    "Cloud Technology and Services": 17,
-    "Billing, Pricing, and Support": 6
-  };
-
-  let testQuestions = [];
-
-  Object.entries(TEST_DISTRIBUTION).forEach(([domain, count]) => {
-    const pool = state.questions.filter(q => q.domain === domain);
-
-    if (pool.length === 0) {
-      console.warn(`No questions for domain: ${domain}`);
-      return;
-    }
-
-      let selected = [];
-
-      if (pool.length >= count) {
-        selected = shuffle(pool).slice(0, count);
-      } else {
-        // Not enough questions → reuse pool
-        const expanded = [];
-        while (expanded.length < count) {
-          expanded.push(...shuffle(pool));
-        }
-        selected = expanded.slice(0, count);
-      }
-
-testQuestions.push(...selected);
-  });
-
-  state.filteredQuestions = shuffle(testQuestions);
-
-  if (state.filteredQuestions.length < 50) {
-    console.warn("Not enough questions for full test");
-  }
-
-  initializeUserAnswers();
-  startTimer();
-  showScreen("quiz-screen");
-  showQuestion();
-  window.scrollTo({ top: 0, behavior: "instant" });
-}
-
-/* =====================================================
-   8. TIMER
-   ===================================================== */
-
-function startTimer() {
-  state.startTime = Date.now();
-
-  if (el("timer")) {
-    el("timer").innerText = `Time: 00:00`;
-  }
-
-  state.timerInterval = setInterval(() => {
-    const diff = Math.floor((Date.now() - state.startTime) / 1000);
-    if (el("timer")) {
-      el("timer").innerText = `Time: ${formatTime(diff)}`;
-    }
-  }, 1000);
-}
-
-/* =====================================================
-   9. RESULTS & REVIEW
-   ===================================================== */
+/* ================= RESULTS ================= */
 
 function endQuiz() {
   clearInterval(state.timerInterval);
 
-  const totalQuestions = state.filteredQuestions.length;
-  const pct = Math.round((state.score / totalQuestions) * 100);
-  const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
-  const avgTime = Math.round(totalTime / totalQuestions);
+  const total = state.filteredQuestions.length;
+  const pct = Math.round((state.score / total) * 100);
 
   showScreen("result-screen");
 
-  if (el("score-summary")) {
-    el("score-summary").innerHTML = `
-      <h3 class="text-2xl font-bold">Score: ${state.score}/${totalQuestions} (${pct}%)</h3>
-      <p class="text-gray-600">Average Pace: ${avgTime}s per question</p>
-      <p class="text-sm ${avgTime <= 83 ? "text-green-600" : "text-red-600"}">
-        ${avgTime <= 83 ? "✅ On track for exam pace!" : "⚠️ Try to speed up (Target: 83s)"}
-      </p>
-      <p class="text-sm text-gray-500 mt-2">Question source: ${state.source}</p>
-    `;
-  }
+  el("score-summary").innerHTML = `
+    <h2>${state.score}/${total} (${pct}%)</h2>
+  `;
 }
+
+/* ================= REVIEW (🔥 UPGRADED) ================= */
 
 function renderReview() {
   showScreen("review-screen");
 
   const container = el("review-container");
-  if (!container) return;
-
   container.innerHTML = "";
 
   state.filteredQuestions.forEach((q, i) => {
     const userAnswer = state.userAnswers[i];
-    const selectedAnswers = [...userAnswer.selected];
-    const isCorrect =
-      selectedAnswers.length === q.answer.length &&
-      q.answer.every(ans => userAnswer.selected.has(ans));
+
+    const optionsHtml = q.options.map(opt => {
+      const isCorrect = q.answer.includes(opt);
+      const isSelected = userAnswer.selected.has(opt);
+
+      let cls = "option-review";
+
+      if (isCorrect) cls += " correct";
+      if (isSelected && !isCorrect) cls += " wrong";
+
+      return `<div class="${cls}">${opt}</div>`;
+    }).join("");
 
     const div = document.createElement("div");
-    div.className = "review-item mb-6 p-4 border rounded shadow-sm bg-white";
 
     div.innerHTML = `
-      <div class="flex justify-between items-start gap-4">
-        <p class="font-bold">${i + 1}. ${q.question}</p>
-        <span class="text-xs px-2 py-1 bg-gray-100 rounded whitespace-nowrap">${userAnswer.timeSpent}s</span>
-      </div>
-      <p class="text-sm mt-2"><strong>Domain:</strong> ${q.domain}</p>
-      <p class="text-sm mt-2"><strong>Correct:</strong> ${q.answer.join(", ")}</p>
-      <p class="text-sm ${isCorrect ? "text-green-600" : "text-red-600"}"><strong>Yours:</strong> ${selectedAnswers.join(", ") || "None"}</p>
-      <p class="text-xs text-gray-500 italic mt-2">${q.explanation}</p>
+      <h4>${i + 1}. ${q.question}</h4>
+      <p>${q.domain}</p>
+      ${optionsHtml}
+      <small>${q.explanation}</small>
     `;
 
     container.appendChild(div);
   });
 }
 
-/* =====================================================
-   10. EVENTS
-   ===================================================== */
+/* ================= TIMER ================= */
+
+function startTimer() {
+  state.startTime = Date.now();
+
+  state.timerInterval = setInterval(() => {
+    const t = Math.floor((Date.now() - state.startTime) / 1000);
+    el("timer").innerText = `Time: ${t}s`;
+  }, 1000);
+}
+
+/* ================= STATE ================= */
+
+function reset() {
+  state.filteredQuestions = [];
+  state.currentQuestionIndex = 0;
+  state.score = 0;
+  state.userAnswers = [];
+  clearInterval(state.timerInterval);
+}
+
+function initAnswers() {
+  state.userAnswers = state.filteredQuestions.map(() => ({
+    selected: new Set(),
+    timeSpent: 0
+  }));
+}
+
+/* ================= NAV ================= */
+
+function showScreen(id) {
+  ["setup-screen", "quiz-screen", "result-screen", "review-screen"]
+    .forEach(s => el(s)?.classList.add("hidden"));
+
+  el(id).classList.remove("hidden");
+}
+
+/* ================= EVENTS ================= */
 
 function bindEvents() {
-  if (el("start-btn")) {
-    el("start-btn").onclick = () => startQuiz(false);
-  }
-
-
-  if (el("next-btn")) {
-    el("next-btn").onclick = handleNextQuestion;
-  }
-
-  if (el("review-btn")) {
-    el("review-btn").onclick = renderReview;
-  }
-
-  if (el("restart-btn")) {
-    el("restart-btn").onclick = () => {
-      resetQuizState();
-      showScreen("setup-screen");
-    };
-  }
-
-  if (el("test-btn")) {
+  el("start-btn").onclick = startQuiz;
   el("test-btn").onclick = startTestMode;
+  el("next-btn").onclick = nextQuestion;
+  el("review-btn").onclick = renderReview;
 }
-}
 
-/* =====================================================
-   11. INIT
-   ===================================================== */
-window.addEventListener("DOMContentLoaded", async () => {
+/* ================= INIT ================= */
+
+window.onload = async () => {
   bindEvents();
-  showScreen("setup-screen");
-
-  state.isLoading = true;
-  disableStartButtons(true);
-
-  try {
-    state.questions = await loadQuestionsFromLocalJson();
-    state.source = "local-json";
-    state.isLoading = false;
-
-    updateDomainUI();
-    disableStartButtons(false);
-
-    const status = el("data-source");
-    if (status) {
-      status.textContent = `Loaded from: ${state.source}`;
-    }
-
-    console.log("Loaded local domains:", [...new Set(state.questions.map(q => q.domain))]);
-  } catch (err) {
-    console.error("❌ Failed to load local JSON", err);
-    state.isLoading = false;
-    alert("Couldn't load local questions.json file.");
-  }
-});
-
-
-
-
-
-
-/*
-window.addEventListener("DOMContentLoaded", async () => {
-  bindEvents();
-  showScreen("setup-screen");
   await loadQuestions();
-});
-*/
+};
