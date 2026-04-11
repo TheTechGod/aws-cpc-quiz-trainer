@@ -215,7 +215,7 @@ async function loadQuestions() {
    ===================================================== */
 
 function disableStartButtons(disabled) {
-  if (el("start-btn")) el("start-btn").disabled = disabled;\git status
+  if (el("start-btn")) el("start-btn").disabled = disabled;
 }
 
 function updateDomainUI() {
