@@ -62,11 +62,9 @@ body {
 }
 
 .container {
-  max-width: 640px;
+  max-width: 800px;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  margin: 0 auto;
 }
 
 /* ========================================================
@@ -477,14 +475,31 @@ button:disabled { background: #94a3b8; cursor: not-allowed; }
   transform: none;
 }
 
-.flex-container, .start-screen, .quiz-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* This centers the items horizontally */
-    text-align: center;
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-button {
-    margin: 10px auto; /* This ensures buttons have space and are centered */
-    display: block;
+.btn-group button {
+  margin: 0;
+  display: inline-block;
+}
+
+.option-review {
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid var(--gray-border);
+}
+
+.option-review.correct {
+  border: 2px solid var(--green);
+  background: var(--green-light);
+}
+
+.option-review.wrong {
+  border: 2px solid var(--red);
+  background: var(--red-light);
 }
