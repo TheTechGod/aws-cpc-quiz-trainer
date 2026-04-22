@@ -220,9 +220,12 @@ function calculateDomainStats() {
 
     const a = state.userAnswers[i];
 
-    const correct =
-      q.answer.length === a.selected.size &&
-      q.answer.every(x => a.selected.has(x));
+    const selected = [...a.selected].map(x => x.trim().toLowerCase());
+const correctAnswers = q.answer.map(x => x.trim().toLowerCase());
+
+const correct =
+  selected.length === correctAnswers.length &&
+  correctAnswers.every(ans => selected.includes(ans));
 
     if (correct) stats[q.domain].correct++;
     stats[q.domain].total++;
@@ -334,8 +337,10 @@ function renderReview() {
     const a = state.userAnswers[i];
 
     const html = q.options.map(opt => {
-      const correct = q.answer.includes(opt);
-      const selected = a.selected.has(opt);
+      const normalize = (x) => x.trim().toLowerCase();
+
+      const correct = q.answer.map(normalize).includes(normalize(opt));
+      const selected = [...a.selected].map(normalize).includes(normalize(opt));
 
       let cls = "option-review";
       if (correct) cls += " correct";
