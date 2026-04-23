@@ -29,16 +29,49 @@ const state = {
   userAnswers: [],
   timerInterval: null,
   startTime: null,
-  questionStartTime: null,
-  isLoading: true
+  isLoading: true,
+  answerSubmitted: false
 };
 
 /* ================= HELPERS ================= */
 
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+const normalize = (x) => String(x).trim().toLowerCase();
 
-const formatTime = (sec) =>
-  `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+function formatTime(sec) {
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+}
+
+function speakText(text) {
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const preferred =
+    voices.find(v => v.name.includes("Zira")) ||
+    voices.find(v => v.name.includes("Samantha")) ||
+    voices[0];
+
+  if (preferred) utterance.voice = preferred;
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function isAnswerCorrect(question, answerSet) {
+  const selected = [...answerSet].map(normalize);
+  const correct = question.answer.map(normalize);
+
+  return (
+    selected.length === correct.length &&
+    correct.every(ans => selected.includes(ans))
+  );
+}
+
+function getRequiredSelectionCount(question) {
+  return question.answer.length;
+}
 
 /* ================= STORAGE ================= */
 
@@ -48,10 +81,6 @@ function saveAttempt(attempt) {
   localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
 }
 
-function getAttempts() {
-  return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || "[]");
-}
-
 /* ================= LOAD ================= */
 
 async function loadQuestions() {
@@ -59,26 +88,20 @@ async function loadQuestions() {
   const data = await res.json();
 
   state.questions = data.map((q, i) => {
-  const options = q.options || q.answers || [];
+    const options = q.options || [];
+    const correctIndexes = Array.isArray(q.correct) ? q.correct : [q.correct];
 
-  // Normalize correct answers safely
-  let correctIndexes = [];
-
-  if (Array.isArray(q.correct)) {
-    correctIndexes = q.correct;
-  } else if (typeof q.correct === "number") {
-    correctIndexes = [q.correct];
-  }
-
-  return {
-    id: q.id ?? i + 1,
-    question: q.question,
-    options,
-    answer: correctIndexes.map(idx => options[idx]?.trim()),
-    explanation: q.explanation || "",
-    domain: q.domain || "General"
-  };
-});
+    return {
+      id: q.id ?? i + 1,
+      question: q.question,
+      options,
+      answer: correctIndexes
+        .filter(idx => typeof idx === "number" && options[idx] !== undefined)
+        .map(idx => options[idx]),
+      explanation: q.explanation || "",
+      domain: q.domain || "General"
+    };
+  });
 
   state.isLoading = false;
   renderDomains();
@@ -106,6 +129,56 @@ function getSelectedDomains() {
     .map(cb => cb.value);
 }
 
+function resetExplanation() {
+  const box = getEl("explanation-box");
+  const text = getEl("explanation-text");
+  const btn = getEl("speak-btn");
+
+  if (box) box.classList.add("hidden");
+  if (text) text.innerHTML = "";
+  if (btn) btn.onclick = null;
+
+  window.speechSynthesis?.cancel();
+}
+
+function showExplanation(question, isCorrect) {
+  const box = getEl("explanation-box");
+  const text = getEl("explanation-text");
+  const btn = getEl("speak-btn");
+
+  if (box) box.classList.remove("hidden");
+
+  if (text) {
+    text.innerHTML = `
+      <strong>${isCorrect ? "✅ Correct" : "❌ Incorrect"}</strong><br>
+      ${question.explanation}
+    `;
+  }
+
+  if (btn) {
+    btn.onclick = () => {
+      speakText(`${isCorrect ? "Correct." : "Incorrect."} ${question.explanation}`);
+    };
+  }
+}
+
+function updateNextButtonState(question) {
+  const nextBtn = getEl("next-btn");
+  const selectedCount = state.userAnswers[state.currentQuestionIndex].selected.size;
+  const requiredCount = getRequiredSelectionCount(question);
+
+  if (!state.answerSubmitted) {
+    nextBtn.disabled = selectedCount < requiredCount;
+    nextBtn.textContent = "Submit Answer";
+  } else {
+    nextBtn.disabled = false;
+    nextBtn.textContent =
+      state.currentQuestionIndex === state.filteredQuestions.length - 1
+        ? "Finish Quiz"
+        : "Next";
+  }
+}
+
 /* ================= QUIZ ================= */
 
 function startQuiz() {
@@ -123,7 +196,7 @@ function startQuiz() {
   state.filteredQuestions =
     count === "all"
       ? shuffle(pool)
-      : shuffle(pool).slice(0, parseInt(count));
+      : shuffle(pool).slice(0, parseInt(count, 10));
 
   startSession();
 }
@@ -135,13 +208,10 @@ function startTestMode() {
 
   Object.entries(CONFIG.TEST_DISTRIBUTION).forEach(([domain, count]) => {
     const pool = state.questions.filter(q => q.domain === domain);
-
-    while (questions.length < count) {
-      questions.push(...shuffle(pool));
-    }
+    questions.push(...shuffle(pool).slice(0, count));
   });
 
-  state.filteredQuestions = shuffle(questions).slice(0, 50);
+  state.filteredQuestions = shuffle(questions);
   startSession();
 }
 
@@ -161,13 +231,21 @@ function startSession() {
 
 function showQuestion() {
   const q = state.filteredQuestions[state.currentQuestionIndex];
+  const isMulti = q.answer.length > 1;
 
-  getEl("question-text").innerText = q.question;
+  state.answerSubmitted = false;
+
+  getEl("question-text").innerText = isMulti
+    ? `${q.question}`
+    : q.question;
+
   getEl("question-number").innerText =
     `Question ${state.currentQuestionIndex + 1} of ${state.filteredQuestions.length}`;
 
   const list = getEl("options");
   list.innerHTML = "";
+
+  resetExplanation();
 
   q.options.forEach(opt => {
     const li = document.createElement("li");
@@ -175,31 +253,56 @@ function showQuestion() {
     li.className = "option";
 
     li.onclick = () => {
-      document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
-      state.userAnswers[state.currentQuestionIndex].selected = new Set([opt]);
-      li.classList.add("selected");
-      getEl("next-btn").disabled = false;
+      if (state.answerSubmitted) return;
+
+      const answerSet = state.userAnswers[state.currentQuestionIndex].selected;
+
+      if (isMulti) {
+        if (answerSet.has(opt)) {
+          answerSet.delete(opt);
+          li.classList.remove("selected");
+        } else {
+          answerSet.add(opt);
+          li.classList.add("selected");
+        }
+      } else {
+        document.querySelectorAll(".option").forEach(o => {
+          o.classList.remove("selected");
+        });
+
+        answerSet.clear();
+        answerSet.add(opt);
+        li.classList.add("selected");
+      }
+
+      updateNextButtonState(q);
     };
 
     list.appendChild(li);
   });
 
-  getEl("next-btn").disabled = true;
+  updateNextButtonState(q);
 }
 
 function nextQuestion() {
   const q = state.filteredQuestions[state.currentQuestionIndex];
   const a = state.userAnswers[state.currentQuestionIndex];
 
-  const selected = [...a.selected].map(x => x.trim().toLowerCase());
-const correctAnswers = q.answer.map(x => x.trim().toLowerCase());
+  if (!state.answerSubmitted) {
+    const selectedCount = a.selected.size;
+    const requiredCount = getRequiredSelectionCount(q);
 
-const correct =
-  selected.length === correctAnswers.length &&
-  correctAnswers.every(ans => selected.includes(ans));
-  
+    if (selectedCount < requiredCount) return;
 
-  if (correct) state.score++;
+    state.answerSubmitted = true;
+
+    const correct = isAnswerCorrect(q, a.selected);
+    if (correct) state.score++;
+
+    showExplanation(q, correct);
+    updateNextButtonState(q);
+    return;
+  }
 
   state.currentQuestionIndex++;
 
@@ -210,110 +313,16 @@ const correct =
   }
 }
 
-/* ================= ANALYTICS ================= */
-
-function calculateDomainStats() {
-  const stats = {};
-
-  state.filteredQuestions.forEach((q, i) => {
-    if (!stats[q.domain]) stats[q.domain] = { correct: 0, total: 0 };
-
-    const a = state.userAnswers[i];
-
-    const selected = [...a.selected].map(x => x.trim().toLowerCase());
-const correctAnswers = q.answer.map(x => x.trim().toLowerCase());
-
-const correct =
-  selected.length === correctAnswers.length &&
-  correctAnswers.every(ans => selected.includes(ans));
-
-    if (correct) stats[q.domain].correct++;
-    stats[q.domain].total++;
-  });
-
-  Object.keys(stats).forEach(d => {
-    stats[d].percent = Math.round((stats[d].correct / stats[d].total) * 100);
-  });
-
-  return stats;
-}
-
-function calculateReadinessScore(pct, domainStats) {
-  const minDomain = Math.min(...Object.values(domainStats).map(d => d.percent));
-  return Math.round(pct * 0.7 + minDomain * 0.3);
-}
-
 /* ================= RESULTS ================= */
 
 function endQuiz() {
   clearInterval(state.timerInterval);
+  window.speechSynthesis?.cancel();
 
   const total = state.filteredQuestions.length;
   const pct = Math.round((state.score / total) * 100);
 
-  const domainStats = calculateDomainStats();
-  const readiness = calculateReadinessScore(pct, domainStats);
-
-  const weakest = Object.entries(domainStats)
-    .sort((a, b) => a[1].percent - b[1].percent)[0];
-
-  const bars = Object.entries(domainStats)
-    .map(([d, v]) => `
-      <div class="domain-bar">
-        <div class="domain-label">
-          <span>${d}</span>
-          <span>${v.percent}%</span>
-        </div>
-        <div class="bar">
-          <div class="fill" style="width:${v.percent}%"></div>
-        </div>
-      </div>
-    `).join("");
-
-  getEl("score-summary").innerHTML = `
-    <h2>${state.score}/${total} (${pct}%)</h2>
-    <h3>🎯 Readiness: ${readiness}%</h3>
-    <p><strong>Focus:</strong> ${weakest[0]}</p>
-    ${bars}
-  `;
-
-  // ===== CHART RENDER =====
-setTimeout(() => {
-  const ctx = document.getElementById("domainChart");
-
-  if (!ctx) return;
-
-  // Destroy previous chart if it exists
-  if (window.domainChartInstance) {
-    window.domainChartInstance.destroy();
-  }
-
-  window.domainChartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: Object.keys(domainStats),
-      datasets: [{
-        label: "Domain Performance (%)",
-        data: Object.values(domainStats).map(d => d.percent),
-        borderWidth: 1
-      }]
-    },
-    options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100
-            }
-          }
-        }
-      });
-    }, 200);
+  getEl("score-summary").innerHTML = `<h2>${state.score}/${total} (${pct}%)</h2>`;
 
   saveAttempt({
     date: new Date().toLocaleString(),
@@ -327,62 +336,39 @@ setTimeout(() => {
 
 /* ================= REVIEW ================= */
 
-function renderReview() {
-  showScreen("review-screen");
-
+function showReview() {
   const container = getEl("review-container");
   container.innerHTML = "";
 
   state.filteredQuestions.forEach((q, i) => {
-    const a = state.userAnswers[i];
+    const userAnswers = [...state.userAnswers[i].selected];
+    const isCorrect = isAnswerCorrect(q, state.userAnswers[i].selected);
 
-    const html = q.options.map(opt => {
-      const normalize = (x) => x.trim().toLowerCase();
+    const div = document.createElement("div");
+    div.className = "review-item";
 
-      const correct = q.answer.map(normalize).includes(normalize(opt));
-      const selected = [...a.selected].map(normalize).includes(normalize(opt));
-
-      let cls = "option-review";
-      if (correct) cls += " correct";
-      if (selected && !correct) cls += " wrong";
-
-      return `<div class="${cls}">${opt}</div>`;
-    }).join("");
-
-    container.innerHTML += `
-      <div class="review-item">
-        <h4>${q.question}</h4>
-        <p>${q.domain}</p>
-        ${html}
-      </div>
+    div.innerHTML = `
+      <h4>${i + 1}. ${q.question}</h4>
+      <p><strong>Your Answer:</strong> ${userAnswers.length ? userAnswers.join(", ") : "None"}</p>
+      <p><strong>Correct:</strong> ${q.answer.join(", ")}</p>
+      <p style="color:${isCorrect ? "#22c55e" : "#ef4444"}; font-weight: bold;">
+        ${isCorrect ? "✅ Correct" : "❌ Incorrect"}
+      </p>
+      <p><em>${q.explanation}</em></p>
+      <hr />
     `;
+
+    container.appendChild(div);
   });
-}
 
-/* ================= PROGRESS ================= */
-
-function renderProgress() {
-  const attempts = getAttempts();
-  getEl("total-quizzes").innerText = attempts.length;
-
-  const avg = attempts.length
-    ? Math.round(attempts.reduce((s, a) => s + a.percent, 0) / attempts.length)
-    : 0;
-
-  getEl("avg-score").innerText = `${avg}%`;
-
-  const list = getEl("history-list");
-  list.innerHTML = attempts.map(a => `
-    <div class="progress-item">
-      <p>${a.date}</p>
-      <p>${a.score}/${a.total} (${a.percent}%)</p>
-    </div>
-  `).join("");
+  showScreen("review-screen");
 }
 
 /* ================= TIMER ================= */
 
 function startTimer() {
+  clearInterval(state.timerInterval);
+
   state.timerInterval = setInterval(() => {
     const sec = Math.floor((Date.now() - state.startTime) / 1000);
     getEl("timer").innerText = `Time: ${formatTime(sec)}`;
@@ -392,16 +378,23 @@ function startTimer() {
 /* ================= NAV ================= */
 
 function showScreen(id) {
-  ["setup-screen","quiz-screen","result-screen","review-screen","progress-screen"]
-    .forEach(s => getEl(s)?.classList.add("hidden"));
+  ["setup-screen", "quiz-screen", "result-screen", "review-screen", "progress-screen"]
+    .forEach(screenId => getEl(screenId)?.classList.add("hidden"));
 
   getEl(id)?.classList.remove("hidden");
 }
 
 function reset() {
   clearInterval(state.timerInterval);
+  window.speechSynthesis?.cancel();
+
   state.score = 0;
   state.currentQuestionIndex = 0;
+  state.filteredQuestions = [];
+  state.userAnswers = [];
+  state.answerSubmitted = false;
+
+  resetExplanation();
 }
 
 /* ================= EVENTS ================= */
@@ -410,16 +403,14 @@ window.onload = async () => {
   getEl("start-btn").onclick = startQuiz;
   getEl("test-btn").onclick = startTestMode;
   getEl("next-btn").onclick = nextQuestion;
-  getEl("review-btn").onclick = renderReview;
-  getEl("dashboard-btn").onclick = () => {
-    renderProgress();
-    showScreen("progress-screen");
-  };
-  getEl("close-progress").onclick = () => showScreen("setup-screen");
+  getEl("review-btn").onclick = showReview;
+
   getEl("restart-btn").onclick = () => showScreen("setup-screen");
   getEl("back-to-results-btn").onclick = () => showScreen("result-screen");
-  getEl("clear-filters-btn").onclick = () =>
-    document.querySelectorAll(".domain-check").forEach(cb => cb.checked = false);
 
   await loadQuestions();
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.getVoices();
+  }
 };
